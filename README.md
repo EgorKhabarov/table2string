@@ -5,6 +5,8 @@
 [![Supported Python versions](https://img.shields.io/pypi/pyversions/table2string.svg)](https://pypi.python.org/pypi/table2string)
 [![PyPi status](https://img.shields.io/pypi/status/table2string.svg?style=flat-square)](https://pypi.python.org/pypi/table2string)
 
+[![Downloads](https://static.pepy.tech/badge/string2string)](https://pepy.tech/project/table2string)
+
 ## Convert table to string
 
 While there are several libraries available for converting tables to strings in Python, none seemed to meet my specific requirements. 
@@ -33,6 +35,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 ## Usage example
 
 ```pycon
+>>> from io import StringIO
 >>> from table2string import print_table
 >>> print_table([("1", "2", "3"), ("qwe", "rty\nuio", "")])
 +-----+-----+---+
@@ -48,4 +51,15 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 |     |      |
 | 789…|      |
 +-----+------+
+>>> file = StringIO()
+>>> print_table([("1", "2", "3"), ("qwe", "rty\nuio", "")], file=file)
+>>> file.seek(0)
+0
+>>> print(file.read())
++-----+-----+---+
+|   1 |   2 | 3 |
++-----+-----+---+
+| qwe | rty |   |
+|     | uio |   |
++-----+-----+---+
 ```
