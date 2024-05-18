@@ -33,7 +33,6 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 ## Usage example
 
 ```pycon
->>> from io import StringIO
 >>> from table2string import print_table
 >>> print_table([("1", "2", "3"), ("qwe", "rty\nuio", "")])
 +-----+-----+---+
