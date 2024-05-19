@@ -47,17 +47,84 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 |     | uio |   |
 +-----+-----+---+
 >>> file = StringIO()
->>> print_table([("123456\n\n789000", "example")], max_width=(3, 4), max_height=4, file=file)
+>>> print_table([("example",)], file=file)
 >>> file.seek(0)
 0
->>> file.read() == """
-... +-----+------+
-... | 123↩| exam↩|
-... | 456 | ple  |
-... |     |      |
-... | 789…|      |
-... +-----+------+
-... """.lstrip()
-True
+>>> print(file.read(), end="")
++---------+
+| example |
++---------+
+
+```
+
+## Custom width and height settings
+
+```pycon
+>>> # Width of the entire table with borders
+>>> print_table([(1,), (2.345,), ("example",)], max_width=10)
++--------+
+|      1 |
++--------+
+|  2.345 |
++--------+
+| exampl↩|
+| e      |
++--------+
+>>> # Width of each column individually
+>>> print_table([(1,), (2.345,), ("example",)], max_width=(10,))
++------------+
+|          1 |
++------------+
+|      2.345 |
++------------+
+| example    |
++------------+
+>>> print_table([("123456\n\n789000", "example")], max_width=(3, 4), max_height=4)
++-----+------+
+| 123↩| exam↩|
+| 456 | ple  |
+|     |      |
+| 789…|      |
++-----+------+
+>>> print_table([("123456789",)], max_width=(1,), max_height=1)
++---+
+| 1…|
++---+
+
+```
+
+## Text alignment
+
+```pycon
+>>> print_table([("1", "example")], max_width=25, name="Table Name", align="<", name_align="<")
++-----------------------+
+| Table Name            |
++-----------+-----------+
+| 1         | example   |
++-----------+-----------+
+>>> print_table([("1", "example")], max_width=25, name="Table Name", align=">", name_align=">")
++-----------------------+
+|            Table Name |
++-----------+-----------+
+|         1 |   example |
++-----------+-----------+
+>>> print_table([("1", "example")], max_width=25, name="Table Name", align="^", name_align="^")
++-----------------------+
+|      Table Name       |
++-----------+-----------+
+|     1     |  example  |
++-----------+-----------+
+>>> print_table([("1", "example")], max_width=25, name="Table Name", align="*", name_align="*")
++-----------------------+
+| Table Name            |
++-----------+-----------+
+|         1 | example   |
++-----------+-----------+
+>>> print_table([("1", "example")], max_width=25, name="Table Name")
++-----------------------+
+|      Table Name       |
++-----------+-----------+
+|         1 | example   |
++-----------+-----------+
 
 ```

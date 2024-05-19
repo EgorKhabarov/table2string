@@ -221,7 +221,7 @@ def print_table(
     name: str = None,
     name_align: Literal["<", ">", "^"] | str = None,
     max_width: int | tuple[int, ...] = None,
-    max_height: int | tuple[int, ...] = None,
+    max_height: int = None,
     file: StringIO = None,
     line_break_symbol: str = "↩",
 ) -> None:
