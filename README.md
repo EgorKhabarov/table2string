@@ -1,11 +1,11 @@
 # table2string
 
-[![Tests](https://github.com/EgorKhabarov/table2string/actions/workflows/tests.yml/badge.svg)](https://github.com/EgorKhabarov/table2string/actions/workflows/tests.yml)
-[![PyPi Package Version](https://img.shields.io/pypi/v/table2string.svg)](https://pypi.python.org/pypi/table2string)
-[![Supported Python versions](https://img.shields.io/pypi/pyversions/table2string.svg)](https://pypi.python.org/pypi/table2string)
-[![PyPi status](https://img.shields.io/pypi/status/table2string.svg?style=flat-square)](https://pypi.python.org/pypi/table2string)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/EgorKhabarov/table2string/tests.yml?style=flat&logo=GitHub&label=Tests)](https://github.com/EgorKhabarov/table2string/actions/workflows/tests.yml)
 
-[![Downloads](https://static.pepy.tech/badge/string2string)](https://pepy.tech/project/table2string)
+[![PyPi Package Version](https://img.shields.io/pypi/v/table2string.svg?style=flat&logo=pypi)](https://pypi.python.org/pypi/table2string)
+[![Supported Python versions](https://img.shields.io/pypi/pyversions/table2string.svg?style=flat&logo=pypi)](https://pypi.python.org/pypi/table2string)
+[![PyPi status](https://img.shields.io/pypi/status/table2string.svg?style=flat&logo=pypi)](https://pypi.python.org/pypi/table2string)
+[![PyPi downloads](https://img.shields.io/pypi/dm/table2string.svg?style=flat&logo=pypi)](https://pypi.org/project/table2string/)
 
 ## Convert table to string
 
@@ -37,29 +37,27 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 ```pycon
 >>> from io import StringIO
 >>> from table2string import print_table
->>> print_table([("1", "2", "3"), ("qwe", "rty\nuio", "")])
+>>> print_table([("1", "2", "3"), ("qwe", "rty\nuio", "")], name="Table Name")
++---------------+
+|  Table Name   |
 +-----+-----+---+
 |   1 |   2 | 3 |
 +-----+-----+---+
 | qwe | rty |   |
 |     | uio |   |
 +-----+-----+---+
->>> print_table([("123456\n\n789000", "example")], max_width=(3, 4), max_height=4)
-+-----+------+
-| 123↩| exam↩|
-| 456 | ple  |
-|     |      |
-| 789…|      |
-+-----+------+
 >>> file = StringIO()
->>> print_table([("1", "2", "3"), ("qwe", "rty\nuio", "")], file=file)
+>>> print_table([("123456\n\n789000", "example")], max_width=(3, 4), max_height=4, file=file)
 >>> file.seek(0)
 0
->>> print(file.read())
-+-----+-----+---+
-|   1 |   2 | 3 |
-+-----+-----+---+
-| qwe | rty |   |
-|     | uio |   |
-+-----+-----+---+
+>>> file.read() == """
+... +-----+------+
+... | 123↩| exam↩|
+... | 456 | ple  |
+... |     |      |
+... | 789…|      |
+... +-----+------+
+... """.lstrip()
+True
+
 ```
