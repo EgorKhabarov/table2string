@@ -1,12 +1,9 @@
-from io import StringIO
-from typing import Callable
-
 from table2string.table2string import (
     decrease_numbers,
     transform_align,
     transform_width,
+    stringify_table,
     line_spliter,
-    print_table,
     fill_line,
 )
 
@@ -32,7 +29,8 @@ def test_transform_width():
     assert transform_width(1, 1, [1]) == [0]
     assert transform_width(1, 2, [2, 2]) == [1, 1]
     assert transform_width((1, 2), 1, [1]) == [6]
-    assert transform_width((1, 2), 2, [2, 2]) == [1, 2]
+    assert transform_width((1, 2), 2, [2, 2]) == (1, 2)
+    assert transform_width((3, 2), 2, [2, 2]) == (3, 2)  # FIXME
 
 
 def test_line_spliter():
@@ -188,20 +186,10 @@ def test_fill_line():
     )
 
 
-def test_print_table():
-    def decorator(func: Callable):
-        def wrapper(*args, **kwargs):
-            file = StringIO()
-            func(*args, **kwargs, file=file)
-            file.seek(0)
-            return file.read()
-
-        return wrapper
-
-    get_table = decorator(print_table)
+def test_stringify_table():
     table_1 = [(1, 2, 3), ("123", "456\n567", "")]
     assert (
-        get_table(table_1)
+        stringify_table(table_1)
         == """
 +-----+-----+---+
 |   1 |   2 | 3 |
@@ -209,11 +197,11 @@ def test_print_table():
 | 123 | 456 |   |
 |     | 567 |   |
 +-----+-----+---+
-""".lstrip()
+""".strip()
     )
     table_2 = [(1, 2, 3), ("12345", "456\n\n567", ""), ("q", "NULL", "NULL")]
     assert (
-        get_table(table_2)
+        stringify_table(table_2)
         == """
 +-------+------+------+
 |     1 |    2 |    3 |
@@ -224,10 +212,10 @@ def test_print_table():
 +-------+------+------+
 | q     | NULL | NULL |
 +-------+------+------+
-""".lstrip()
+""".strip()
     )
     assert (
-        get_table(table_2, align="<", name="Table Name")
+        stringify_table(table_2, align="<", name="Table Name")
         == """
 +---------------------+
 |     Table Name      |
@@ -240,10 +228,10 @@ def test_print_table():
 +-------+------+------+
 | q     | NULL | NULL |
 +-------+------+------+
-""".lstrip()
+""".strip()
     )
     assert (
-        get_table(table_2, align=">", name="Table Name")
+        stringify_table(table_2, align=">", name="Table Name")
         == """
 +---------------------+
 |     Table Name      |
@@ -256,11 +244,11 @@ def test_print_table():
 +-------+------+------+
 |     q | NULL | NULL |
 +-------+------+------+
-""".lstrip()
+""".strip()
     )
     table_3 = [("coll 1", "coll 2")]
     assert (
-        get_table(table_3, name="Table\nName", name_align="<")
+        stringify_table(table_3, name="Table\nName", name_align="<")
         == """
 +-----------------+
 | Table           |
@@ -268,10 +256,10 @@ def test_print_table():
 +--------+--------+
 | coll 1 | coll 2 |
 +--------+--------+
-""".lstrip()
+""".strip()
     )
     assert (
-        get_table(table_3, name="Table\nName", name_align="^")
+        stringify_table(table_3, name="Table\nName", name_align="^")
         == """
 +-----------------+
 |      Table      |
@@ -279,10 +267,10 @@ def test_print_table():
 +--------+--------+
 | coll 1 | coll 2 |
 +--------+--------+
-""".lstrip()
+""".strip()
     )
     assert (
-        get_table(table_3, name="Table\nName", name_align=">")
+        stringify_table(table_3, name="Table\nName", name_align=">")
         == """
 +-----------------+
 |           Table |
@@ -290,10 +278,10 @@ def test_print_table():
 +--------+--------+
 | coll 1 | coll 2 |
 +--------+--------+
-""".lstrip()
+""".strip()
     )
     assert (
-        get_table(table_3, name="Table\nName", name_align="<<")
+        stringify_table(table_3, name="Table\nName", name_align="<<")
         == """
 +-----------------+
 | Table           |
@@ -301,10 +289,10 @@ def test_print_table():
 +--------+--------+
 | coll 1 | coll 2 |
 +--------+--------+
-""".lstrip()
+""".strip()
     )
     assert (
-        get_table(table_3, name="Table\nName", name_align=">>")
+        stringify_table(table_3, name="Table\nName", name_align=">>")
         == """
 +-----------------+
 |           Table |
@@ -312,10 +300,10 @@ def test_print_table():
 +--------+--------+
 | coll 1 | coll 2 |
 +--------+--------+
-""".lstrip()
+""".strip()
     )
     assert (
-        get_table(table_3, name="Table\nName", name_align="<>")
+        stringify_table(table_3, name="Table\nName", name_align="<>")
         == """
 +-----------------+
 | Table           |
@@ -323,10 +311,10 @@ def test_print_table():
 +--------+--------+
 | coll 1 | coll 2 |
 +--------+--------+
-""".lstrip()
+""".strip()
     )
     assert (
-        get_table(table_3, name="Table\nName", name_align="><")
+        stringify_table(table_3, name="Table\nName", name_align="><")
         == """
 +-----------------+
 |           Table |
@@ -334,61 +322,61 @@ def test_print_table():
 +--------+--------+
 | coll 1 | coll 2 |
 +--------+--------+
-""".lstrip()
+""".strip()
     )
     table_4 = [("",)]
     assert (
-        get_table(table_4)
+        stringify_table(table_4)
         == """
 +---+
 |   |
 +---+
-""".lstrip()
+""".strip()
     )
     table_5 = [("\n1",)]
     assert (
-        get_table(table_5)
+        stringify_table(table_5)
         == """
 +---+
 |   |
 | 1 |
 +---+
-""".lstrip()
+""".strip()
     )
     table_6 = [("123",)]
     assert (
-        get_table(table_6, max_width=1)
+        stringify_table(table_6, max_width=1)
         == """
 +---+
 | 1↩|
 | 2↩|
 | 3 |
 +---+
-""".lstrip()
+""".strip()
     )
     table_7 = [("123",)]
     assert (
-        get_table(table_7, max_width=(2,))
+        stringify_table(table_7, max_width=(2,))
         == """
 +----+
 | 12↩|
 | 3  |
 +----+
-""".lstrip()
+""".strip()
     )
     table_7 = [("123",)]
     assert (
-        get_table(table_7, max_width=(1,), max_height=2)
+        stringify_table(table_7, max_width=(1,), max_height=2)
         == """
 +---+
 | 1↩|
 | 2…|
 +---+
-""".lstrip()
+""".strip()
     )
     table_8 = [("1",), ("q",), ("👍",)]
     assert (
-        get_table(table_8)
+        stringify_table(table_8)
         == """
 +----+
 |  1 |
@@ -397,11 +385,11 @@ def test_print_table():
 +----+
 | 👍 |
 +----+
-""".lstrip()
+""".strip()
     )
     table_9 = [("123456\n\n789000",)]
     assert (
-        get_table(table_9, max_width=(3,), max_height=4)
+        stringify_table(table_9, max_width=(3,), max_height=4)
         == """
 +-----+
 | 123↩|
@@ -409,11 +397,11 @@ def test_print_table():
 |     |
 | 789…|
 +-----+
-""".lstrip()
+""".strip()
     )
     table_10 = [("1234567\n\n891\n234",)]
     assert (
-        get_table(table_10, max_width=(2,), max_height=7)
+        stringify_table(table_10, max_width=(2,), max_height=7)
         == """
 +----+
 | 12↩|
@@ -424,11 +412,11 @@ def test_print_table():
 | 89↩|
 | 1 …|
 +----+
-""".lstrip()
+""".strip()
     )
     table_11 = [("1234567\n\n891\n234", "qwe" * 20)]
     assert (
-        get_table(table_11, max_width=(2,), max_height=7)
+        stringify_table(table_11, max_width=(2,), max_height=7)
         == """
 +----+----+
 | 12↩| qw↩|
@@ -439,11 +427,11 @@ def test_print_table():
 | 89↩| we↩|
 | 1 …| qw…|
 +----+----+
-""".lstrip()
+""".strip()
     )
     table_12 = [("long string",), ("1234567\n34\n787878",)]
     assert (
-        get_table(table_12, align="^<")
+        stringify_table(table_12, align="^<")
         == """
 +-------------+
 | long string |
@@ -452,7 +440,7 @@ def test_print_table():
 |   34        |
 |   787878    |
 +-------------+
-""".lstrip()
+""".strip()
     )
     table_13 = [
         ("filler " * 10,),
@@ -476,7 +464,7 @@ Never gonna tell a lie and hurt you
         ),
     ]
     assert (
-        get_table(table_13, align="^<")
+        stringify_table(table_13, align="^<")
         == """
 +------------------------------------------------------------------------+
 | filler filler filler filler filler filler filler filler filler filler  |
@@ -496,10 +484,10 @@ Never gonna tell a lie and hurt you
 |                Never gonna say goodbye                                 |
 |                Never gonna tell a lie and hurt you                     |
 +------------------------------------------------------------------------+
-""".lstrip()
+""".strip()
     )
     assert (
-        get_table(table_13, align="^>")
+        stringify_table(table_13, align="^>")
         == """
 +------------------------------------------------------------------------+
 | filler filler filler filler filler filler filler filler filler filler  |
@@ -519,10 +507,10 @@ Never gonna tell a lie and hurt you
 |                                 Never gonna say goodbye                |
 |                     Never gonna tell a lie and hurt you                |
 +------------------------------------------------------------------------+
-""".lstrip()
+""".strip()
     )
     assert (
-        get_table(table_13, align="^>", max_width=20)
+        stringify_table(table_13, align="^>", max_width=20)
         == """
 +------------------+
 | filler filler fi↩|
@@ -564,10 +552,10 @@ Never gonna tell a lie and hurt you
 |  a lie and hurt ↩|
 |              you |
 +------------------+
-""".lstrip()
+""".strip()
     )
     assert (
-        get_table(table_13[:1], name=table_13[1][0], name_align="^<")
+        stringify_table(table_13[:1], name=table_13[1][0], name_align="^<")
         == """
 +------------------------------------------------------------------------+
 |                We're no strangers to love                              |
@@ -587,11 +575,11 @@ Never gonna tell a lie and hurt you
 +------------------------------------------------------------------------+
 | filler filler filler filler filler filler filler filler filler filler  |
 +------------------------------------------------------------------------+
-""".lstrip()
+""".strip()
     )
     table_14 = [("filler" * 2,), ("12345\n67890",)]
     assert (
-        get_table(table_14, align="<>")
+        stringify_table(table_14, align="<>")
         == """
 +--------------+
 | fillerfiller |
@@ -599,10 +587,10 @@ Never gonna tell a lie and hurt you
 | 12345        |
 |        67890 |
 +--------------+
-""".lstrip()
+""".strip()
     )
     assert (
-        get_table(table_14, align="><")
+        stringify_table(table_14, align="><")
         == """
 +--------------+
 | fillerfiller |
@@ -610,5 +598,114 @@ Never gonna tell a lie and hurt you
 |        12345 |
 | 67890        |
 +--------------+
-""".lstrip()
+""".strip()
     )
+    table_15 = [("qwe", "rty\nuio"), ("123456\n\n789000", "example")]
+    kwargs = {
+        "max_width": (3, 4),
+        "max_height": 4,
+        "line_break_symbol": "\\",
+        "cell_break_symbol": "/",
+    }
+    assert stringify_table(table_15, **kwargs, sep=True) == """
++-----+------+
+| qwe | rty  |
+|     | uio  |
++-----+------+
+| 123\\| exam\\|
+| 456 | ple  |
+|     |      |
+| 789/|      |
++-----+------+
+""".strip()
+    assert stringify_table(table_15, **kwargs, sep=False) == """
++-----+------+
+| qwe | rty  |
+|     | uio  |
+| 123\\| exam\\|
+| 456 | ple  |
+|     |      |
+| 789/|      |
++-----+------+
+""".strip()
+    table_16 = [("1", "2"), ("3", "4")]
+    assert stringify_table(table_16, sep=True, name="Name") == """
++-------+
+| Name  |
++---+---+
+| 1 | 2 |
++---+---+
+| 3 | 4 |
++---+---+
+""".strip()
+    assert stringify_table(table_16, sep=False, name="Name") == """
++-------+
+| Name  |
++---+---+
+| 1 | 2 |
+| 3 | 4 |
++---+---+
+""".strip()
+    table_17 = [("1", "2"), ("3", "4"), ("5", "6"), ("7", "8")]
+    assert stringify_table(table_17, sep=(1,)) == """
++---+---+
+| 1 | 2 |
++---+---+
+| 3 | 4 |
+| 5 | 6 |
+| 7 | 8 |
++---+---+
+""".strip()
+    assert stringify_table(table_17, sep=(2,)) == """
++---+---+
+| 1 | 2 |
+| 3 | 4 |
++---+---+
+| 5 | 6 |
+| 7 | 8 |
++---+---+
+""".strip()
+    assert stringify_table(table_17, sep=(1, 3)) == """
++---+---+
+| 1 | 2 |
++---+---+
+| 3 | 4 |
+| 5 | 6 |
++---+---+
+| 7 | 8 |
++---+---+
+""".strip()
+    assert stringify_table(table_17, sep=(1,), name="Name") == """
++-------+
+| Name  |
++---+---+
+| 1 | 2 |
++---+---+
+| 3 | 4 |
+| 5 | 6 |
+| 7 | 8 |
++---+---+
+""".strip()
+    assert stringify_table(table_17, sep=(2,), name="Name") == """
++-------+
+| Name  |
++---+---+
+| 1 | 2 |
+| 3 | 4 |
++---+---+
+| 5 | 6 |
+| 7 | 8 |
++---+---+
+""".strip()
+    assert stringify_table(table_17, sep=(1, 3), name="Name") == """
++-------+
+| Name  |
++---+---+
+| 1 | 2 |
++---+---+
+| 3 | 4 |
+| 5 | 6 |
++---+---+
+| 7 | 8 |
++---+---+
+""".strip()

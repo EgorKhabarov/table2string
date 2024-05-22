@@ -90,10 +90,15 @@ def transform_width(
     :param row_lengths:
     :return:
     """
-    if width is not None and isinstance(width, tuple):
+    if isinstance(width, (tuple, list)) and column_count == len(width):
+        return width
+
+    if width is not None and isinstance(width, (tuple, list)):
         width: tuple[int]
+
         if len(width) < column_count:
             width: tuple = tuple((*width, *(width[-1],) * (column_count - len(width))))
+
         width: int = sum(width) + (3 * len(width)) + 1
 
     if width is not None and width < column_count + (3 * column_count) + 1:
@@ -116,6 +121,7 @@ def line_spliter(
     width: int = None,
     height: int = None,
     line_break_symbol: str = "↩",
+    cell_break_symbol: str = "…",  # chr(8230)
 ) -> tuple[list[str], list[str]]:
     """
 
@@ -123,6 +129,7 @@ def line_spliter(
     :param width:
     :param height:
     :param line_break_symbol:
+    :param cell_break_symbol:
     :return:
     """
     lines = text.split("\n")
@@ -149,7 +156,7 @@ def line_spliter(
     if height and len(result_lines) > height:
         result_lines = result_lines[:height]
         result_breaks = result_breaks[:height]
-        result_breaks[-1] = chr(8230)  # "…"
+        result_breaks[-1] = cell_break_symbol
 
     return result_lines, result_breaks
 
@@ -224,6 +231,9 @@ def print_table(
     max_height: int = None,
     file: StringIO = None,
     line_break_symbol: str = "↩",
+    cell_break_symbol: str = "…",
+    sep: bool | range | tuple = True,
+    end: str | None = "\n",
 ) -> None:
     """
 
@@ -235,8 +245,18 @@ def print_table(
     :param max_height:
     :param file:
     :param line_break_symbol:
+    :param cell_break_symbol:
+    :param sep:
+    :param end:
     :return:
     """
+
+    if len(line_break_symbol) != 1:
+        raise ValueError("length of line_break_symbol must be 1")
+
+    if len(cell_break_symbol) != 1:
+        raise ValueError("length of cell_break_symbol must be 1")
+
     row_lengths: list[int] = []
 
     for column in zip(*table):
@@ -260,31 +280,39 @@ def print_table(
     # Обрезаем длинные строки
     table = [
         [
-            line_spliter(column, max_widths[n], max_height, line_break_symbol)
+            line_spliter(
+                column, max_widths[n], max_height, line_break_symbol, cell_break_symbol
+            )
             for n, column in enumerate(map(str, row))
         ]
         for row in table
     ]
 
     # Разделитель строк
-    sep = "+" + "".join(("-" * (i + 2)) + "+" for i in max_widths)
+    line_separator = "+" + "".join(("-" * (i + 2)) + "+" for i in max_widths)
 
     if name:
         # noinspection PyTypeChecker
         name_align = transform_align(1, name_align or "^")
-        print("+" + sep.replace("+", "-")[1:-1] + "+", file=file)
+        print("+" + line_separator.replace("+", "-")[1:-1] + "+", file=file)
 
-        if not max_width:
-            max_width: int = sum(row_lengths) + (3 * column_count) + 1
+        if not max_widths:
+            max_name_width: int = sum(row_lengths) + (3 * column_count) + 1 - 4
+        else:
+            max_name_width = sum(max_widths) + (3 * column_count) + 1 - 4
 
         rows, symbols = zip(
-            line_spliter(name, max_width - 4, max_height, line_break_symbol)
+            line_spliter(
+                name, max_name_width, max_height, line_break_symbol, cell_break_symbol
+            )
         )
-        line = fill_line(rows, symbols, [max_width - 4], name_align)
+        line = fill_line(rows, symbols, [max_name_width], name_align)
         print(line, file=file)
 
     for n, row in enumerate(table):
-        print(sep, file=file)
+        if (sep is True or n == 0) or (isinstance(sep, (range, tuple)) and n in sep):
+            print(line_separator, file=file)
+
         max_row_height = max(map(len, tuple(zip(*row))[0]))
 
         for column in row:
@@ -296,4 +324,48 @@ def print_table(
         line = fill_line(rows, symbols, max_widths, align)
         print(line, file=file)
 
-    print(sep.rstrip("\n"), file=file)
+    print(line_separator.rstrip("\n"), file=file, end=end)
+
+
+def stringify_table(
+    table: list[tuple[str, ...]],
+    align: tuple[AlignType | str] | AlignType | str = "*",
+    name: str = None,
+    name_align: Literal["<", ">", "^"] | str = None,
+    max_width: int | tuple[int, ...] = None,
+    max_height: int = None,
+    line_break_symbol: str = "↩",
+    cell_break_symbol: str = "…",
+    sep: bool | range | tuple = True,
+    end: str | None = "",
+) -> str:
+    """
+
+    :param table:
+    :param align:
+    :param name:
+    :param name_align:
+    :param max_width:
+    :param max_height:
+    :param line_break_symbol:
+    :param cell_break_symbol:
+    :param sep:
+    :param end:
+    :return:
+    """
+    file = StringIO()
+    print_table(
+        table=table,
+        align=align,
+        name=name,
+        name_align=name_align,
+        max_width=max_width,
+        max_height=max_height,
+        file=file,
+        line_break_symbol=line_break_symbol,
+        cell_break_symbol=cell_break_symbol,
+        sep=sep,
+        end=end,
+    )
+    file.seek(0)
+    return file.read()

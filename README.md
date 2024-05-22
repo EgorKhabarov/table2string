@@ -35,8 +35,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 ## Usage example
 
 ```pycon
->>> from io import StringIO
->>> from table2string import print_table
+>>> from table2string import print_table, stringify_table
 >>> print_table([("1", "2", "3"), ("qwe", "rty\nuio", "")], name="Table Name")
 +---------------+
 |  Table Name   |
@@ -46,11 +45,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 | qwe | rty |   |
 |     | uio |   |
 +-----+-----+---+
->>> file = StringIO()
->>> print_table([("example",)], file=file)
->>> file.seek(0)
-0
->>> print(file.read(), end="")
+>>> print(stringify_table([("example",)]), end="")
 +---------+
 | example |
 +---------+
@@ -126,5 +121,108 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 +-----------+-----------+
 |         1 | example   |
 +-----------+-----------+
+
+```
+
+```pycon
+>>> table_1 = [("qwe", "rty\nuio"), ("123456\n\n789000", "example")]
+>>> kwargs = {
+...     "max_width": (3, 4),
+...     "max_height": 4,
+...     "line_break_symbol": "\\",
+...     "cell_break_symbol": "/",
+... }
+>>> print_table(table_1, **kwargs, sep=True)
++-----+------+
+| qwe | rty  |
+|     | uio  |
++-----+------+
+| 123\| exam\|
+| 456 | ple  |
+|     |      |
+| 789/|      |
++-----+------+
+>>> print_table(table_1, **kwargs, sep=False)
++-----+------+
+| qwe | rty  |
+|     | uio  |
+| 123\| exam\|
+| 456 | ple  |
+|     |      |
+| 789/|      |
++-----+------+
+>>> table_2 = [("1", "2"), ("3", "4")]
+>>> print_table(table_2, sep=True, name="Name")
++-------+
+| Name  |
++---+---+
+| 1 | 2 |
++---+---+
+| 3 | 4 |
++---+---+
+>>> print_table(table_2, sep=False, name="Name")
++-------+
+| Name  |
++---+---+
+| 1 | 2 |
+| 3 | 4 |
++---+---+
+>>> table_3 = [("1", "2"), ("3", "4"), ("5", "6"), ("7", "8")]
+>>> print_table(table_3, sep=(1,))
++---+---+
+| 1 | 2 |
++---+---+
+| 3 | 4 |
+| 5 | 6 |
+| 7 | 8 |
++---+---+
+>>> print_table(table_3, sep=(2,))
++---+---+
+| 1 | 2 |
+| 3 | 4 |
++---+---+
+| 5 | 6 |
+| 7 | 8 |
++---+---+
+>>> print_table(table_3, sep=(1, 3))
++---+---+
+| 1 | 2 |
++---+---+
+| 3 | 4 |
+| 5 | 6 |
++---+---+
+| 7 | 8 |
++---+---+
+>>> print_table(table_3, sep=(1,), name="Name")
++-------+
+| Name  |
++---+---+
+| 1 | 2 |
++---+---+
+| 3 | 4 |
+| 5 | 6 |
+| 7 | 8 |
++---+---+
+>>> print_table(table_3, sep=(2,), name="Name")
++-------+
+| Name  |
++---+---+
+| 1 | 2 |
+| 3 | 4 |
++---+---+
+| 5 | 6 |
+| 7 | 8 |
++---+---+
+>>> print_table(table_3, sep=(1, 3), name="Name")
++-------+
+| Name  |
++---+---+
+| 1 | 2 |
++---+---+
+| 3 | 4 |
+| 5 | 6 |
++---+---+
+| 7 | 8 |
++---+---+
 
 ```
