@@ -607,7 +607,9 @@ Never gonna tell a lie and hurt you
         "line_break_symbol": "\\",
         "cell_break_symbol": "/",
     }
-    assert stringify_table(table_15, **kwargs, sep=True) == """
+    assert (
+        stringify_table(table_15, **kwargs, sep=True)
+        == """
 +-----+------+
 | qwe | rty  |
 |     | uio  |
@@ -618,7 +620,10 @@ Never gonna tell a lie and hurt you
 | 789/|      |
 +-----+------+
 """.strip()
-    assert stringify_table(table_15, **kwargs, sep=False) == """
+    )
+    assert (
+        stringify_table(table_15, **kwargs, sep=False)
+        == """
 +-----+------+
 | qwe | rty  |
 |     | uio  |
@@ -628,8 +633,11 @@ Never gonna tell a lie and hurt you
 | 789/|      |
 +-----+------+
 """.strip()
+    )
     table_16 = [("1", "2"), ("3", "4")]
-    assert stringify_table(table_16, sep=True, name="Name") == """
+    assert (
+        stringify_table(table_16, sep=True, name="Name")
+        == """
 +-------+
 | Name  |
 +---+---+
@@ -638,7 +646,10 @@ Never gonna tell a lie and hurt you
 | 3 | 4 |
 +---+---+
 """.strip()
-    assert stringify_table(table_16, sep=False, name="Name") == """
+    )
+    assert (
+        stringify_table(table_16, sep=False, name="Name")
+        == """
 +-------+
 | Name  |
 +---+---+
@@ -646,8 +657,11 @@ Never gonna tell a lie and hurt you
 | 3 | 4 |
 +---+---+
 """.strip()
+    )
     table_17 = [("1", "2"), ("3", "4"), ("5", "6"), ("7", "8")]
-    assert stringify_table(table_17, sep=(1,)) == """
+    assert (
+        stringify_table(table_17, sep=(1,))
+        == """
 +---+---+
 | 1 | 2 |
 +---+---+
@@ -656,7 +670,10 @@ Never gonna tell a lie and hurt you
 | 7 | 8 |
 +---+---+
 """.strip()
-    assert stringify_table(table_17, sep=(2,)) == """
+    )
+    assert (
+        stringify_table(table_17, sep=(2,))
+        == """
 +---+---+
 | 1 | 2 |
 | 3 | 4 |
@@ -665,7 +682,10 @@ Never gonna tell a lie and hurt you
 | 7 | 8 |
 +---+---+
 """.strip()
-    assert stringify_table(table_17, sep=(1, 3)) == """
+    )
+    assert (
+        stringify_table(table_17, sep=(1, 3))
+        == """
 +---+---+
 | 1 | 2 |
 +---+---+
@@ -675,7 +695,10 @@ Never gonna tell a lie and hurt you
 | 7 | 8 |
 +---+---+
 """.strip()
-    assert stringify_table(table_17, sep=(1,), name="Name") == """
+    )
+    assert (
+        stringify_table(table_17, sep=(1,), name="Name")
+        == """
 +-------+
 | Name  |
 +---+---+
@@ -686,7 +709,10 @@ Never gonna tell a lie and hurt you
 | 7 | 8 |
 +---+---+
 """.strip()
-    assert stringify_table(table_17, sep=(2,), name="Name") == """
+    )
+    assert (
+        stringify_table(table_17, sep=(2,), name="Name")
+        == """
 +-------+
 | Name  |
 +---+---+
@@ -697,7 +723,10 @@ Never gonna tell a lie and hurt you
 | 7 | 8 |
 +---+---+
 """.strip()
-    assert stringify_table(table_17, sep=(1, 3), name="Name") == """
+    )
+    assert (
+        stringify_table(table_17, sep=(1, 3), name="Name")
+        == """
 +-------+
 | Name  |
 +---+---+
@@ -709,3 +738,4 @@ Never gonna tell a lie and hurt you
 | 7 | 8 |
 +---+---+
 """.strip()
+    )
