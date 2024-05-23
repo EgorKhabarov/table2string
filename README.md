@@ -124,32 +124,34 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 
 ```
 
+# Separator settings
+
 ```pycon
 >>> table_1 = [("qwe", "rty\nuio"), ("123456\n\n789000", "example")]
 >>> kwargs = {
 ...     "max_width": (3, 4),
 ...     "max_height": 4,
-...     "line_break_symbol": "\\",
-...     "cell_break_symbol": "/",
+...     "line_break_symbol": "/",
+...     "cell_break_symbol": "…",
 ... }
 >>> print_table(table_1, **kwargs, sep=True)
 +-----+------+
 | qwe | rty  |
 |     | uio  |
 +-----+------+
-| 123\| exam\|
+| 123/| exam/|
 | 456 | ple  |
 |     |      |
-| 789/|      |
+| 789…|      |
 +-----+------+
 >>> print_table(table_1, **kwargs, sep=False)
 +-----+------+
 | qwe | rty  |
 |     | uio  |
-| 123\| exam\|
+| 123/| exam/|
 | 456 | ple  |
 |     |      |
-| 789/|      |
+| 789…|      |
 +-----+------+
 >>> table_2 = [("1", "2"), ("3", "4")]
 >>> print_table(table_2, sep=True, name="Name")

@@ -9,13 +9,15 @@ AlignType: TypeAlias = Literal[
 
 
 def get_text_width_in_console(text: str) -> int:
-    """Определяет количество позиций, которое займет строка в консоли."""
+    """
+    Calculates the number of positions that a line will occupy in the console.
+    """
     width = 0
     for char in text:
         if unicodedata.east_asian_width(char) in ("W", "F"):
-            width += 2  # Широкие символы
+            width += 2  # Wide characters
         else:
-            width += 1  # Узкие символы
+            width += 1  # Narrow characters
     return width
 
 
@@ -29,12 +31,12 @@ def decrease_numbers(
     :param min_value:
     :return:
     """
-    # Рассчитываем среднее значение
+    # Calculate the average value
     mean_value = sum(row_lengths) / len(row_lengths)
     new_numbers = []
 
     for num in row_lengths:
-        # Определяем насколько это число больше или меньше среднего
+        # Determine how much more or less this number is than the average
         diff_from_mean = num - mean_value
 
         if diff_from_mean > 0:
@@ -47,15 +49,15 @@ def decrease_numbers(
         new_num = max(int(reduced_num), min_value)
         new_numbers.append(new_num)
 
-    # Если общая сумма новых чисел превышает max_width, уменьшаем наибольшее число на 1
+    # If the total sum of new numbers exceeds max_width, reduce the largest number by 1
     while sum(new_numbers) > max_width:
         new_numbers[new_numbers.index(max(new_numbers))] -= 1
 
-    # Рассчитываем коэффициент для пропорционального увеличения, если сумма меньше max_sum
+    # Calculate the coefficient for proportional increase if the sum is less than max_sum
     if sum(new_numbers) < max_width:
         new_numbers = [int(num * (max_width / sum(new_numbers))) for num in new_numbers]
 
-    # Если общая сумма новых чисел меньше max_width, увеличиваем наименьшее число на 1
+    # If the total sum of new numbers is less than max_width, increase the smallest number by 1
     while sum(new_numbers) < max_width and min(new_numbers) < min_value:
         new_numbers[new_numbers.index(min(new_numbers))] += 1
 
@@ -66,12 +68,12 @@ def transform_align(
     column_count: int, align: tuple[AlignType | str, ...] | AlignType | str = "*"
 ) -> tuple[AlignType]:
     """
+    Convert align to a suitable view
 
     :param column_count:
     :param align:
     :return:
     """
-    # Преобразуем align в подходящий вид
     if isinstance(align, str):
         align = (align, *(align,) * (column_count - 1))
     else:
@@ -106,7 +108,7 @@ def transform_width(
             sum(1 if rl > 1 else 0 for rl in row_lengths) + (3 * column_count) + 1
         )
 
-    # Вычисляем ширину каждой колонки
+    # Calculate the width of each column
     if width:
         sum_column_width = width - (3 * column_count) - 1
         max_widths = decrease_numbers(row_lengths, sum_column_width)
@@ -183,7 +185,7 @@ def fill_line(
     if isinstance(rows[0], tuple):
         rows = list(map(list, rows))  # noqa
 
-    # Делаем каждый элемент одинаковой ширины по максимальному элементу
+    # Make each element the same width according to the maximum element
     for n, row in enumerate(rows):
         if align_left[n] == "^" and align_right[n] in ("<", ">") and len(row) > 1:
             max_width = len(max(row, key=len))
@@ -276,19 +278,6 @@ def print_table(
     column_count = max(map(len, table))
     align = transform_align(column_count, align)
     max_widths = transform_width(max_width, column_count, row_lengths)
-
-    # Обрезаем длинные строки
-    table = [
-        [
-            line_spliter(
-                column, max_widths[n], max_height, line_break_symbol, cell_break_symbol
-            )
-            for n, column in enumerate(map(str, row))
-        ]
-        for row in table
-    ]
-
-    # Разделитель строк
     line_separator = "+" + "".join(("-" * (i + 2)) + "+" for i in max_widths)
 
     if name:
@@ -308,6 +297,17 @@ def print_table(
         )
         line = fill_line(rows, symbols, [max_name_width], name_align)
         print(line, file=file)
+
+    # Trimming long lines
+    table = (
+        [
+            line_spliter(
+                column, max_widths[n], max_height, line_break_symbol, cell_break_symbol
+            )
+            for n, column in enumerate(map(str, row))
+        ]
+        for row in table
+    )
 
     for n, row in enumerate(table):
         if (sep is True or n == 0) or (isinstance(sep, (range, tuple)) and n in sep):
