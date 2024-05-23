@@ -225,8 +225,8 @@ def fill_line(
 
 
 def print_table(
-    table: list[tuple[str, ...]],
-    align: tuple[AlignType | str] | AlignType | str = "*",
+    table,
+    align: tuple[AlignType | str, ...] | AlignType | str = "*",
     name: str = None,
     name_align: Literal["<", ">", "^"] | str = None,
     max_width: int | tuple[int, ...] = None,
@@ -328,8 +328,8 @@ def print_table(
 
 
 def stringify_table(
-    table: list[tuple[str, ...]],
-    align: tuple[AlignType | str] | AlignType | str = "*",
+    table,
+    align: tuple[AlignType | str, ...] | AlignType | str = "*",
     name: str = None,
     name_align: Literal["<", ">", "^"] | str = None,
     max_width: int | tuple[int, ...] = None,
