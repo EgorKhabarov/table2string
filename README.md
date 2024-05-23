@@ -45,10 +45,15 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 | qwe | rty |   |
 |     | uio |   |
 +-----+-----+---+
->>> print(stringify_table([("example",)]), end="")
-+---------+
-| example |
-+---------+
+>>> print(stringify_table([("1", "2", "3"), ("qwe", "rty\nuio", "")], name="Table Name"), end="")
++---------------+
+|  Table Name   |
++-----+-----+---+
+|   1 |   2 | 3 |
++-----+-----+---+
+| qwe | rty |   |
+|     | uio |   |
++-----+-----+---+
 
 ```
 
