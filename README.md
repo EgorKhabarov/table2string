@@ -121,36 +121,93 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 ## Text alignment
 
 ```pycon
->>> print_table([("1", "example")], max_width=25, name="Table Name", align="<", name_align="<")
-+-----------------------+
-| Table Name            |
-+-----------+-----------+
-| 1         | example   |
-+-----------+-----------+
->>> print_table([("1", "example")], max_width=25, name="Table Name", align=">", name_align=">")
-+-----------------------+
-|            Table Name |
-+-----------+-----------+
-|         1 |   example |
-+-----------+-----------+
->>> print_table([("1", "example")], max_width=25, name="Table Name", align="^", name_align="^")
-+-----------------------+
-|      Table Name       |
-+-----------+-----------+
-|     1     |  example  |
-+-----------+-----------+
->>> print_table([("1", "example")], max_width=25, name="Table Name", align="*", name_align="*")
-+-----------------------+
-| Table Name            |
-+-----------+-----------+
-|         1 | example   |
-+-----------+-----------+
->>> print_table([("1", "example")], max_width=25, name="Table Name")
-+-----------------------+
-|      Table Name       |
-+-----------+-----------+
-|         1 | example   |
-+-----------+-----------+
+>>> kwargs_1 = {
+...     "table": [("1", "123456789\nqwerty\nasdfghjklzxcvb")],
+...     "name": "Table Name\nName\nNaaaaame",
+...     "max_width": (5, 15),
+... }
+>>> print_table(**kwargs_1)
++-------------------------+
+|       Table Name        |
+|          Name           |
+|        Naaaaame         |
++-------+-----------------+
+|     1 | 123456789       |
+|       | qwerty          |
+|       | asdfghjklzxcvb  |
++-------+-----------------+
+>>> print_table(**kwargs_1, align="*", name_align="*")  # align="**", name_align="**"
++-------------------------+
+| Table Name              |
+| Name                    |
+| Naaaaame                |
++-------+-----------------+
+|     1 | 123456789       |
+|       | qwerty          |
+|       | asdfghjklzxcvb  |
++-------+-----------------+
+>>> print_table(**kwargs_1, align="<", name_align="<")  # align="<<", name_align="<<"
++-------------------------+
+| Table Name              |
+| Name                    |
+| Naaaaame                |
++-------+-----------------+
+| 1     | 123456789       |
+|       | qwerty          |
+|       | asdfghjklzxcvb  |
++-------+-----------------+
+>>> print_table(**kwargs_1, align=">", name_align=">")  # align=">>", name_align=">>"
++-------------------------+
+|              Table Name |
+|                    Name |
+|                Naaaaame |
++-------+-----------------+
+|     1 |       123456789 |
+|       |          qwerty |
+|       |  asdfghjklzxcvb |
++-------+-----------------+
+>>> print_table(**kwargs_1, align="^", name_align="^")  # align="^^", name_align="^^"
++-------------------------+
+|       Table Name        |
+|          Name           |
+|        Naaaaame         |
++-------+-----------------+
+|   1   |    123456789    |
+|       |     qwerty      |
+|       | asdfghjklzxcvb  |
++-------+-----------------+
+>>> print_table(**kwargs_1, align="^<", name_align="^<")
++-------------------------+
+|       Table Name        |
+|       Name              |
+|       Naaaaame          |
++-------+-----------------+
+|   1   | 123456789       |
+|       | qwerty          |
+|       | asdfghjklzxcvb  |
++-------+-----------------+
+>>> print_table(**kwargs_1, align="^>", name_align="^>")
++-------------------------+
+|       Table Name        |
+|             Name        |
+|         Naaaaame        |
++-------+-----------------+
+|   1   |      123456789  |
+|       |         qwerty  |
+|       | asdfghjklzxcvb  |
++-------+-----------------+
+>>> print_table([("qwerty\n123456789\nasdfghjklzxcvb",)], max_width=(18,), align="^<")
++--------------------+
+|   qwerty           |
+|   123456789        |
+|   asdfghjklzxcvb   |
++--------------------+
+>>> print_table([("qwerty\n123456789\nasdfghjklzxcvb",)], max_width=(18,), align="^>")
++--------------------+
+|           qwerty   |
+|        123456789   |
+|   asdfghjklzxcvb   |
++--------------------+
 
 ```
 

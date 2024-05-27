@@ -1,8 +1,8 @@
-from table2string.table2string import (
+from table2string.table2string import stringify_table
+from table2string.utils import (
     decrease_numbers,
     transform_align,
     transform_width,
-    stringify_table,
     line_spliter,
     fill_line,
 )
@@ -840,7 +840,7 @@ Never gonna tell a lie and hurt you
                 ("Melbourne", 1566, 3806092, 646.9),
                 ("Perth", 5386, 1554769, 869.4),
             ],
-            sep=(1,)
+            sep=(1,),
         )
         == """
 +-----------+------+------------+-----------------+
@@ -871,9 +871,9 @@ Never gonna tell a lie and hurt you
                         ("Perth", 5386, 1554769, 869.4),
                     ],
                     key=lambda x: x[3],
-                )
+                ),
             ],
-            sep=(1, 5)
+            sep=(1, 5),
         )
         == """
 +-----------+------+------------+-----------------+
