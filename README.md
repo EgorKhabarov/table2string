@@ -1,6 +1,7 @@
 # table2string
 
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/EgorKhabarov/table2string/tests.yml?style=flat&logo=GitHub&label=Tests)](https://github.com/EgorKhabarov/table2string/actions/workflows/tests.yml)
+[![Publish Python Package to PyPI](https://img.shields.io/github/actions/workflow/status/EgorKhabarov/table2string/publish.yml?style=flat&logo=GitHub&label=Publish%20to%20PyPI)](https://github.com/EgorKhabarov/table2string/actions/workflows/publish.yml)
 
 [![PyPi Package Version](https://img.shields.io/pypi/v/table2string.svg?style=flat&logo=pypi)](https://pypi.python.org/pypi/table2string)
 [![Supported Python versions](https://img.shields.io/pypi/pyversions/table2string.svg?style=flat&logo=pypi)](https://pypi.python.org/pypi/table2string)
@@ -90,6 +91,30 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 +---+
 | 1…|
 +---+
+>>> print_table(
+...     table=[("123\n456\n789",)],
+...     max_width=(3,),
+...     max_height=4,
+...     maximize_height=True,
+... )
++-----+
+| 123 |
+| 456 |
+| 789 |
+|     |
++-----+
+>>> print_table(
+...     table=[("123456789",)],
+...     max_width=(3,),
+...     max_height=4,
+...     maximize_height=True,
+... )
++-----+
+| 123↩|
+| 456↩|
+| 789 |
+|     |
++-----+
 
 ```
 

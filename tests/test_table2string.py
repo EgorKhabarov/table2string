@@ -48,6 +48,24 @@ def test_line_spliter():
     assert line_spliter("123\n456", 3) == (["123", "456"], [" ", " "])
     assert line_spliter("123\n\n456", 3) == (["123", " ", "456"], [" ", " ", " "])
 
+    assert line_spliter(
+        text="123\n456\n789",
+        width=3,
+        height=2,
+    ) == (["123", "456"], [" ", "…"])
+
+    assert line_spliter(
+        text="123\n456\n789",
+        width=3,
+        height=3,
+    ) == (["123", "456", "789"], [" ", " ", " "])
+
+    assert line_spliter(
+        text="123\n456",
+        width=3,
+        height=3,
+    ) == (["123", "456"], [" ", " "])
+
 
 def test_fill_line():
     assert (
@@ -737,5 +755,138 @@ Never gonna tell a lie and hurt you
 +---+---+
 | 7 | 8 |
 +---+---+
+""".strip()
+    )
+    table_18 = [("123\n456\n789",)]
+    assert (
+        stringify_table(
+            table=table_18,
+            max_width=(3,),
+            max_height=3,
+        )
+        == stringify_table(
+            table=table_18,
+            max_width=(3,),
+            max_height=3,
+            maximize_height=True,
+        )
+        == """
++-----+
+| 123 |
+| 456 |
+| 789 |
++-----+
+""".strip()
+    )
+    assert (
+        stringify_table(
+            table=table_18,
+            max_width=(3,),
+            max_height=2,
+            maximize_height=True,
+        )
+        == """
++-----+
+| 123 |
+| 456…|
++-----+
+""".strip()
+    )
+    assert (
+        stringify_table(
+            table=table_18,
+            max_width=(3,),
+            max_height=4,
+            maximize_height=True,
+        )
+        == """
++-----+
+| 123 |
+| 456 |
+| 789 |
+|     |
++-----+
+""".strip()
+    )
+    assert (
+        stringify_table(
+            table=table_18,
+            max_width=(3,),
+            max_height=8,
+            maximize_height=True,
+        )
+        == """
++-----+
+| 123 |
+| 456 |
+| 789 |
+|     |
+|     |
+|     |
+|     |
+|     |
++-----+
+""".strip()
+    )
+    assert (
+        stringify_table(
+            table=[
+                ("City name", "Area", "Population", "Annual Rainfall"),
+                ("Adelaide", 1295, 1158259, 600.5),
+                ("Brisbane", 5905, 1857594, 1146.4),
+                ("Darwin", 112, 120900, 1714.7),
+                ("Hobart", 1357, 205556, 619.5),
+                ("Sydney", 2058, 4336374, 1214.8),
+                ("Melbourne", 1566, 3806092, 646.9),
+                ("Perth", 5386, 1554769, 869.4),
+            ],
+            sep=(1,)
+        )
+        == """
++-----------+------+------------+-----------------+
+| City name | Area | Population | Annual Rainfall |
++-----------+------+------------+-----------------+
+| Adelaide  | 1295 |    1158259 |           600.5 |
+| Brisbane  | 5905 |    1857594 |          1146.4 |
+| Darwin    |  112 |     120900 |          1714.7 |
+| Hobart    | 1357 |     205556 |           619.5 |
+| Sydney    | 2058 |    4336374 |          1214.8 |
+| Melbourne | 1566 |    3806092 |           646.9 |
+| Perth     | 5386 |    1554769 |           869.4 |
++-----------+------+------------+-----------------+
+""".strip()
+    )
+    assert (
+        stringify_table(
+            table=[
+                ("City name", "Area", "Population", "Annual Rainfall"),
+                *sorted(
+                    [
+                        ("Adelaide", 1295, 1158259, 600.5),
+                        ("Brisbane", 5905, 1857594, 1146.4),
+                        ("Darwin", 112, 120900, 1714.7),
+                        ("Hobart", 1357, 205556, 619.5),
+                        ("Sydney", 2058, 4336374, 1214.8),
+                        ("Melbourne", 1566, 3806092, 646.9),
+                        ("Perth", 5386, 1554769, 869.4),
+                    ],
+                    key=lambda x: x[3],
+                )
+            ],
+            sep=(1, 5)
+        )
+        == """
++-----------+------+------------+-----------------+
+| City name | Area | Population | Annual Rainfall |
++-----------+------+------------+-----------------+
+| Adelaide  | 1295 |    1158259 |           600.5 |
+| Hobart    | 1357 |     205556 |           619.5 |
+| Melbourne | 1566 |    3806092 |           646.9 |
+| Perth     | 5386 |    1554769 |           869.4 |
++-----------+------+------------+-----------------+
+| Brisbane  | 5905 |    1857594 |          1146.4 |
+| Sydney    | 2058 |    4336374 |          1214.8 |
+| Darwin    |  112 |     120900 |          1714.7 |
++-----------+------+------------+-----------------+
 """.strip()
     )

@@ -137,6 +137,7 @@ def line_spliter(
     lines = text.split("\n")
     result_lines = []
     result_breaks = []
+
     for line in lines:
         if get_text_width_in_console(line) == 0:
             result_lines.append(" ")
@@ -231,6 +232,7 @@ def print_table(
     name_align: Literal["<", ">", "^"] | str = None,
     max_width: int | tuple[int, ...] = None,
     max_height: int = None,
+    maximize_height: bool = False,
     file: StringIO = None,
     line_break_symbol: str = "↩",
     cell_break_symbol: str = "…",
@@ -245,9 +247,10 @@ def print_table(
     :param name_align:
     :param max_width:
     :param max_height:
+    :param maximize_height:
     :param file:
-    :param line_break_symbol:
-    :param cell_break_symbol:
+    :param line_break_symbol: "↩" or chr(8617) or "\\U000021a9"
+    :param cell_break_symbol: "…" or chr(8230) or "\\U00002026"
     :param sep:
     :param end:
     :return:
@@ -313,7 +316,10 @@ def print_table(
         if (sep is True or n == 0) or (isinstance(sep, (range, tuple)) and n in sep):
             print(line_separator, file=file)
 
-        max_row_height = max(map(len, tuple(zip(*row))[0]))
+        if maximize_height:
+            max_row_height = max_height
+        else:
+            max_row_height = max(map(len, tuple(zip(*row))[0]))
 
         for column in row:
             extend_data = (" ",) * (max_row_height - len(column[0]))
@@ -334,6 +340,7 @@ def stringify_table(
     name_align: Literal["<", ">", "^"] | str = None,
     max_width: int | tuple[int, ...] = None,
     max_height: int = None,
+    maximize_height: bool = False,
     line_break_symbol: str = "↩",
     cell_break_symbol: str = "…",
     sep: bool | range | tuple = True,
@@ -347,8 +354,9 @@ def stringify_table(
     :param name_align:
     :param max_width:
     :param max_height:
-    :param line_break_symbol:
-    :param cell_break_symbol:
+    :param maximize_height:
+    :param line_break_symbol: "↩" or chr(8617) or "\\U000021a9"
+    :param cell_break_symbol: "…" or chr(8230) or "\\U00002026"
     :param sep:
     :param end:
     :return:
@@ -361,6 +369,7 @@ def stringify_table(
         name_align=name_align,
         max_width=max_width,
         max_height=max_height,
+        maximize_height=maximize_height,
         file=file,
         line_break_symbol=line_break_symbol,
         cell_break_symbol=cell_break_symbol,
