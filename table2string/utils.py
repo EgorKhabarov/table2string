@@ -73,7 +73,7 @@ def decrease_numbers(
 
 def transform_align(
     column_count: int,
-    align: Union[Tuple[str], str] = "*",
+    align: Union[Tuple[str, ...], str] = "*",
 ) -> Tuple[str]:
     """
     Convert align to a suitable view
@@ -91,7 +91,7 @@ def transform_align(
 
 
 def transform_width(
-    width: Union[int, Tuple[int], None],
+    width: Union[int, Tuple[int, ...], None],
     column_count: int,
     row_lengths: List[int],
 ) -> List[int]:
@@ -178,7 +178,7 @@ def fill_line(
     rows: List[List[str]],
     symbols: List[List[str]],
     widths: List[int],
-    align: Tuple[str],
+    align: Tuple[str, ...],
 ) -> str:
     """
 
