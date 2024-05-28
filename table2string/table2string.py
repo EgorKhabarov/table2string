@@ -1,8 +1,7 @@
 from io import StringIO
-from typing import Literal
+from typing import Union, Tuple
 
 from table2string.utils import (
-    AlignType,
     get_text_width_in_console,
     transform_align,
     transform_width,
@@ -13,33 +12,34 @@ from table2string.utils import (
 
 def print_table(
     table,
-    align: tuple[AlignType | str, ...] | AlignType | str = "*",
+    align: Union[Tuple[str], str] = "*",
     name: str = None,
-    name_align: Literal["<", ">", "^"] | str = None,
-    max_width: int | tuple[int, ...] = None,
+    name_align: str = "^",
+    max_width: Union[int, Tuple[int]] = None,
     max_height: int = None,
     maximize_height: bool = False,
-    file: StringIO = None,
     line_break_symbol: str = "↩",
     cell_break_symbol: str = "…",
-    sep: bool | range | tuple = True,
-    end: str | None = "\n",
+    sep: Union[bool, range, tuple] = True,
+    end: Union[str, None] = "\n",
+    file: StringIO = None,
 ) -> None:
     """
+    Print the table in sys.stdout or file
 
-    :param table:
-    :param align:
-    :param name:
-    :param name_align:
-    :param max_width:
-    :param max_height:
-    :param maximize_height:
-    :param file:
+    :param table: Two-dimensional matrix
+    :param align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
+    :param name: Table name
+    :param name_align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
+    :param max_width: Table width or width of individual columns
+    :param max_height: The maximum number of lines in one line
+    :param maximize_height: Make all lines of the same height max_height
     :param line_break_symbol: "↩" or chr(8617) or "\\U000021a9"
     :param cell_break_symbol: "…" or chr(8230) or "\\U00002026"
-    :param sep:
-    :param end:
-    :return:
+    :param sep: Settings of dividers. You can specify specific lines with dividers.
+    :param end: Configure the last symbol of the table. \\n or nothing
+    :param file: File where you can record the table by .write method.
+    :return: None
     """
 
     if len(line_break_symbol) != 1:
@@ -71,7 +71,7 @@ def print_table(
 
     if name:
         # noinspection PyTypeChecker
-        name_align = transform_align(1, name_align or "^")
+        name_align = transform_align(1, name_align)
         print("+" + line_separator.replace("+", "-")[1:-1] + "+", file=file)
 
         if not max_widths:
@@ -121,31 +121,31 @@ def print_table(
 
 def stringify_table(
     table,
-    align: tuple[AlignType | str, ...] | AlignType | str = "*",
+    align: Union[Tuple[str], str] = "*",
     name: str = None,
-    name_align: Literal["<", ">", "^"] | str = None,
-    max_width: int | tuple[int, ...] = None,
+    name_align: str = "^",
+    max_width: Union[int, Tuple[int]] = None,
     max_height: int = None,
     maximize_height: bool = False,
     line_break_symbol: str = "↩",
     cell_break_symbol: str = "…",
-    sep: bool | range | tuple = True,
-    end: str | None = "",
+    sep: Union[bool, range, tuple] = True,
+    end: Union[str, None] = "",
 ) -> str:
     """
 
-    :param table:
-    :param align:
-    :param name:
-    :param name_align:
-    :param max_width:
-    :param max_height:
-    :param maximize_height:
+    :param table: Two-dimensional matrix
+    :param align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
+    :param name: Table name
+    :param name_align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
+    :param max_width: Table width or width of individual columns
+    :param max_height: The maximum number of lines in one line
+    :param maximize_height: Make all lines of the same height max_height
     :param line_break_symbol: "↩" or chr(8617) or "\\U000021a9"
     :param cell_break_symbol: "…" or chr(8230) or "\\U00002026"
-    :param sep:
-    :param end:
-    :return:
+    :param sep: Settings of dividers. You can specify specific lines with dividers.
+    :param end: Configure the last symbol of the table. \\n or nothing
+    :return: String table
     """
     file = StringIO()
     print_table(
@@ -156,11 +156,11 @@ def stringify_table(
         max_width=max_width,
         max_height=max_height,
         maximize_height=maximize_height,
-        file=file,
         line_break_symbol=line_break_symbol,
         cell_break_symbol=cell_break_symbol,
         sep=sep,
         end=end,
+        file=file,
     )
     file.seek(0)
     return file.read()

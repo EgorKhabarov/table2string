@@ -1,9 +1,9 @@
 import unicodedata
-from typing import TypeAlias, Literal
+from typing import Union, List, Tuple
 
 
 # fmt: off
-AlignType: TypeAlias = Literal[
+ALLOWED_ALIGNS = [
     "<", "^", ">",
     "<<", "<^", "<>",
     "^<", "^^", "^>",
@@ -27,10 +27,10 @@ def get_text_width_in_console(text: str) -> int:
 
 
 def decrease_numbers(
-    row_lengths: list[int],
+    row_lengths: List[int],
     max_width: int = 120,
     min_value: int = 10,
-) -> list[int]:
+) -> List[int]:
     """
 
     :param row_lengths:
@@ -73,8 +73,8 @@ def decrease_numbers(
 
 def transform_align(
     column_count: int,
-    align: tuple[AlignType | str, ...] | AlignType | str = "*",
-) -> tuple[AlignType]:
+    align: Union[Tuple[str], str] = "*",
+) -> Tuple[str]:
     """
     Convert align to a suitable view
 
@@ -91,10 +91,10 @@ def transform_align(
 
 
 def transform_width(
-    width: int | tuple[int, ...] | None,
+    width: Union[int, Tuple[int], None],
     column_count: int,
-    row_lengths: list[int],
-) -> list[int]:
+    row_lengths: List[int],
+) -> List[int]:
     """
 
     :param width:
@@ -133,8 +133,8 @@ def line_spliter(
     width: int = None,
     height: int = None,
     line_break_symbol: str = "↩",
-    cell_break_symbol: str = "…",  # chr(8230)
-) -> tuple[list[str], list[str]]:
+    cell_break_symbol: str = "…",
+) -> Tuple[List[str], List[str]]:
     """
 
     :param text:
@@ -175,10 +175,10 @@ def line_spliter(
 
 
 def fill_line(
-    rows: list[list[str]],
-    symbols: list[list[str]],
-    widths: list[int],
-    align: tuple[AlignType | str, ...],
+    rows: List[List[str]],
+    symbols: List[List[str]],
+    widths: List[int],
+    align: Tuple[str],
 ) -> str:
     """
 
