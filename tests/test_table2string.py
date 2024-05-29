@@ -1,4 +1,4 @@
-from table2string.table2string import stringify_table
+from table2string.table2string import stringify_table, BORDERS
 from table2string.utils import (
     decrease_numbers,
     transform_align,
@@ -888,5 +888,418 @@ Never gonna tell a lie and hurt you
 | Sydney    | 2058 |    4336374 |          1214.8 |
 | Darwin    |  112 |     120900 |          1714.7 |
 +-----------+------+------------+-----------------+
+""".strip()
+    )
+    table_19 = [("1", "2", "3"), ("qwe", "rty\nuio", "")]
+    name_1 = "Table Name"
+    assert (
+        stringify_table(table_19, border=BORDERS["ascii_thin"])
+        == """
++-----+-----+---+
+|   1 |   2 | 3 |
++-----+-----+---+
+| qwe | rty |   |
+|     | uio |   |
++-----+-----+---+
+""".strip()
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["ascii_thin"], name=name_1)
+        == """
++---------------+
+|  Table Name   |
++-----+-----+---+
+|   1 |   2 | 3 |
++-----+-----+---+
+| qwe | rty |   |
+|     | uio |   |
++-----+-----+---+
+""".strip()
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["ascii_thin_double"])
+        == """
++-----+-----+---+
+|   1 |   2 | 3 |
++=====+=====+===+
+| qwe | rty |   |
+|     | uio |   |
++-----+-----+---+
+""".strip()
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["ascii_thin_double"], name=name_1)
+        == """
++---------------+
+|  Table Name   |
++-----+-----+---+
+|   1 |   2 | 3 |
++=====+=====+===+
+| qwe | rty |   |
+|     | uio |   |
++-----+-----+---+
+""".strip()
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["ascii_double"])
+        == """
++=====+=====+===+
+‖   1 ‖   2 ‖ 3 ‖
++=====+=====+===+
+‖ qwe ‖ rty ‖   ‖
+‖     ‖ uio ‖   ‖
++=====+=====+===+
+""".strip()
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["ascii_double"], name=name_1)
+        == """
++===============+
+‖  Table Name   ‖
++=====+=====+===+
+‖   1 ‖   2 ‖ 3 ‖
++=====+=====+===+
+‖ qwe ‖ rty ‖   ‖
+‖     ‖ uio ‖   ‖
++=====+=====+===+
+""".strip()
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["ascii_double_thin"])
+        == """
++=====+=====+===+
+‖   1 ‖   2 ‖ 3 ‖
++-----+-----+---+
+‖ qwe ‖ rty ‖   ‖
+‖     ‖ uio ‖   ‖
++=====+=====+===+
+""".strip()
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["ascii_double_thin"], name=name_1)
+        == """
++===============+
+‖  Table Name   ‖
++=====+=====+===+
+‖   1 ‖   2 ‖ 3 ‖
++-----+-----+---+
+‖ qwe ‖ rty ‖   ‖
+‖     ‖ uio ‖   ‖
++=====+=====+===+
+""".strip()
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["ascii_booktabs"])
+        == """
+ --------------- 
+    1     2   3  
+ =============== 
+  qwe   rty      
+        uio      
+ --------------- 
+""".strip(
+            "\n"
+        )
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["ascii_booktabs"], name=name_1)
+        == """
+ --------------- 
+   Table Name    
+ --------------- 
+    1     2   3  
+ =============== 
+  qwe   rty      
+        uio      
+ --------------- 
+""".strip(
+            "\n"
+        )
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["thin"])
+        == """
+┌─────┬─────┬───┐
+│   1 │   2 │ 3 │
+├─────┼─────┼───┤
+│ qwe │ rty │   │
+│     │ uio │   │
+└─────┴─────┴───┘
+""".strip()
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["thin"], name=name_1)
+        == """
+┌───────────────┐
+│  Table Name   │
+├─────┬─────┬───┤
+│   1 │   2 │ 3 │
+├─────┼─────┼───┤
+│ qwe │ rty │   │
+│     │ uio │   │
+└─────┴─────┴───┘
+""".strip()
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["thin_thick"])
+        == """
+┌─────┬─────┬───┐
+│   1 │   2 │ 3 │
+┝━━━━━┿━━━━━┿━━━┥
+│ qwe │ rty │   │
+│     │ uio │   │
+└─────┴─────┴───┘
+""".strip()
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["thin_thick"], name=name_1)
+        == """
+┌───────────────┐
+│  Table Name   │
+├─────┬─────┬───┤
+│   1 │   2 │ 3 │
+┝━━━━━┿━━━━━┿━━━┥
+│ qwe │ rty │   │
+│     │ uio │   │
+└─────┴─────┴───┘
+""".strip()
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["thin_double"])
+        == """
+┌─────┬─────┬───┐
+│   1 │   2 │ 3 │
+╞═════╪═════╪═══╡
+│ qwe │ rty │   │
+│     │ uio │   │
+└─────┴─────┴───┘
+""".strip()
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["thin_double"], name=name_1)
+        == """
+┌───────────────┐
+│  Table Name   │
+├─────┬─────┬───┤
+│   1 │   2 │ 3 │
+╞═════╪═════╪═══╡
+│ qwe │ rty │   │
+│     │ uio │   │
+└─────┴─────┴───┘
+""".strip()
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["rounded"])
+        == """
+╭─────┬─────┬───╮
+│   1 │   2 │ 3 │
+├─────┼─────┼───┤
+│ qwe │ rty │   │
+│     │ uio │   │
+╰─────┴─────┴───╯
+""".strip()
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["rounded"], name=name_1)
+        == """
+╭───────────────╮
+│  Table Name   │
+├─────┬─────┬───┤
+│   1 │   2 │ 3 │
+├─────┼─────┼───┤
+│ qwe │ rty │   │
+│     │ uio │   │
+╰─────┴─────┴───╯
+""".strip()
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["rounded_thick"])
+        == """
+╭─────┬─────┬───╮
+│   1 │   2 │ 3 │
+┝━━━━━┿━━━━━┿━━━┥
+│ qwe │ rty │   │
+│     │ uio │   │
+╰─────┴─────┴───╯
+""".strip()
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["rounded_thick"], name=name_1)
+        == """
+╭───────────────╮
+│  Table Name   │
+├─────┬─────┬───┤
+│   1 │   2 │ 3 │
+┝━━━━━┿━━━━━┿━━━┥
+│ qwe │ rty │   │
+│     │ uio │   │
+╰─────┴─────┴───╯
+""".strip()
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["rounded_double"])
+        == """
+╭─────┬─────┬───╮
+│   1 │   2 │ 3 │
+╞═════╪═════╪═══╡
+│ qwe │ rty │   │
+│     │ uio │   │
+╰─────┴─────┴───╯
+""".strip()
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["rounded_double"], name=name_1)
+        == """
+╭───────────────╮
+│  Table Name   │
+├─────┬─────┬───┤
+│   1 │   2 │ 3 │
+╞═════╪═════╪═══╡
+│ qwe │ rty │   │
+│     │ uio │   │
+╰─────┴─────┴───╯
+""".strip()
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["thick"])
+        == """
+┏━━━━━┳━━━━━┳━━━┓
+┃   1 ┃   2 ┃ 3 ┃
+┣━━━━━╋━━━━━╋━━━┫
+┃ qwe ┃ rty ┃   ┃
+┃     ┃ uio ┃   ┃
+┗━━━━━┻━━━━━┻━━━┛
+""".strip()
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["thick"], name=name_1)
+        == """
+┏━━━━━━━━━━━━━━━┓
+┃  Table Name   ┃
+┣━━━━━┳━━━━━┳━━━┫
+┃   1 ┃   2 ┃ 3 ┃
+┣━━━━━╋━━━━━╋━━━┫
+┃ qwe ┃ rty ┃   ┃
+┃     ┃ uio ┃   ┃
+┗━━━━━┻━━━━━┻━━━┛
+""".strip()
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["thick_thin"])
+        == """
+┌─────┬─────┬───┐
+│   1 │   2 │ 3 │
+┠━━━━━╂━━━━━╂━━━┨
+│ qwe │ rty │   │
+│     │ uio │   │
+└─────┴─────┴───┘
+""".strip()
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["thick_thin"], name=name_1)
+        == """
+┌───────────────┐
+│  Table Name   │
+├─────┬─────┬───┤
+│   1 │   2 │ 3 │
+┠━━━━━╂━━━━━╂━━━┨
+│ qwe │ rty │   │
+│     │ uio │   │
+└─────┴─────┴───┘
+""".strip()
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["double"])
+        == """
+╔═════╦═════╦═══╗
+║   1 ║   2 ║ 3 ║
+╠═════╬═════╬═══╣
+║ qwe ║ rty ║   ║
+║     ║ uio ║   ║
+╚═════╩═════╩═══╝
+""".strip()
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["double"], name=name_1)
+        == """
+╔═══════════════╗
+║  Table Name   ║
+╠═════╦═════╦═══╣
+║   1 ║   2 ║ 3 ║
+╠═════╬═════╬═══╣
+║ qwe ║ rty ║   ║
+║     ║ uio ║   ║
+╚═════╩═════╩═══╝
+""".strip()
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["double_thin"])
+        == """
+╔═════╦═════╦═══╗
+║   1 ║   2 ║ 3 ║
+╟─────╫─────╫───╢
+║ qwe ║ rty ║   ║
+║     ║ uio ║   ║
+╚═════╩═════╩═══╝
+""".strip()
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["double_thin"], name=name_1)
+        == """
+╔═══════════════╗
+║  Table Name   ║
+╠═════╦═════╦═══╣
+║   1 ║   2 ║ 3 ║
+╟─────╫─────╫───╢
+║ qwe ║ rty ║   ║
+║     ║ uio ║   ║
+╚═════╩═════╩═══╝
+""".strip()
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["booktabs"])
+        == """
+ ─────────────── 
+    1     2   3  
+ ━━━━━━━━━━━━━━━ 
+  qwe   rty      
+        uio      
+ ─────────────── 
+""".strip(
+            "\n"
+        )
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["booktabs"], name=name_1)
+        == """
+ ─────────────── 
+   Table Name    
+ ─────────────── 
+    1     2   3  
+ ━━━━━━━━━━━━━━━ 
+  qwe   rty      
+        uio      
+ ─────────────── 
+""".strip(
+            "\n"
+        )
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["markdown"])
+        == """
+|   1 |   2 | 3 |
+|-----|-----|---|
+| qwe | rty |   |
+|     | uio |   |
+""".strip()
+    )
+    assert (
+        stringify_table(table_19, border=BORDERS["markdown"], name=name_1)
+        == """
+|  Table Name   |
+|   1 |   2 | 3 |
+|-----|-----|---|
+| qwe | rty |   |
+|     | uio |   |
 """.strip()
     )

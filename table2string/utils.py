@@ -1,16 +1,114 @@
 import unicodedata
+from collections import namedtuple
 from typing import Union, List, Tuple
 
 
-# fmt: off
 ALLOWED_ALIGNS = [
-    "<", "^", ">",
-    "<<", "<^", "<>",
-    "^<", "^^", "^>",
-    "><", ">^", ">>",
-    "*", "**"
+    "<",
+    "^",
+    ">",
+    "<<",
+    "<^",
+    "<>",
+    "^<",
+    "^^",
+    "^>",
+    "><",
+    ">^",
+    ">>",
+    "*",
+    "**",
 ]
-# fmt: on
+_Border = namedtuple(
+    "_Border",
+    (
+        "g",
+        "v",
+        "ul",
+        "ur",
+        "dl",
+        "dr",
+        "vl",
+        "vr",
+        "ug",
+        "dg",
+        "c",
+        "vlp",
+        "gp",
+        "cp",
+        "vrp",
+    ),
+    defaults=(
+        "-",
+        "|",
+        "+",
+        "+",
+        "+",
+        "+",
+        "+",
+        "+",
+        "+",
+        "+",
+        "+",
+        "+",
+        "-",
+        "+",
+        "+",
+    ),
+)
+BORDERS = {
+    "ascii_thin": _Border(
+        "-", "|", "+", "+", "+", "+", "+", "+", "+", "+", "+", "+", "-", "+", "+"
+    ),
+    "ascii_thin_double": _Border(
+        "-", "|", "+", "+", "+", "+", "+", "+", "+", "+", "+", "+", "=", "+", "+"
+    ),
+    "ascii_double": _Border(
+        "=", "‖", "+", "+", "+", "+", "+", "+", "+", "+", "+", "+", "=", "+", "+"
+    ),
+    "ascii_double_thin": _Border(
+        "=", "‖", "+", "+", "+", "+", "+", "+", "+", "+", "+", "+", "-", "+", "+"
+    ),
+    "ascii_booktabs": _Border(
+        "-", " ", " ", " ", " ", " ", " ", " ", "-", "-", "-", " ", "=", "=", " "
+    ),
+    "thin": _Border(
+        "─", "│", "┌", "┐", "└", "┘", "├", "┤", "┬", "┴", "┼", "├", "─", "┼", "┤"
+    ),
+    "thin_thick": _Border(
+        "─", "│", "┌", "┐", "└", "┘", "├", "┤", "┬", "┴", "┼", "┝", "━", "┿", "┥"
+    ),
+    "thin_double": _Border(
+        "─", "│", "┌", "┐", "└", "┘", "├", "┤", "┬", "┴", "┼", "╞", "═", "╪", "╡"
+    ),
+    "rounded": _Border(
+        "─", "│", "╭", "╮", "╰", "╯", "├", "┤", "┬", "┴", "┼", "├", "─", "┼", "┤"
+    ),
+    "rounded_thick": _Border(
+        "─", "│", "╭", "╮", "╰", "╯", "├", "┤", "┬", "┴", "┼", "┝", "━", "┿", "┥"
+    ),
+    "rounded_double": _Border(
+        "─", "│", "╭", "╮", "╰", "╯", "├", "┤", "┬", "┴", "┼", "╞", "═", "╪", "╡"
+    ),
+    "thick": _Border(
+        "━", "┃", "┏", "┓", "┗", "┛", "┣", "┫", "┳", "┻", "╋", "┣", "━", "╋", "┫"
+    ),
+    "thick_thin": _Border(
+        "─", "│", "┌", "┐", "└", "┘", "├", "┤", "┬", "┴", "┼", "┠", "━", "╂", "┨"
+    ),
+    "double": _Border(
+        "═", "║", "╔", "╗", "╚", "╝", "╠", "╣", "╦", "╩", "╬", "╠", "═", "╬", "╣"
+    ),
+    "double_thin": _Border(
+        "═", "║", "╔", "╗", "╚", "╝", "╠", "╣", "╦", "╩", "╬", "╟", "─", "╫", "╢"
+    ),
+    "booktabs": _Border(
+        "─", " ", " ", " ", " ", " ", " ", " ", "─", "─", "─", " ", "━", "━", " "
+    ),
+    "markdown": _Border(
+        " ", "|", " ", " ", " ", " ", " ", " ", " ", " ", " ", "|", "-", "|", "|"
+    ),
+}
 
 
 def get_text_width_in_console(text: str) -> int:
@@ -74,7 +172,7 @@ def decrease_numbers(
 def transform_align(
     column_count: int,
     align: Union[Tuple[str, ...], str] = "*",
-) -> Tuple[str]:
+) -> Tuple[str, ...]:
     """
     Convert align to a suitable view
 
@@ -82,6 +180,14 @@ def transform_align(
     :param align:
     :return:
     """
+    wrong_align = [
+        a
+        for a in ((align,) if isinstance(align, str) else align)
+        if a not in ALLOWED_ALIGNS
+    ]
+    if wrong_align:
+        raise ValueError(f"{wrong_align[0]} not in ALLOWED_ALIGNS")
+
     if isinstance(align, str):
         align = (align, *(align,) * (column_count - 1))
     else:
@@ -130,8 +236,8 @@ def transform_width(
 
 def line_spliter(
     text: str,
-    width: int = None,
-    height: int = None,
+    width: int | None = None,
+    height: int | None = None,
     line_break_symbol: str = "↩",
     cell_break_symbol: str = "…",
 ) -> Tuple[List[str], List[str]]:
@@ -179,6 +285,7 @@ def fill_line(
     symbols: List[List[str]],
     widths: List[int],
     align: Tuple[str, ...],
+    border: _Border = BORDERS["ascii_thin"],
 ) -> str:
     """
 
@@ -186,6 +293,7 @@ def fill_line(
     :param symbols:
     :param widths:
     :param align:
+    :param border:
     :return:
     """
     # noinspection PyTypeChecker
@@ -226,8 +334,8 @@ def fill_line(
                 get_text_width_in_console(row[index]) - len(row[index])
             )
 
-        template = "|" + "".join(
-            f" {{:{align[cn]}{get_width(cn)}}}{symbol[rn][cn]}|"
+        template = border.v + "".join(
+            f" {{:{align[cn]}{get_width(cn)}}}{symbol[rn][cn]}" + border.v
             for cn in range(len(row))
         )
         lines.append(template.format(*row))

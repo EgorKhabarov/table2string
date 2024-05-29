@@ -1,5 +1,5 @@
-from io import StringIO
-from typing import Union, Tuple
+from io import TextIOWrapper, StringIO
+from typing import Union, Tuple, Any, Sequence
 
 from table2string.utils import (
     get_text_width_in_console,
@@ -7,22 +7,25 @@ from table2string.utils import (
     transform_width,
     line_spliter,
     fill_line,
+    BORDERS,
+    _Border,
 )
 
 
 def print_table(
-    table,
-    align: Union[Tuple[str], str] = "*",
-    name: str = None,
+    table: Sequence[Sequence[Any]],
+    align: Union[Tuple[str, ...], str] = "*",
+    name: str | None = None,
     name_align: str = "^",
-    max_width: Union[int, Tuple[int]] = None,
-    max_height: int = None,
+    max_width: Union[int, Tuple[int, ...], None] = None,
+    max_height: int | None = None,
     maximize_height: bool = False,
     line_break_symbol: str = "↩",
     cell_break_symbol: str = "…",
     sep: Union[bool, range, tuple] = True,
     end: Union[str, None] = "\n",
-    file: StringIO = None,
+    file: TextIOWrapper | None = None,
+    border: _Border = BORDERS["ascii_thin"],
 ) -> None:
     """
     Print the table in sys.stdout or file
@@ -39,6 +42,7 @@ def print_table(
     :param sep: Settings of dividers. You can specify specific lines with dividers.
     :param end: Configure the last symbol of the table. \\n or nothing
     :param file: File where you can record the table by .write method.
+    :param border:
     :return: None
     """
 
@@ -67,12 +71,36 @@ def print_table(
     column_count = max(map(len, table))
     align = transform_align(column_count, align)
     max_widths = transform_width(max_width, column_count, row_lengths)
-    line_separator = "+" + "".join(("-" * (i + 2)) + "+" for i in max_widths)
+
+    up_separator = (
+        border.ul
+        + "".join((border.g * (i + 2)) for i in max_widths)
+        + border.g * (len(max_widths) - 1)
+        + border.ur
+    )
+    under_name_separator = (
+        border.vl + border.ug.join((border.g * (i + 2)) for i in max_widths) + border.vr
+    )
+    up_noname_separator = (
+        border.ul + border.ug.join((border.g * (i + 2)) for i in max_widths) + border.ur
+    )
+    line_separator = (
+        border.vl + border.c.join((border.g * (i + 2)) for i in max_widths) + border.vr
+    )
+    line_separator_plus = (
+        border.vlp
+        + border.cp.join((border.gp * (i + 2)) for i in max_widths)
+        + border.vrp
+    )
+    down_separator = (
+        border.dl + border.dg.join((border.g * (i + 2)) for i in max_widths) + border.dr
+    )
 
     if name:
         # noinspection PyTypeChecker
         name_align = transform_align(1, name_align)
-        print("+" + line_separator.replace("+", "-")[1:-1] + "+", file=file)
+        if up_separator.strip():
+            print(up_separator, file=file)
 
         if not max_widths:
             max_name_width: int = sum(row_lengths) + (3 * column_count) + 1 - 4
@@ -84,7 +112,7 @@ def print_table(
                 name, max_name_width, max_height, line_break_symbol, cell_break_symbol
             )
         )
-        line = fill_line(rows, symbols, [max_name_width], name_align)
+        line = fill_line(rows, symbols, [max_name_width], name_align, border)
         print(line, file=file)
 
     # Trimming long lines
@@ -99,8 +127,21 @@ def print_table(
     )
 
     for n, row in enumerate(table):
+        if n != 0:
+            print(file=file)
+
         if (sep is True or n == 0) or (isinstance(sep, (range, tuple)) and n in sep):
-            print(line_separator, file=file)
+            if (name and n == 1) or ((not name) and n == 1):
+                s = line_separator_plus
+            elif name and n == 0:
+                s = under_name_separator
+            elif (not name) and n == 0:
+                s = up_noname_separator
+            else:
+                s = line_separator
+
+            if s.strip():
+                print(s, file=file)
 
         if maximize_height:
             max_row_height = max_height
@@ -113,24 +154,26 @@ def print_table(
             column[1].extend(extend_data)
 
         rows, symbols = zip(*row)
-        line = fill_line(rows, symbols, max_widths, align)
-        print(line, file=file)
+        line = fill_line(rows, symbols, max_widths, align, border)
+        print(line, file=file, end="")
 
-    print(line_separator.rstrip("\n"), file=file, end=end)
+    if down_separator.strip():
+        print("\n" + down_separator.rstrip("\n"), file=file, end=end)
 
 
 def stringify_table(
-    table,
-    align: Union[Tuple[str], str] = "*",
-    name: str = None,
+    table: Sequence[Sequence[Any]],
+    align: Union[Tuple[str, ...], str] = "*",
+    name: str | None = None,
     name_align: str = "^",
-    max_width: Union[int, Tuple[int]] = None,
-    max_height: int = None,
+    max_width: Union[int, Tuple[int, ...], None] = None,
+    max_height: int | None = None,
     maximize_height: bool = False,
     line_break_symbol: str = "↩",
     cell_break_symbol: str = "…",
     sep: Union[bool, range, tuple] = True,
     end: Union[str, None] = "",
+    border: _Border = BORDERS["ascii_thin"],
 ) -> str:
     """
 
@@ -145,6 +188,7 @@ def stringify_table(
     :param cell_break_symbol: "…" or chr(8230) or "\\U00002026"
     :param sep: Settings of dividers. You can specify specific lines with dividers.
     :param end: Configure the last symbol of the table. \\n or nothing
+    :param border:
     :return: String table
     """
     file = StringIO()
@@ -161,6 +205,7 @@ def stringify_table(
         sep=sep,
         end=end,
         file=file,
+        border=border,
     )
     file.seek(0)
     return file.read()
