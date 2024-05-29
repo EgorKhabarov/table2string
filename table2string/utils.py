@@ -236,8 +236,8 @@ def transform_width(
 
 def line_spliter(
     text: str,
-    width: int | None = None,
-    height: int | None = None,
+    width: Union[int, None] = None,
+    height: Union[int, None] = None,
     line_break_symbol: str = "↩",
     cell_break_symbol: str = "…",
 ) -> Tuple[List[str], List[str]]:

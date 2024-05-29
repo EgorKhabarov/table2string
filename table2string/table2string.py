@@ -15,16 +15,16 @@ from table2string.utils import (
 def print_table(
     table: Sequence[Sequence[Any]],
     align: Union[Tuple[str, ...], str] = "*",
-    name: str | None = None,
+    name: Union[str, None] = None,
     name_align: str = "^",
     max_width: Union[int, Tuple[int, ...], None] = None,
-    max_height: int | None = None,
+    max_height: Union[int, None] = None,
     maximize_height: bool = False,
     line_break_symbol: str = "↩",
     cell_break_symbol: str = "…",
     sep: Union[bool, range, tuple] = True,
     end: Union[str, None] = "\n",
-    file: TextIOWrapper | None = None,
+    file: Union[TextIOWrapper, None] = None,
     border: _Border = BORDERS["ascii_thin"],
 ) -> None:
     """
@@ -164,10 +164,10 @@ def print_table(
 def stringify_table(
     table: Sequence[Sequence[Any]],
     align: Union[Tuple[str, ...], str] = "*",
-    name: str | None = None,
+    name: Union[str, None] = None,
     name_align: str = "^",
     max_width: Union[int, Tuple[int, ...], None] = None,
-    max_height: int | None = None,
+    max_height: Union[int, None] = None,
     maximize_height: bool = False,
     line_break_symbol: str = "↩",
     cell_break_symbol: str = "…",
