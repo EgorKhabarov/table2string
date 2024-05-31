@@ -1,4 +1,4 @@
-from table2string import stringify_table, BORDERS
+from table2string import stringify_table, Themes
 from table2string.utils import (
     decrease_numbers,
     transform_align,
@@ -30,7 +30,7 @@ def test_transform_width():
     assert transform_width(1, 2, [2, 2]) == [1, 1]
     assert transform_width((1, 2), 1, [1]) == (1,)
     assert transform_width((1, 2), 2, [2, 2]) == (1, 2)
-    assert transform_width((3, 2), 2, [2, 2]) == (3, 2)  # FIXME
+    assert transform_width((3, 2), 2, [2, 2]) == (3, 2)
 
 
 def test_line_spliter():
@@ -893,7 +893,7 @@ Never gonna tell a lie and hurt you
     table_19 = [("1", "2", "3"), ("qwe", "rty\nuio", "")]
     name_1 = "Table Name"
     assert (
-        stringify_table(table_19, border=BORDERS["ascii_thin"])
+        stringify_table(table_19, theme=Themes.ascii_thin)
         == """
 +-----+-----+---+
 |   1 |   2 | 3 |
@@ -904,7 +904,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_19, border=BORDERS["ascii_thin"], name=name_1)
+        stringify_table(table_19, theme=Themes.ascii_thin, name=name_1)
         == """
 +---------------+
 |  Table Name   |
@@ -917,7 +917,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_19, border=BORDERS["ascii_thin_double"])
+        stringify_table(table_19, theme=Themes.ascii_thin_double)
         == """
 +-----+-----+---+
 |   1 |   2 | 3 |
@@ -928,7 +928,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_19, border=BORDERS["ascii_thin_double"], name=name_1)
+        stringify_table(table_19, theme=Themes.ascii_thin_double, name=name_1)
         == """
 +---------------+
 |  Table Name   |
@@ -941,7 +941,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_19, border=BORDERS["ascii_double"])
+        stringify_table(table_19, theme=Themes.ascii_double)
         == """
 +=====+=====+===+
 ‖   1 ‖   2 ‖ 3 ‖
@@ -952,7 +952,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_19, border=BORDERS["ascii_double"], name=name_1)
+        stringify_table(table_19, theme=Themes.ascii_double, name=name_1)
         == """
 +===============+
 ‖  Table Name   ‖
@@ -965,7 +965,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_19, border=BORDERS["ascii_double_thin"])
+        stringify_table(table_19, theme=Themes.ascii_double_thin)
         == """
 +=====+=====+===+
 ‖   1 ‖   2 ‖ 3 ‖
@@ -976,7 +976,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_19, border=BORDERS["ascii_double_thin"], name=name_1)
+        stringify_table(table_19, theme=Themes.ascii_double_thin, name=name_1)
         == """
 +===============+
 ‖  Table Name   ‖
@@ -989,7 +989,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_19, border=BORDERS["ascii_booktabs"])
+        stringify_table(table_19, theme=Themes.ascii_booktabs)
         == """
  --------------- 
     1     2   3  
@@ -1002,7 +1002,7 @@ Never gonna tell a lie and hurt you
         )
     )
     assert (
-        stringify_table(table_19, border=BORDERS["ascii_booktabs"], name=name_1)
+        stringify_table(table_19, theme=Themes.ascii_booktabs, name=name_1)
         == """
  --------------- 
    Table Name    
@@ -1017,7 +1017,7 @@ Never gonna tell a lie and hurt you
         )
     )
     assert (
-        stringify_table(table_19, border=BORDERS["thin"])
+        stringify_table(table_19, theme=Themes.thin)
         == """
 ┌─────┬─────┬───┐
 │   1 │   2 │ 3 │
@@ -1028,7 +1028,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_19, border=BORDERS["thin"], name=name_1)
+        stringify_table(table_19, theme=Themes.thin, name=name_1)
         == """
 ┌───────────────┐
 │  Table Name   │
@@ -1041,7 +1041,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_19, border=BORDERS["thin_thick"])
+        stringify_table(table_19, theme=Themes.thin_thick)
         == """
 ┌─────┬─────┬───┐
 │   1 │   2 │ 3 │
@@ -1052,7 +1052,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_19, border=BORDERS["thin_thick"], name=name_1)
+        stringify_table(table_19, theme=Themes.thin_thick, name=name_1)
         == """
 ┌───────────────┐
 │  Table Name   │
@@ -1065,7 +1065,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_19, border=BORDERS["thin_double"])
+        stringify_table(table_19, theme=Themes.thin_double)
         == """
 ┌─────┬─────┬───┐
 │   1 │   2 │ 3 │
@@ -1076,7 +1076,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_19, border=BORDERS["thin_double"], name=name_1)
+        stringify_table(table_19, theme=Themes.thin_double, name=name_1)
         == """
 ┌───────────────┐
 │  Table Name   │
@@ -1089,7 +1089,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_19, border=BORDERS["rounded"])
+        stringify_table(table_19, theme=Themes.rounded)
         == """
 ╭─────┬─────┬───╮
 │   1 │   2 │ 3 │
@@ -1100,7 +1100,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_19, border=BORDERS["rounded"], name=name_1)
+        stringify_table(table_19, theme=Themes.rounded, name=name_1)
         == """
 ╭───────────────╮
 │  Table Name   │
@@ -1113,7 +1113,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_19, border=BORDERS["rounded_thick"])
+        stringify_table(table_19, theme=Themes.rounded_thick)
         == """
 ╭─────┬─────┬───╮
 │   1 │   2 │ 3 │
@@ -1124,7 +1124,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_19, border=BORDERS["rounded_thick"], name=name_1)
+        stringify_table(table_19, theme=Themes.rounded_thick, name=name_1)
         == """
 ╭───────────────╮
 │  Table Name   │
@@ -1137,7 +1137,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_19, border=BORDERS["rounded_double"])
+        stringify_table(table_19, theme=Themes.rounded_double)
         == """
 ╭─────┬─────┬───╮
 │   1 │   2 │ 3 │
@@ -1148,7 +1148,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_19, border=BORDERS["rounded_double"], name=name_1)
+        stringify_table(table_19, theme=Themes.rounded_double, name=name_1)
         == """
 ╭───────────────╮
 │  Table Name   │
@@ -1161,7 +1161,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_19, border=BORDERS["thick"])
+        stringify_table(table_19, theme=Themes.thick)
         == """
 ┏━━━━━┳━━━━━┳━━━┓
 ┃   1 ┃   2 ┃ 3 ┃
@@ -1172,7 +1172,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_19, border=BORDERS["thick"], name=name_1)
+        stringify_table(table_19, theme=Themes.thick, name=name_1)
         == """
 ┏━━━━━━━━━━━━━━━┓
 ┃  Table Name   ┃
@@ -1185,7 +1185,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_19, border=BORDERS["thick_thin"])
+        stringify_table(table_19, theme=Themes.thick_thin)
         == """
 ┌─────┬─────┬───┐
 │   1 │   2 │ 3 │
@@ -1196,7 +1196,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_19, border=BORDERS["thick_thin"], name=name_1)
+        stringify_table(table_19, theme=Themes.thick_thin, name=name_1)
         == """
 ┌───────────────┐
 │  Table Name   │
@@ -1209,7 +1209,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_19, border=BORDERS["double"])
+        stringify_table(table_19, theme=Themes.double)
         == """
 ╔═════╦═════╦═══╗
 ║   1 ║   2 ║ 3 ║
@@ -1220,7 +1220,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_19, border=BORDERS["double"], name=name_1)
+        stringify_table(table_19, theme=Themes.double, name=name_1)
         == """
 ╔═══════════════╗
 ║  Table Name   ║
@@ -1233,7 +1233,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_19, border=BORDERS["double_thin"])
+        stringify_table(table_19, theme=Themes.double_thin)
         == """
 ╔═════╦═════╦═══╗
 ║   1 ║   2 ║ 3 ║
@@ -1244,7 +1244,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_19, border=BORDERS["double_thin"], name=name_1)
+        stringify_table(table_19, theme=Themes.double_thin, name=name_1)
         == """
 ╔═══════════════╗
 ║  Table Name   ║
@@ -1257,7 +1257,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_19, border=BORDERS["booktabs"])
+        stringify_table(table_19, theme=Themes.booktabs)
         == """
  ─────────────── 
     1     2   3  
@@ -1270,7 +1270,7 @@ Never gonna tell a lie and hurt you
         )
     )
     assert (
-        stringify_table(table_19, border=BORDERS["booktabs"], name=name_1)
+        stringify_table(table_19, theme=Themes.booktabs, name=name_1)
         == """
  ─────────────── 
    Table Name    
@@ -1285,7 +1285,7 @@ Never gonna tell a lie and hurt you
         )
     )
     assert (
-        stringify_table(table_19, border=BORDERS["markdown"])
+        stringify_table(table_19, theme=Themes.markdown)
         == """
 |   1 |   2 | 3 |
 |-----|-----|---|
@@ -1294,7 +1294,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_19, border=BORDERS["markdown"], name=name_1)
+        stringify_table(table_19, theme=Themes.markdown, name=name_1)
         == """
 |  Table Name   |
 |   1 |   2 | 3 |

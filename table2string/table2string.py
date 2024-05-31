@@ -7,8 +7,8 @@ from table2string.utils import (
     transform_width,
     line_spliter,
     fill_line,
-    BORDERS,
-    _Border,
+    Themes,
+    Theme,
 )
 
 
@@ -25,7 +25,7 @@ def print_table(
     sep: Union[bool, range, tuple] = True,
     end: Union[str, None] = "\n",
     file: Union[TextIOWrapper, None] = None,
-    border: _Border = BORDERS["ascii_thin"],
+    theme: Theme = Themes.ascii_thin,
 ) -> None:
     """
     Print the table in sys.stdout or file
@@ -42,9 +42,10 @@ def print_table(
     :param sep: Settings of dividers. You can specify specific lines with dividers.
     :param end: Configure the last symbol of the table. \\n or nothing
     :param file: File where you can record the table by .write method.
-    :param border:
+    :param theme:
     :return: None
     """
+    border = theme.border
 
     if len(line_break_symbol) != 1:
         raise ValueError("length of line_break_symbol must be 1")
@@ -102,7 +103,7 @@ def print_table(
                 name, max_name_width, max_height, line_break_symbol, cell_break_symbol
             )
         )
-        line = fill_line(rows, symbols, [max_name_width], name_align, border)
+        line = fill_line(rows, symbols, [max_name_width], name_align, theme)
         print(line, file=file)
 
     # Trimming long lines
@@ -144,7 +145,7 @@ def print_table(
             column[1].extend(extend_data)
 
         rows, symbols = zip(*row)
-        line = fill_line(rows, symbols, max_widths, align, border)
+        line = fill_line(rows, symbols, max_widths, align, theme)
         print(line, file=file, end="")
 
     if down_separator.strip():
@@ -163,7 +164,7 @@ def stringify_table(
     cell_break_symbol: str = "…",
     sep: Union[bool, range, tuple] = True,
     end: Union[str, None] = "",
-    border: _Border = BORDERS["ascii_thin"],
+    theme: Theme = Themes.ascii_thin,
 ) -> str:
     """
 
@@ -178,7 +179,7 @@ def stringify_table(
     :param cell_break_symbol: "…" or chr(8230) or "\\U00002026"
     :param sep: Settings of dividers. You can specify specific lines with dividers.
     :param end: Configure the last symbol of the table. \\n or nothing
-    :param border:
+    :param theme:
     :return: String table
     """
     file = StringIO()
@@ -195,7 +196,7 @@ def stringify_table(
         sep=sep,
         end=end,
         file=file,
-        border=border,
+        theme=theme,
     )
     file.seek(0)
     return file.read()

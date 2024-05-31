@@ -508,17 +508,17 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 <summary>Example</summary>
 
 ```pycon
->>> from table2string import BORDERS
+>>> from table2string import Themes
 >>> table_1 = [("1", "2", "3"), ("qwe", "rty\nuio", "")]
 >>> name_1 = "Table Name"
->>> print_table(table_1, border=BORDERS["ascii_thin"])
+>>> print_table(table_1, theme=Themes.ascii_thin)
 +-----+-----+---+
 |   1 |   2 | 3 |
 +-----+-----+---+
 | qwe | rty |   |
 |     | uio |   |
 +-----+-----+---+
->>> print_table(table_1, border=BORDERS["ascii_thin"], name=name_1)
+>>> print_table(table_1, theme=Themes.ascii_thin, name=name_1)
 +---------------+
 |  Table Name   |
 +-----+-----+---+
@@ -527,14 +527,14 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 | qwe | rty |   |
 |     | uio |   |
 +-----+-----+---+
->>> print_table(table_1, border=BORDERS["ascii_thin_double"])
+>>> print_table(table_1, theme=Themes.ascii_thin_double)
 +-----+-----+---+
 |   1 |   2 | 3 |
 +=====+=====+===+
 | qwe | rty |   |
 |     | uio |   |
 +-----+-----+---+
->>> print_table(table_1, border=BORDERS["ascii_thin_double"], name=name_1)
+>>> print_table(table_1, theme=Themes.ascii_thin_double, name=name_1)
 +---------------+
 |  Table Name   |
 +-----+-----+---+
@@ -543,14 +543,14 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 | qwe | rty |   |
 |     | uio |   |
 +-----+-----+---+
->>> print_table(table_1, border=BORDERS["ascii_double"])
+>>> print_table(table_1, theme=Themes.ascii_double)
 +=====+=====+===+
 ‖   1 ‖   2 ‖ 3 ‖
 +=====+=====+===+
 ‖ qwe ‖ rty ‖   ‖
 ‖     ‖ uio ‖   ‖
 +=====+=====+===+
->>> print_table(table_1, border=BORDERS["ascii_double"], name=name_1)
+>>> print_table(table_1, theme=Themes.ascii_double, name=name_1)
 +===============+
 ‖  Table Name   ‖
 +=====+=====+===+
@@ -559,14 +559,14 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 ‖ qwe ‖ rty ‖   ‖
 ‖     ‖ uio ‖   ‖
 +=====+=====+===+
->>> print_table(table_1, border=BORDERS["ascii_double_thin"])
+>>> print_table(table_1, theme=Themes.ascii_double_thin)
 +=====+=====+===+
 ‖   1 ‖   2 ‖ 3 ‖
 +-----+-----+---+
 ‖ qwe ‖ rty ‖   ‖
 ‖     ‖ uio ‖   ‖
 +=====+=====+===+
->>> print_table(table_1, border=BORDERS["ascii_double_thin"], name=name_1)
+>>> print_table(table_1, theme=Themes.ascii_double_thin, name=name_1)
 +===============+
 ‖  Table Name   ‖
 +=====+=====+===+
@@ -575,14 +575,14 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 ‖ qwe ‖ rty ‖   ‖
 ‖     ‖ uio ‖   ‖
 +=====+=====+===+
->>> print_table(table_1, border=BORDERS["ascii_booktabs"])
+>>> print_table(table_1, theme=Themes.ascii_booktabs)
  --------------- 
     1     2   3  
  =============== 
   qwe   rty      
         uio      
  --------------- 
->>> print_table(table_1, border=BORDERS["ascii_booktabs"], name=name_1)
+>>> print_table(table_1, theme=Themes.ascii_booktabs, name=name_1)
  --------------- 
    Table Name    
  --------------- 
@@ -591,14 +591,14 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
   qwe   rty      
         uio      
  --------------- 
->>> print_table(table_1, border=BORDERS["thin"])
+>>> print_table(table_1, theme=Themes.thin)
 ┌─────┬─────┬───┐
 │   1 │   2 │ 3 │
 ├─────┼─────┼───┤
 │ qwe │ rty │   │
 │     │ uio │   │
 └─────┴─────┴───┘
->>> print_table(table_1, border=BORDERS["thin"], name=name_1)
+>>> print_table(table_1, theme=Themes.thin, name=name_1)
 ┌───────────────┐
 │  Table Name   │
 ├─────┬─────┬───┤
@@ -607,14 +607,14 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 │ qwe │ rty │   │
 │     │ uio │   │
 └─────┴─────┴───┘
->>> print_table(table_1, border=BORDERS["thin_thick"])
+>>> print_table(table_1, theme=Themes.thin_thick)
 ┌─────┬─────┬───┐
 │   1 │   2 │ 3 │
 ┝━━━━━┿━━━━━┿━━━┥
 │ qwe │ rty │   │
 │     │ uio │   │
 └─────┴─────┴───┘
->>> print_table(table_1, border=BORDERS["thin_thick"], name=name_1)
+>>> print_table(table_1, theme=Themes.thin_thick, name=name_1)
 ┌───────────────┐
 │  Table Name   │
 ├─────┬─────┬───┤
@@ -623,14 +623,14 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 │ qwe │ rty │   │
 │     │ uio │   │
 └─────┴─────┴───┘
->>> print_table(table_1, border=BORDERS["thin_double"])
+>>> print_table(table_1, theme=Themes.thin_double)
 ┌─────┬─────┬───┐
 │   1 │   2 │ 3 │
 ╞═════╪═════╪═══╡
 │ qwe │ rty │   │
 │     │ uio │   │
 └─────┴─────┴───┘
->>> print_table(table_1, border=BORDERS["thin_double"], name=name_1)
+>>> print_table(table_1, theme=Themes.thin_double, name=name_1)
 ┌───────────────┐
 │  Table Name   │
 ├─────┬─────┬───┤
@@ -639,14 +639,14 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 │ qwe │ rty │   │
 │     │ uio │   │
 └─────┴─────┴───┘
->>> print_table(table_1, border=BORDERS["rounded"])
+>>> print_table(table_1, theme=Themes.rounded)
 ╭─────┬─────┬───╮
 │   1 │   2 │ 3 │
 ├─────┼─────┼───┤
 │ qwe │ rty │   │
 │     │ uio │   │
 ╰─────┴─────┴───╯
->>> print_table(table_1, border=BORDERS["rounded"], name=name_1)
+>>> print_table(table_1, theme=Themes.rounded, name=name_1)
 ╭───────────────╮
 │  Table Name   │
 ├─────┬─────┬───┤
@@ -655,14 +655,14 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 │ qwe │ rty │   │
 │     │ uio │   │
 ╰─────┴─────┴───╯
->>> print_table(table_1, border=BORDERS["rounded_thick"])
+>>> print_table(table_1, theme=Themes.rounded_thick)
 ╭─────┬─────┬───╮
 │   1 │   2 │ 3 │
 ┝━━━━━┿━━━━━┿━━━┥
 │ qwe │ rty │   │
 │     │ uio │   │
 ╰─────┴─────┴───╯
->>> print_table(table_1, border=BORDERS["rounded_thick"], name=name_1)
+>>> print_table(table_1, theme=Themes.rounded_thick, name=name_1)
 ╭───────────────╮
 │  Table Name   │
 ├─────┬─────┬───┤
@@ -671,14 +671,14 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 │ qwe │ rty │   │
 │     │ uio │   │
 ╰─────┴─────┴───╯
->>> print_table(table_1, border=BORDERS["rounded_double"])
+>>> print_table(table_1, theme=Themes.rounded_double)
 ╭─────┬─────┬───╮
 │   1 │   2 │ 3 │
 ╞═════╪═════╪═══╡
 │ qwe │ rty │   │
 │     │ uio │   │
 ╰─────┴─────┴───╯
->>> print_table(table_1, border=BORDERS["rounded_double"], name=name_1)
+>>> print_table(table_1, theme=Themes.rounded_double, name=name_1)
 ╭───────────────╮
 │  Table Name   │
 ├─────┬─────┬───┤
@@ -687,14 +687,14 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 │ qwe │ rty │   │
 │     │ uio │   │
 ╰─────┴─────┴───╯
->>> print_table(table_1, border=BORDERS["thick"])
+>>> print_table(table_1, theme=Themes.thick)
 ┏━━━━━┳━━━━━┳━━━┓
 ┃   1 ┃   2 ┃ 3 ┃
 ┣━━━━━╋━━━━━╋━━━┫
 ┃ qwe ┃ rty ┃   ┃
 ┃     ┃ uio ┃   ┃
 ┗━━━━━┻━━━━━┻━━━┛
->>> print_table(table_1, border=BORDERS["thick"], name=name_1)
+>>> print_table(table_1, theme=Themes.thick, name=name_1)
 ┏━━━━━━━━━━━━━━━┓
 ┃  Table Name   ┃
 ┣━━━━━┳━━━━━┳━━━┫
@@ -703,14 +703,14 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 ┃ qwe ┃ rty ┃   ┃
 ┃     ┃ uio ┃   ┃
 ┗━━━━━┻━━━━━┻━━━┛
->>> print_table(table_1, border=BORDERS["thick_thin"])
+>>> print_table(table_1, theme=Themes.thick_thin)
 ┌─────┬─────┬───┐
 │   1 │   2 │ 3 │
 ┠━━━━━╂━━━━━╂━━━┨
 │ qwe │ rty │   │
 │     │ uio │   │
 └─────┴─────┴───┘
->>> print_table(table_1, border=BORDERS["thick_thin"], name=name_1)
+>>> print_table(table_1, theme=Themes.thick_thin, name=name_1)
 ┌───────────────┐
 │  Table Name   │
 ├─────┬─────┬───┤
@@ -719,14 +719,14 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 │ qwe │ rty │   │
 │     │ uio │   │
 └─────┴─────┴───┘
->>> print_table(table_1, border=BORDERS["double"])
+>>> print_table(table_1, theme=Themes.double)
 ╔═════╦═════╦═══╗
 ║   1 ║   2 ║ 3 ║
 ╠═════╬═════╬═══╣
 ║ qwe ║ rty ║   ║
 ║     ║ uio ║   ║
 ╚═════╩═════╩═══╝
->>> print_table(table_1, border=BORDERS["double"], name=name_1)
+>>> print_table(table_1, theme=Themes.double, name=name_1)
 ╔═══════════════╗
 ║  Table Name   ║
 ╠═════╦═════╦═══╣
@@ -735,14 +735,14 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 ║ qwe ║ rty ║   ║
 ║     ║ uio ║   ║
 ╚═════╩═════╩═══╝
->>> print_table(table_1, border=BORDERS["double_thin"])
+>>> print_table(table_1, theme=Themes.double_thin)
 ╔═════╦═════╦═══╗
 ║   1 ║   2 ║ 3 ║
 ╟─────╫─────╫───╢
 ║ qwe ║ rty ║   ║
 ║     ║ uio ║   ║
 ╚═════╩═════╩═══╝
->>> print_table(table_1, border=BORDERS["double_thin"], name=name_1)
+>>> print_table(table_1, theme=Themes.double_thin, name=name_1)
 ╔═══════════════╗
 ║  Table Name   ║
 ╠═════╦═════╦═══╣
@@ -751,14 +751,14 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 ║ qwe ║ rty ║   ║
 ║     ║ uio ║   ║
 ╚═════╩═════╩═══╝
->>> print_table(table_1, border=BORDERS["booktabs"])
+>>> print_table(table_1, theme=Themes.booktabs)
  ─────────────── 
     1     2   3  
  ━━━━━━━━━━━━━━━ 
   qwe   rty      
         uio      
  ─────────────── 
->>> print_table(table_1, border=BORDERS["booktabs"], name=name_1)
+>>> print_table(table_1, theme=Themes.booktabs, name=name_1)
  ─────────────── 
    Table Name    
  ─────────────── 
@@ -767,12 +767,12 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
   qwe   rty      
         uio      
  ─────────────── 
->>> print_table(table_1, border=BORDERS["markdown"])
+>>> print_table(table_1, theme=Themes.markdown)
 |   1 |   2 | 3 |
 |-----|-----|---|
 | qwe | rty |   |
 |     | uio |   |
->>> print_table(table_1, border=BORDERS["markdown"], name=name_1)
+>>> print_table(table_1, theme=Themes.markdown, name=name_1)
 |  Table Name   |
 |   1 |   2 | 3 |
 |-----|-----|---|
