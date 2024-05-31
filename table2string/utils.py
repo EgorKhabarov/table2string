@@ -22,7 +22,7 @@ ALLOWED_ALIGNS = [
 _Border = namedtuple(
     "_Border",
     (
-        "g",
+        "h",
         "v",
         "ul",
         "ur",
@@ -30,11 +30,11 @@ _Border = namedtuple(
         "dr",
         "vl",
         "vr",
-        "ug",
-        "dg",
+        "uh",
+        "dh",
         "c",
         "vlp",
-        "gp",
+        "hp",
         "cp",
         "vrp",
     ),
@@ -200,7 +200,7 @@ def transform_width(
     width: Union[int, Tuple[int, ...], None],
     column_count: int,
     row_lengths: List[int],
-) -> List[int]:
+) -> Union[List[int], Tuple[int, ...]]:
     """
 
     :param width:
@@ -208,12 +208,13 @@ def transform_width(
     :param row_lengths:
     :return:
     """
-    if isinstance(width, (tuple, list)) and column_count == len(width):
-        return width
+    if isinstance(width, (tuple, list)):
+        width = width[:column_count]
+
+        if column_count == len(width):
+            return width
 
     if width is not None and isinstance(width, (tuple, list)):
-        width: tuple[int]
-
         if len(width) < column_count:
             width: tuple = tuple((*width, *(width[-1],) * (column_count - len(width))))
 

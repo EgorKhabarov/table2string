@@ -72,29 +72,19 @@ def print_table(
     align = transform_align(column_count, align)
     max_widths = transform_width(max_width, column_count, row_lengths)
 
+    horizontally = [(border.h * (i + 2)) for i in max_widths]
     up_separator = (
-        border.ul
-        + "".join((border.g * (i + 2)) for i in max_widths)
-        + border.g * (len(max_widths) - 1)
-        + border.ur
+        border.ul + "".join(horizontally) + border.h * (len(max_widths) - 1) + border.ur
     )
-    under_name_separator = (
-        border.vl + border.ug.join((border.g * (i + 2)) for i in max_widths) + border.vr
-    )
-    up_noname_separator = (
-        border.ul + border.ug.join((border.g * (i + 2)) for i in max_widths) + border.ur
-    )
-    line_separator = (
-        border.vl + border.c.join((border.g * (i + 2)) for i in max_widths) + border.vr
-    )
+    under_name_separator = border.vl + border.uh.join(horizontally) + border.vr
+    up_noname_separator = border.ul + border.uh.join(horizontally) + border.ur
+    line_separator = border.vl + border.c.join(horizontally) + border.vr
     line_separator_plus = (
         border.vlp
-        + border.cp.join((border.gp * (i + 2)) for i in max_widths)
+        + border.cp.join((border.hp * (i + 2)) for i in max_widths)
         + border.vrp
     )
-    down_separator = (
-        border.dl + border.dg.join((border.g * (i + 2)) for i in max_widths) + border.dr
-    )
+    down_separator = border.dl + border.dh.join(horizontally) + border.dr
 
     if name:
         # noinspection PyTypeChecker

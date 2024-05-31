@@ -19,7 +19,7 @@ While there are several libraries available for converting tables to strings in 
 
 # Install
 
-# PyPI
+## PyPI
 
 ```shell
 pip install -U table2string
@@ -33,7 +33,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 
 ---
 
-## Usage example
+# Usage example
 
 ```pycon
 >>> from table2string import print_table, stringify_table
@@ -219,7 +219,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 ```
 </details>
 
-# Separator settings
+## Separator settings
 
 <details>
 <summary>Example</summary>
@@ -328,7 +328,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 ```
 </details>
 
-# Borders
+## Borders
 
 <details>
 <summary>Border types</summary>

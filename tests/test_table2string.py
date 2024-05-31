@@ -1,4 +1,4 @@
-from table2string.table2string import stringify_table, BORDERS
+from table2string import stringify_table, BORDERS
 from table2string.utils import (
     decrease_numbers,
     transform_align,
@@ -28,7 +28,7 @@ def test_transform_align():
 def test_transform_width():
     assert transform_width(1, 1, [1]) == [0]
     assert transform_width(1, 2, [2, 2]) == [1, 1]
-    assert transform_width((1, 2), 1, [1]) == [6]
+    assert transform_width((1, 2), 1, [1]) == (1,)
     assert transform_width((1, 2), 2, [2, 2]) == (1, 2)
     assert transform_width((3, 2), 2, [2, 2]) == (3, 2)  # FIXME
 
