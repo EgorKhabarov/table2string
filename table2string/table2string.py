@@ -1,3 +1,4 @@
+import csv
 from io import TextIOWrapper, StringIO
 from typing import Union, Tuple, Any, Sequence
 
@@ -103,8 +104,7 @@ def print_table(
                 name, max_name_width, max_height, line_break_symbol, cell_break_symbol
             )
         )
-        line = fill_line(rows, symbols, [max_name_width], name_align, theme)
-        print(line, file=file)
+        print(fill_line(rows, symbols, [max_name_width], name_align, theme), file=file)
 
     # Trimming long lines
     table = (
@@ -145,8 +145,7 @@ def print_table(
             column[1].extend(extend_data)
 
         rows, symbols = zip(*row)
-        line = fill_line(rows, symbols, max_widths, align, theme)
-        print(line, file=file, end="")
+        print(fill_line(rows, symbols, max_widths, align, theme), file=file, end="")
 
     if down_separator.strip():
         print("\n" + down_separator.rstrip("\n"), file=file, end=end)
@@ -200,3 +199,84 @@ def stringify_table(
     )
     file.seek(0)
     return file.read()
+
+
+class Table:
+    def __init__(self, table: Sequence[Sequence[Any]], name: Union[str, None] = None):
+        self.table = table
+        self.name = name
+
+    @classmethod
+    def from_table(
+        cls, table: Sequence[Sequence[Any]], name: Union[str, None] = None
+    ) -> "Table":
+        return cls(table=table, name=name)
+
+    @classmethod
+    def from_db_cursor(cls, cursor, name: Union[str, None] = None) -> "Table":
+        return cls(table=cursor.fetchall(), name=name)
+
+    @classmethod
+    def from_csv(cls, file: TextIOWrapper, name: Union[str, None] = None) -> "Table":
+        return cls(table=list(csv.reader(file)), name=name)
+
+    def stringify(
+        self,
+        align: Union[Tuple[str], str] = "*",
+        name_align: str = "^",
+        max_width: Union[int, Tuple[int], None] = None,
+        max_height: Union[int, None] = None,
+        maximize_height: bool = False,
+        line_break_symbol: str = "↩",
+        cell_break_symbol: str = "…",
+        sep: Union[bool, range, tuple] = True,
+        end: Union[str, None] = "",
+        theme: Theme = Themes.ascii_thin,
+    ) -> str:
+        return stringify_table(
+            table=self.table,
+            align=align,
+            name=self.name,
+            name_align=name_align,
+            max_width=max_width,
+            max_height=max_height,
+            maximize_height=maximize_height,
+            line_break_symbol=line_break_symbol,
+            cell_break_symbol=cell_break_symbol,
+            sep=sep,
+            end=end,
+            theme=theme,
+        )
+
+    def print(
+        self,
+        align: Union[Tuple[str], str] = "*",
+        name_align: str = "^",
+        max_width: Union[int, Tuple[int], None] = None,
+        max_height: Union[int, None] = None,
+        maximize_height: bool = False,
+        line_break_symbol: str = "↩",
+        cell_break_symbol: str = "…",
+        sep: Union[bool, range, tuple] = True,
+        end: Union[str, None] = "\n",
+        file: Union[TextIOWrapper, None] = None,
+        theme: Theme = Themes.ascii_thin,
+    ) -> None:
+        print_table(
+            table=self.table,
+            align=align,
+            name=self.name,
+            name_align=name_align,
+            max_width=max_width,
+            max_height=max_height,
+            maximize_height=maximize_height,
+            line_break_symbol=line_break_symbol,
+            cell_break_symbol=cell_break_symbol,
+            sep=sep,
+            end=end,
+            file=file,
+            theme=theme,
+        )
+
+    def __str__(self):
+        return self.stringify()

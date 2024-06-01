@@ -1,4 +1,7 @@
-from table2string import stringify_table, Themes
+import sqlite3
+from io import StringIO
+
+from table2string import stringify_table, Table, Themes
 from table2string.utils import (
     decrease_numbers,
     transform_align,
@@ -205,7 +208,7 @@ def test_fill_line():
 
 
 def test_stringify_table():
-    table_1 = [(1, 2, 3), ("123", "456\n567", "")]
+    table_1 = [("1", "2", "3"), ("123", "456\n567", "")]
     assert (
         stringify_table(table_1)
         == """
@@ -217,7 +220,7 @@ def test_stringify_table():
 +-----+-----+---+
 """.strip()
     )
-    table_2 = [(1, 2, 3), ("12345", "456\n\n567", ""), ("q", "NULL", "NULL")]
+    table_2 = [("1", "2", "3"), ("12345", "456\n\n567", ""), ("q", "NULL", "NULL")]
     assert (
         stringify_table(table_2)
         == """
@@ -1301,5 +1304,77 @@ Never gonna tell a lie and hurt you
 |-----|-----|---|
 | qwe | rty |   |
 |     | uio |   |
+""".strip()
+    )
+
+
+# noinspection PyPep8Naming
+def test_Table():
+    table_1 = [("1", "2", "3"), ("qwe", "rty\nuio", "")]
+    assert (
+        Table(table_1, name="Table Name").stringify()
+        == """
++---------------+
+|  Table Name   |
++-----+-----+---+
+|   1 |   2 | 3 |
++-----+-----+---+
+| qwe | rty |   |
+|     | uio |   |
++-----+-----+---+
+""".strip()
+    )
+    assert (
+        Table.from_table(table_1, name="Table Name").stringify()
+        == """
++---------------+
+|  Table Name   |
++-----+-----+---+
+|   1 |   2 | 3 |
++-----+-----+---+
+| qwe | rty |   |
+|     | uio |   |
++-----+-----+---+
+""".strip()
+    )
+    file = StringIO(
+        """
+1,2,3
+qwe,"rty
+uio",
+""".strip()
+    )
+    assert (
+        Table.from_csv(file, name="Table Name").stringify()
+        == """
++---------------+
+|  Table Name   |
++-----+-----+---+
+|   1 |   2 | 3 |
++-----+-----+---+
+| qwe | rty |   |
+|     | uio |   |
++-----+-----+---+
+""".strip()
+    )
+    connection = sqlite3.connect(":memory:")
+    cursor = connection.cursor()
+    cursor.execute("CREATE TABLE data (c1 TEXT, c2 TEXT, c3 TEXT);")
+    cursor.executemany(
+        "INSERT INTO data (c1, c2, c3) VALUES (?, ?, ?);",
+        [("1", "2", "3"), ("qwe", "rty\nuio", "")],
+    )
+    cursor.execute("SELECT c1, c2, c3 FROM data;")
+    assert (
+        Table.from_db_cursor(cursor, name="Table Name").stringify()
+        == """
++---------------+
+|  Table Name   |
++-----+-----+---+
+|   1 |   2 | 3 |
++-----+-----+---+
+| qwe | rty |   |
+|     | uio |   |
++-----+-----+---+
 """.strip()
     )
