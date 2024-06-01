@@ -57,14 +57,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 +-----+-----+---+
 >>> from io import StringIO
 >>> from table2string import Table
->>> file = StringIO(
-...     """
-... 1,2,3
-... qwe,"rty
-... uio",
-... """.strip()
-... )
->>> Table.from_csv(file, name="Table Name").print()
+>>> Table.from_csv(StringIO('1,2,3\nqwe,"rty\nuio",'), name="Table Name").print()
 +---------------+
 |  Table Name   |
 +-----+-----+---+
@@ -74,17 +67,15 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 |     | uio |   |
 +-----+-----+---+
 >>> import sqlite3
->>> connection = sqlite3.connect(":memory:")
->>> cursor = connection.cursor()
->>> cursor.execute("CREATE TABLE data (c1 TEXT, c2 TEXT, c3 TEXT);")  # doctest: +ELLIPSIS
-<sqlite3.Cursor object at 0x...>
->>> cursor.executemany(
+>>> cursor = sqlite3.connect(":memory:").cursor()
+>>> cursor.execute(
+...     "CREATE TABLE data (c1 TEXT, c2 TEXT, c3 TEXT);"
+... ).executemany(
 ...     "INSERT INTO data (c1, c2, c3) VALUES (?, ?, ?);",
 ...     [("1", "2", "3"), ("qwe", "rty\nuio", "")],
-... )  # doctest: +ELLIPSIS
-<sqlite3.Cursor object at 0x...>
->>> cursor.execute("SELECT c1, c2, c3 FROM data;")  # doctest: +ELLIPSIS
-<sqlite3.Cursor object at 0x...>
+... ).execute(
+...     "SELECT c1, c2, c3 FROM data;"
+... ) and None  # because this method returns a cursor
 >>> Table.from_db_cursor(cursor, name="Table Name").print()
 +---------------+
 |  Table Name   |
