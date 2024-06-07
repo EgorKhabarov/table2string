@@ -392,46 +392,46 @@ def get_text_width_in_console(text: str) -> int:
 def decrease_numbers(
     row_lengths: List[int],
     max_width: int = 120,
-    min_value: int = 10,
+    min_width: int = 1,
 ) -> List[int]:
-    """
+    current_sum = sum(row_lengths)
+    difference = max_width - current_sum
 
-    :param row_lengths:
-    :param max_width:
-    :param min_value:
-    :return:
-    """
-    # Calculate the average value
-    mean_value = sum(row_lengths) / len(row_lengths)
-    new_numbers = []
+    if difference == 0 and all(n >= min_width for n in row_lengths):
+        return row_lengths
 
-    for num in row_lengths:
-        # Determine how much more or less this number is than the average
-        diff_from_mean = num - mean_value
+    proportions = [n / current_sum for n in row_lengths]
+    distributed = [n + round(difference * p) for n, p in zip(row_lengths, proportions)]
 
-        if diff_from_mean > 0:
-            reduction_percent = 0.4
-        else:
-            reduction_percent = 0.01
+    total = sum(distributed)
+    final_difference = max_width - total
 
-        reduced_num = num - (mean_value * reduction_percent)
+    if final_difference > 0:
+        for i in range(final_difference):
+            distributed[i % len(distributed)] += 1
+    elif final_difference < 0:
+        for i in range(-final_difference):
+            if distributed[i % len(distributed)] > min_width:
+                distributed[i % len(distributed)] -= 1
 
-        new_num = max(int(reduced_num), min_value)
-        new_numbers.append(new_num)
+    # Ensure all values are at least min_value
+    for i in range(len(distributed)):
+        if distributed[i] < min_width:
+            distributed[i] = min_width
 
-    # If the total sum of new numbers exceeds max_width, reduce the largest number by 1
-    while sum(new_numbers) > max_width:
-        new_numbers[new_numbers.index(max(new_numbers))] -= 1
+    # Adjust again if min_value correction breaks the total sum
+    total = sum(distributed)
+    final_difference = max_width - total
 
-    # Calculate the coefficient for proportional increase if the sum is less than max_sum
-    if sum(new_numbers) < max_width:
-        new_numbers = [int(num * (max_width / sum(new_numbers))) for num in new_numbers]
+    if final_difference > 0:
+        for i in range(final_difference):
+            distributed[i % len(distributed)] += 1
+    elif final_difference < 0:
+        for i in range(-final_difference):
+            if distributed[i % len(distributed)] > min_width:
+                distributed[i % len(distributed)] -= 1
 
-    # If the total sum of new numbers is less than max_width, increase the smallest number by 1
-    while sum(new_numbers) < max_width and min(new_numbers) < min_value:
-        new_numbers[new_numbers.index(min(new_numbers))] += 1
-
-    return new_numbers
+    return distributed
 
 
 def transform_align(
@@ -465,7 +465,7 @@ def transform_width(
     width: Union[int, Tuple[int, ...], None],
     column_count: int,
     row_lengths: List[int],
-) -> Union[List[int], Tuple[int, ...]]:
+) -> Union[List[int]]:
     """
 
     :param width:
@@ -473,30 +473,30 @@ def transform_width(
     :param row_lengths:
     :return:
     """
+    if width is None:
+        return row_lengths
+
     if isinstance(width, (tuple, list)):
-        width = width[:column_count]
+        width_l = list(width[:column_count])
 
-        if column_count == len(width):
-            return width
+        if len(width_l) == column_count:
+            return width_l
 
-    if width is not None and isinstance(width, (tuple, list)):
-        if len(width) < column_count:
-            width: tuple = tuple((*width, *(width[-1],) * (column_count - len(width))))
+        if len(width_l) < column_count:
+            width_l.extend((width_l[-1] for _ in range(column_count - len(width_l))))
+            return width_l
 
-        width: int = sum(width) + (3 * len(width)) + 1
+        width_t = tuple((*width_l, *(width_l[-1],) * (column_count - len(width_l))))
+        width_i = sum(width_t) + (3 * len(width_t)) + 1
+    else:
+        width_i = width
 
-    if width is not None and width < column_count + (3 * column_count) + 1:
-        width: int = (
-            sum(1 if rl > 1 else 0 for rl in row_lengths) + (3 * column_count) + 1
-        )
+    if width_i < column_count * 4 + 1:
+        width_i = sum(1 if rl > 1 else 0 for rl in row_lengths) + (3 * column_count) + 1
 
     # Calculate the width of each column
-    if width:
-        sum_column_width = width - (3 * column_count) - 1
-        max_widths = decrease_numbers(row_lengths, sum_column_width)
-    else:
-        max_widths = row_lengths
-
+    sum_column_width = (width_i - column_count * 3 - 1) or 1
+    max_widths = decrease_numbers(row_lengths, sum_column_width)
     return max_widths
 
 
@@ -507,7 +507,7 @@ def line_spliter(
     line_break_symbol: str = "↩",
     cell_break_symbol: str = "…",
     theme: Theme = Themes.ascii_thin,  # noqa
-) -> Tuple[List[str], List[str]]:
+) -> List[List[str]]:
     """
 
     :param text:
@@ -519,6 +519,10 @@ def line_spliter(
     :return:
     """
     lines = text.split("\n")
+
+    if width is None:
+        width = len(max(lines))
+
     result_lines = []
     result_breaks = []
 
@@ -534,6 +538,7 @@ def line_spliter(
                     line = ""
                 else:
                     w = 0
+                    assert width >= 1, f"{width = }"
                     while get_text_width_in_console(line[:w]) <= width - 1:
                         w += 1
                     result_lines.append(line[:w])
@@ -545,7 +550,7 @@ def line_spliter(
         result_breaks = result_breaks[:height]
         result_breaks[-1] = cell_break_symbol
 
-    return result_lines, result_breaks
+    return [result_lines, result_breaks]
 
 
 def fill_line(
@@ -566,13 +571,11 @@ def fill_line(
     """
     border = theme.border
 
-    # noinspection PyTypeChecker
-    align_left, align_right = map(
-        list, zip(*(a * 2 if len(a) == 1 else a for a in align))
-    )
-
-    if isinstance(rows[0], tuple):
-        rows = list(map(list, rows))  # noqa
+    align_left, align_right = [], []
+    for a in align:
+        al, ar = [*a * 2] if len(a) == 1 else [*a]
+        align_left.append(al)
+        align_right.append(ar)
 
     # Make each element the same width according to the maximum element
     for n, row in enumerate(rows):
@@ -595,9 +598,9 @@ def fill_line(
 
     for rn, row in enumerate(zip(*rows)):
         if rn == 0:
-            align = align_left
+            current_align = align_left
         else:
-            align = align_right
+            current_align = align_right
 
         def get_width(index: int):
             return widths[index] - (
@@ -605,7 +608,7 @@ def fill_line(
             )
 
         template = border.v + "".join(
-            f" {{:{align[cn]}{get_width(cn)}}}{symbol[rn][cn]}" + border.v
+            f" {{:{current_align[cn]}{get_width(cn)}}}{symbol[rn][cn]}" + border.v
             for cn in range(len(row))
         )
         lines.append(template.format(*row))

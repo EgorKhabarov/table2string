@@ -6,6 +6,7 @@ from table2string.utils import (
     get_text_width_in_console,
     transform_align,
     transform_width,
+    ALLOWED_ALIGNS,
     line_spliter,
     fill_line,
     Themes,
@@ -27,6 +28,7 @@ def print_table(
     end: Union[str, None] = "\n",
     file: Union[TextIOWrapper, None] = None,
     theme: Theme = Themes.ascii_thin,
+    ignore_width_errors: bool = False,
 ) -> None:
     """
     Print the table in sys.stdout or file
@@ -44,35 +46,58 @@ def print_table(
     :param end: Configure the last symbol of the table. \\n or nothing
     :param file: File where you can record the table by .write method.
     :param theme:
+    :param ignore_width_errors:
     :return: None
     """
-    border = theme.border
-
-    if len(line_break_symbol) != 1:
-        raise ValueError("length of line_break_symbol must be 1")
-
-    if len(cell_break_symbol) != 1:
-        raise ValueError("length of cell_break_symbol must be 1")
-
-    row_lengths: list[int] = []
-
-    for column in zip(*table):
-        cell_widths = []
-        for cell in column:
-            if cell:
-                lines = str(cell).splitlines() or [""]
-                cell_width = get_text_width_in_console(
-                    max(lines, key=get_text_width_in_console)
-                )
-                cell_widths.append(cell_width)
-            else:
-                cell_widths.append(1)
-
-        row_lengths.append(max(cell_widths))
+    assert any(table), table
+    assert sum(hasattr(row, "__getitem__") for row in table)
+    assert max_height >= 1 if max_height else True, f"{max_height = }"
+    assert len(line_break_symbol) == 1, f"{len(line_break_symbol) = }"
+    assert len(cell_break_symbol) == 1, f"{len(cell_break_symbol) = }"
+    assert isinstance(theme, Theme), f"{type(theme) = }"
+    not_allowed_aligns = {
+        *((align,) if isinstance(align, str) else align),
+        name_align,
+    } - set(ALLOWED_ALIGNS)
+    assert not not_allowed_aligns, not_allowed_aligns
 
     column_count = max(map(len, table))
-    align = transform_align(column_count, align)
+
+    if max_width is not None and not ignore_width_errors:
+        if isinstance(max_width, int):
+            min_width = column_count * 4 + 1
+            assert max_width >= min_width, f"{max_width} >= {min_width}"
+        else:
+            assert not [mw for mw in max_width if mw < 1], [
+                mw for mw in max_width if mw < 1
+            ]
+            max_width = max_width[:column_count]
+            max_width = (
+                *max_width,
+                *(max_width[-1],) * (column_count - len(max_width)),
+            )
+            min_width = column_count
+            assert sum(max_width) >= min_width, f"{sum(max_width)} >= {min_width}"
+
+    table = list(table)
+    border = theme.border
+    row_lengths = [
+        max(
+            (
+                max(
+                    get_text_width_in_console(line)
+                    for line in str(cell).splitlines() or [""]
+                )
+                if cell
+                else 1
+            )
+            for cell in column
+        )
+        for column in zip(*table)
+    ]
+
     max_widths = transform_width(max_width, column_count, row_lengths)
+    align_t = transform_align(column_count, align)
 
     horizontally = [(border.h * (i + 2)) for i in max_widths]
     up_separator = (
@@ -89,35 +114,45 @@ def print_table(
     down_separator = border.dl + border.dh.join(horizontally) + border.dr
 
     if name:
-        # noinspection PyTypeChecker
-        name_align = transform_align(1, name_align)
+        name_align_t = transform_align(1, name_align)
+
         if up_separator.strip():
             print(up_separator, file=file)
 
         if not max_widths:
-            max_name_width: int = sum(row_lengths) + (3 * column_count) + 1 - 4
+            max_name_width = sum(row_lengths) + (3 * column_count) + 1 - 4
         else:
             max_name_width = sum(max_widths) + (3 * column_count) + 1 - 4
 
         rows, symbols = zip(
             line_spliter(
-                name, max_name_width, max_height, line_break_symbol, cell_break_symbol
+                name,
+                max_name_width,
+                max_height,
+                line_break_symbol,
+                cell_break_symbol,
             )
         )
-        print(fill_line(rows, symbols, [max_name_width], name_align, theme), file=file)
+        print(
+            fill_line(rows, symbols, [max_name_width], name_align_t, theme), file=file
+        )
 
     # Trimming long lines
-    table = (
+    table_g = (
         [
             line_spliter(
-                column, max_widths[n], max_height, line_break_symbol, cell_break_symbol
+                column,
+                max_widths[n],
+                max_height,
+                line_break_symbol,
+                cell_break_symbol,
             )
             for n, column in enumerate(map(str, row))
         ]
         for row in table
     )
 
-    for n, row in enumerate(table):
+    for n, row in enumerate(table_g):
         if n != 0:
             print(file=file)
 
@@ -134,7 +169,7 @@ def print_table(
             if s.strip():
                 print(s, file=file)
 
-        if maximize_height:
+        if maximize_height and max_height:
             max_row_height = max_height
         else:
             max_row_height = max(map(len, tuple(zip(*row))[0]))
@@ -145,7 +180,7 @@ def print_table(
             column[1].extend(extend_data)
 
         rows, symbols = zip(*row)
-        print(fill_line(rows, symbols, max_widths, align, theme), file=file, end="")
+        print(fill_line(rows, symbols, max_widths, align_t, theme), file=file, end="")
 
     if down_separator.strip():
         print("\n" + down_separator.rstrip("\n"), file=file, end=end)
@@ -164,6 +199,7 @@ def stringify_table(
     sep: Union[bool, range, tuple] = True,
     end: Union[str, None] = "",
     theme: Theme = Themes.ascii_thin,
+    ignore_width_errors: bool = False,
 ) -> str:
     """
 
@@ -179,6 +215,7 @@ def stringify_table(
     :param sep: Settings of dividers. You can specify specific lines with dividers.
     :param end: Configure the last symbol of the table. \\n or nothing
     :param theme:
+    :param ignore_width_errors:
     :return: String table
     """
     file = StringIO()
@@ -196,6 +233,7 @@ def stringify_table(
         end=end,
         file=file,
         theme=theme,
+        ignore_width_errors=ignore_width_errors,
     )
     file.seek(0)
     return file.read()
@@ -213,12 +251,25 @@ class Table:
         return cls(table=table, name=name)
 
     @classmethod
-    def from_db_cursor(cls, cursor, name: Union[str, None] = None) -> "Table":
-        return cls(table=cursor.fetchall(), name=name)
+    def from_db_cursor(
+        cls, cursor, name: Union[str, None] = None, column_names: bool = False
+    ) -> "Table":
+        table = cursor.fetchall()
+
+        if column_names and getattr(cursor, "description"):
+            table = [[column[0] for column in cursor.description], *table]
+
+        return cls(table=table, name=name)
 
     @classmethod
-    def from_csv(cls, file: TextIOWrapper, name: Union[str, None] = None) -> "Table":
-        return cls(table=list(csv.reader(file)), name=name)
+    def from_csv(
+        cls,
+        file: TextIOWrapper,
+        name: Union[str, None] = None,
+        skip_first_line: bool = False,
+        **kwargs,
+    ) -> "Table":
+        return cls(table=list(csv.reader(file, **kwargs))[skip_first_line:], name=name)
 
     def stringify(
         self,
@@ -232,6 +283,7 @@ class Table:
         sep: Union[bool, range, tuple] = True,
         end: Union[str, None] = "",
         theme: Theme = Themes.ascii_thin,
+        ignore_width_errors: bool = False,
     ) -> str:
         return stringify_table(
             table=self.table,
@@ -246,6 +298,7 @@ class Table:
             sep=sep,
             end=end,
             theme=theme,
+            ignore_width_errors=ignore_width_errors,
         )
 
     def print(
@@ -261,6 +314,7 @@ class Table:
         end: Union[str, None] = "\n",
         file: Union[TextIOWrapper, None] = None,
         theme: Theme = Themes.ascii_thin,
+        ignore_width_errors: bool = False,
     ) -> None:
         print_table(
             table=self.table,
@@ -276,6 +330,7 @@ class Table:
             end=end,
             file=file,
             theme=theme,
+            ignore_width_errors=ignore_width_errors,
         )
 
     def __str__(self):

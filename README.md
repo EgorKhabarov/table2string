@@ -57,7 +57,18 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 +-----+-----+---+
 >>> from io import StringIO
 >>> from table2string import Table
->>> Table.from_csv(StringIO('1,2,3\nqwe,"rty\nuio",'), name="Table Name").print()
+>>> Table.from_csv(StringIO('c1,c2,c3\n1,2,3\nqwe,"rty\nuio",'), name="Table Name").print()
++----------------+
+|   Table Name   |
++-----+-----+----+
+| c1  | c2  | c3 |
++-----+-----+----+
+|   1 |   2 |  3 |
++-----+-----+----+
+| qwe | rty |    |
+|     | uio |    |
++-----+-----+----+
+>>> Table.from_csv(StringIO('c1,c2,c3\n1,2,3\nqwe,"rty\nuio",'), name="Table Name", skip_first_line=True).print()
 +---------------+
 |  Table Name   |
 +-----+-----+---+
@@ -85,6 +96,18 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 | qwe | rty |   |
 |     | uio |   |
 +-----+-----+---+
+>>> cursor.execute("SELECT c1, c2, c3 FROM data;") and None
+>>> Table.from_db_cursor(cursor, name="Table Name", column_names=True).print()
++----------------+
+|   Table Name   |
++-----+-----+----+
+| c1  | c2  | c3 |
++-----+-----+----+
+|   1 |   2 |  3 |
++-----+-----+----+
+| qwe | rty |    |
+|     | uio |    |
++-----+-----+----+
 
 ```
 
