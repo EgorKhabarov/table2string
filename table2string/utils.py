@@ -538,7 +538,7 @@ def line_spliter(
                     line = ""
                 else:
                     w = 0
-                    assert width >= 1, f"{width=}"
+                    assert width >= 1, width
                     while get_text_width_in_console(line[:w]) <= width - 1:
                         w += 1
                     result_lines.append(line[:w])

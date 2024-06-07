@@ -51,10 +51,10 @@ def print_table(
     """
     assert any(table), table
     assert sum(hasattr(row, "__getitem__") for row in table)
-    assert max_height >= 1 if max_height else True, f"{max_height=}"
-    assert len(line_break_symbol) == 1, f"{len(line_break_symbol)=}"
-    assert len(cell_break_symbol) == 1, f"{len(cell_break_symbol)=}"
-    assert isinstance(theme, Theme), f"{type(theme)=}"
+    assert max_height >= 1 if max_height else True, max_height
+    assert len(line_break_symbol) == 1, len(line_break_symbol)
+    assert len(cell_break_symbol) == 1, len(cell_break_symbol)
+    assert isinstance(theme, Theme), type(theme)
     not_allowed_aligns = {
         *((align,) if isinstance(align, str) else align),
         name_align,
