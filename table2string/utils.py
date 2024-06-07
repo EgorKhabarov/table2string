@@ -24,21 +24,21 @@ ALLOWED_ALIGNS = [
 @dataclass
 class Border:
     name: str = "ascii_thin"
-    h: str = "-"
-    v: str = "|"
-    ul: str = "+"
-    ur: str = "+"
-    dl: str = "+"
-    dr: str = "+"
-    vl: str = "+"
-    vr: str = "+"
-    uh: str = "+"
-    dh: str = "+"
-    c: str = "+"
-    vlp: str = "+"
-    hp: str = "-"
-    cp: str = "+"
-    vrp: str = "+"
+    horizontal: str = "-"
+    vertical: str = "|"
+    top_left: str = "+"
+    top_right: str = "+"
+    bottom_left: str = "+"
+    bottom_right: str = "+"
+    vertical_left: str = "+"
+    vertical_right: str = "+"
+    top_horizontal: str = "+"
+    bottom_horizontal: str = "+"
+    central: str = "+"
+    vertical_left_plus: str = "+"
+    horizontal_plus: str = "-"
+    central_plus: str = "+"
+    vertical_right_plus: str = "+"
 
 
 class Borders:
@@ -607,8 +607,9 @@ def fill_line(
                 get_text_width_in_console(row[index]) - len(row[index])
             )
 
-        template = border.v + "".join(
-            f" {{:{current_align[cn]}{get_width(cn)}}}{symbol[rn][cn]}" + border.v
+        template = border.vertical + "".join(
+            f" {{:{current_align[cn]}{get_width(cn)}}}{symbol[rn][cn]}"
+            + border.vertical
             for cn in range(len(row))
         )
         lines.append(template.format(*row))

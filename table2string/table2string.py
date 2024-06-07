@@ -16,6 +16,7 @@ from table2string.utils import (
 
 def print_table(
     table: Sequence[Sequence[Any]],
+    *,
     align: Union[Tuple[str, ...], str] = "*",
     name: Union[str, None] = None,
     name_align: str = "^",
@@ -99,19 +100,36 @@ def print_table(
     max_widths = transform_width(max_width, column_count, row_lengths)
     align_t = transform_align(column_count, align)
 
-    horizontally = [(border.h * (i + 2)) for i in max_widths]
+    horizontally = [(border.horizontal * (i + 2)) for i in max_widths]
     up_separator = (
-        border.ul + "".join(horizontally) + border.h * (len(max_widths) - 1) + border.ur
+        border.top_left
+        + "".join(horizontally)
+        + border.horizontal * (len(max_widths) - 1)
+        + border.top_right
     )
-    under_name_separator = border.vl + border.uh.join(horizontally) + border.vr
-    up_noname_separator = border.ul + border.uh.join(horizontally) + border.ur
-    line_separator = border.vl + border.c.join(horizontally) + border.vr
+    under_name_separator = (
+        border.vertical_left
+        + border.top_horizontal.join(horizontally)
+        + border.vertical_right
+    )
+    up_noname_separator = (
+        border.top_left + border.top_horizontal.join(horizontally) + border.top_right
+    )
+    line_separator = (
+        border.vertical_left + border.central.join(horizontally) + border.vertical_right
+    )
     line_separator_plus = (
-        border.vlp
-        + border.cp.join((border.hp * (i + 2)) for i in max_widths)
-        + border.vrp
+        border.vertical_left_plus
+        + border.central_plus.join(
+            (border.horizontal_plus * (i + 2)) for i in max_widths
+        )
+        + border.vertical_right_plus
     )
-    down_separator = border.dl + border.dh.join(horizontally) + border.dr
+    down_separator = (
+        border.bottom_left
+        + border.bottom_horizontal.join(horizontally)
+        + border.bottom_right
+    )
 
     if name:
         name_align_t = transform_align(1, name_align)
@@ -188,6 +206,7 @@ def print_table(
 
 def stringify_table(
     table: Sequence[Sequence[Any]],
+    *,
     align: Union[Tuple[str, ...], str] = "*",
     name: Union[str, None] = None,
     name_align: str = "^",
@@ -273,9 +292,10 @@ class Table:
 
     def stringify(
         self,
-        align: Union[Tuple[str], str] = "*",
+        *,
+        align: Union[Tuple[str, ...], str] = "*",
         name_align: str = "^",
-        max_width: Union[int, Tuple[int], None] = None,
+        max_width: Union[int, Tuple[int, ...], None] = None,
         max_height: Union[int, None] = None,
         maximize_height: bool = False,
         line_break_symbol: str = "↩",
@@ -303,9 +323,10 @@ class Table:
 
     def print(
         self,
-        align: Union[Tuple[str], str] = "*",
+        *,
+        align: Union[Tuple[str, ...], str] = "*",
         name_align: str = "^",
-        max_width: Union[int, Tuple[int], None] = None,
+        max_width: Union[int, Tuple[int, ...], None] = None,
         max_height: Union[int, None] = None,
         maximize_height: bool = False,
         line_break_symbol: str = "↩",
