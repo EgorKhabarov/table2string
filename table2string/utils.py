@@ -1,7 +1,6 @@
 import unicodedata
 from dataclasses import dataclass
-from typing import Union, List, Tuple
-
+from typing import Union, List, Tuple, Sequence
 
 ALLOWED_ALIGNS = [
     "<",
@@ -41,339 +40,352 @@ class Border:
     vertical_right_plus: str = "+"
 
 
-class Borders:
-    ascii_thin: Border = Border(
-        "ascii_thin",
-        "-",
-        "|",
-        "+",
-        "+",
-        "+",
-        "+",
-        "+",
-        "+",
-        "+",
-        "+",
-        "+",
-        "+",
-        "-",
-        "+",
-        "+",
-    )
-    ascii_thin_double: Border = Border(
-        "ascii_thin_double",
-        "-",
-        "|",
-        "+",
-        "+",
-        "+",
-        "+",
-        "+",
-        "+",
-        "+",
-        "+",
-        "+",
-        "+",
-        "=",
-        "+",
-        "+",
-    )
-    ascii_double: Border = Border(
-        "ascii_double",
-        "=",
-        "‖",
-        "+",
-        "+",
-        "+",
-        "+",
-        "+",
-        "+",
-        "+",
-        "+",
-        "+",
-        "+",
-        "=",
-        "+",
-        "+",
-    )
-    ascii_double_thin: Border = Border(
-        "ascii_double_thin",
-        "=",
-        "‖",
-        "+",
-        "+",
-        "+",
-        "+",
-        "+",
-        "+",
-        "+",
-        "+",
-        "+",
-        "+",
-        "-",
-        "+",
-        "+",
-    )
-    ascii_booktabs: Border = Border(
-        "ascii_booktabs",
-        "-",
-        " ",
-        " ",
-        " ",
-        " ",
-        " ",
-        " ",
-        " ",
-        "-",
-        "-",
-        "-",
-        " ",
-        "=",
-        "=",
-        " ",
-    )
-    thin: Border = Border(
-        "thin",
-        "─",
-        "│",
-        "┌",
-        "┐",
-        "└",
-        "┘",
-        "├",
-        "┤",
-        "┬",
-        "┴",
-        "┼",
-        "├",
-        "─",
-        "┼",
-        "┤",
-    )
-    thin_thick: Border = Border(
-        "thin_thick",
-        "─",
-        "│",
-        "┌",
-        "┐",
-        "└",
-        "┘",
-        "├",
-        "┤",
-        "┬",
-        "┴",
-        "┼",
-        "┝",
-        "━",
-        "┿",
-        "┥",
-    )
-    thin_double: Border = Border(
-        "thin_double",
-        "─",
-        "│",
-        "┌",
-        "┐",
-        "└",
-        "┘",
-        "├",
-        "┤",
-        "┬",
-        "┴",
-        "┼",
-        "╞",
-        "═",
-        "╪",
-        "╡",
-    )
-    rounded: Border = Border(
-        "rounded",
-        "─",
-        "│",
-        "╭",
-        "╮",
-        "╰",
-        "╯",
-        "├",
-        "┤",
-        "┬",
-        "┴",
-        "┼",
-        "├",
-        "─",
-        "┼",
-        "┤",
-    )
-    rounded_thick: Border = Border(
-        "rounded_thick",
-        "─",
-        "│",
-        "╭",
-        "╮",
-        "╰",
-        "╯",
-        "├",
-        "┤",
-        "┬",
-        "┴",
-        "┼",
-        "┝",
-        "━",
-        "┿",
-        "┥",
-    )
-    rounded_double: Border = Border(
-        "rounded_double",
-        "─",
-        "│",
-        "╭",
-        "╮",
-        "╰",
-        "╯",
-        "├",
-        "┤",
-        "┬",
-        "┴",
-        "┼",
-        "╞",
-        "═",
-        "╪",
-        "╡",
-    )
-    thick: Border = Border(
-        "thick",
-        "━",
-        "┃",
-        "┏",
-        "┓",
-        "┗",
-        "┛",
-        "┣",
-        "┫",
-        "┳",
-        "┻",
-        "╋",
-        "┣",
-        "━",
-        "╋",
-        "┫",
-    )
-    thick_thin: Border = Border(
-        "thick_thin",
-        "─",
-        "│",
-        "┌",
-        "┐",
-        "└",
-        "┘",
-        "├",
-        "┤",
-        "┬",
-        "┴",
-        "┼",
-        "┠",
-        "━",
-        "╂",
-        "┨",
-    )
-    double: Border = Border(
-        "double",
-        "═",
-        "║",
-        "╔",
-        "╗",
-        "╚",
-        "╝",
-        "╠",
-        "╣",
-        "╦",
-        "╩",
-        "╬",
-        "╠",
-        "═",
-        "╬",
-        "╣",
-    )
-    double_thin: Border = Border(
-        "double_thin",
-        "═",
-        "║",
-        "╔",
-        "╗",
-        "╚",
-        "╝",
-        "╠",
-        "╣",
-        "╦",
-        "╩",
-        "╬",
-        "╟",
-        "─",
-        "╫",
-        "╢",
-    )
-    booktabs: Border = Border(
-        "booktabs",
-        "─",
-        " ",
-        " ",
-        " ",
-        " ",
-        " ",
-        " ",
-        " ",
-        "─",
-        "─",
-        "─",
-        " ",
-        "━",
-        "━",
-        " ",
-    )
-    markdown: Border = Border(
-        "markdown",
-        " ",
-        "|",
-        " ",
-        " ",
-        " ",
-        " ",
-        " ",
-        " ",
-        " ",
-        " ",
-        " ",
-        "|",
-        "-",
-        "|",
-        "|",
-    )
-
-
 class Theme:
     def __init__(self, border: Border = Border()):
         self.border = border
 
 
-@dataclass
 class Themes:
-    ascii_thin: Theme = Theme(Borders.ascii_thin)
-    ascii_thin_double: Theme = Theme(Borders.ascii_thin_double)
-    ascii_double: Theme = Theme(Borders.ascii_double)
-    ascii_double_thin: Theme = Theme(Borders.ascii_double_thin)
-    ascii_booktabs: Theme = Theme(Borders.ascii_booktabs)
-    thin: Theme = Theme(Borders.thin)
-    thin_thick: Theme = Theme(Borders.thin_thick)
-    thin_double: Theme = Theme(Borders.thin_double)
-    rounded: Theme = Theme(Borders.rounded)
-    rounded_thick: Theme = Theme(Borders.rounded_thick)
-    rounded_double: Theme = Theme(Borders.rounded_double)
-    thick: Theme = Theme(Borders.thick)
-    thick_thin: Theme = Theme(Borders.thick_thin)
-    double: Theme = Theme(Borders.double)
-    double_thin: Theme = Theme(Borders.double_thin)
-    booktabs: Theme = Theme(Borders.booktabs)
-    markdown: Theme = Theme(Borders.markdown)
+    ascii_thin: Theme = Theme(
+        Border(
+            "ascii_thin",
+            "-",
+            "|",
+            "+",
+            "+",
+            "+",
+            "+",
+            "+",
+            "+",
+            "+",
+            "+",
+            "+",
+            "+",
+            "-",
+            "+",
+            "+",
+        ),
+    )
+    ascii_thin_double: Theme = Theme(
+        Border(
+            "ascii_thin_double",
+            "-",
+            "|",
+            "+",
+            "+",
+            "+",
+            "+",
+            "+",
+            "+",
+            "+",
+            "+",
+            "+",
+            "+",
+            "=",
+            "+",
+            "+",
+        ),
+    )
+    ascii_double: Theme = Theme(
+        Border(
+            "ascii_double",
+            "=",
+            "‖",
+            "+",
+            "+",
+            "+",
+            "+",
+            "+",
+            "+",
+            "+",
+            "+",
+            "+",
+            "+",
+            "=",
+            "+",
+            "+",
+        ),
+    )
+    ascii_double_thin: Theme = Theme(
+        Border(
+            "ascii_double_thin",
+            "=",
+            "‖",
+            "+",
+            "+",
+            "+",
+            "+",
+            "+",
+            "+",
+            "+",
+            "+",
+            "+",
+            "+",
+            "-",
+            "+",
+            "+",
+        ),
+    )
+    ascii_booktabs: Theme = Theme(
+        Border(
+            "ascii_booktabs",
+            "-",
+            " ",
+            " ",
+            " ",
+            " ",
+            " ",
+            " ",
+            " ",
+            "-",
+            "-",
+            "-",
+            " ",
+            "=",
+            "=",
+            " ",
+        ),
+    )
+    thin: Theme = Theme(
+        Border(
+            "thin",
+            "─",
+            "│",
+            "┌",
+            "┐",
+            "└",
+            "┘",
+            "├",
+            "┤",
+            "┬",
+            "┴",
+            "┼",
+            "├",
+            "─",
+            "┼",
+            "┤",
+        ),
+    )
+    thin_thick: Theme = Theme(
+        Border(
+            "thin_thick",
+            "─",
+            "│",
+            "┌",
+            "┐",
+            "└",
+            "┘",
+            "├",
+            "┤",
+            "┬",
+            "┴",
+            "┼",
+            "┝",
+            "━",
+            "┿",
+            "┥",
+        ),
+    )
+    thin_double: Theme = Theme(
+        Border(
+            "thin_double",
+            "─",
+            "│",
+            "┌",
+            "┐",
+            "└",
+            "┘",
+            "├",
+            "┤",
+            "┬",
+            "┴",
+            "┼",
+            "╞",
+            "═",
+            "╪",
+            "╡",
+        ),
+    )
+    rounded: Theme = Theme(
+        Border(
+            "rounded",
+            "─",
+            "│",
+            "╭",
+            "╮",
+            "╰",
+            "╯",
+            "├",
+            "┤",
+            "┬",
+            "┴",
+            "┼",
+            "├",
+            "─",
+            "┼",
+            "┤",
+        ),
+    )
+    rounded_thick: Theme = Theme(
+        Border(
+            "rounded_thick",
+            "─",
+            "│",
+            "╭",
+            "╮",
+            "╰",
+            "╯",
+            "├",
+            "┤",
+            "┬",
+            "┴",
+            "┼",
+            "┝",
+            "━",
+            "┿",
+            "┥",
+        ),
+    )
+    rounded_double: Theme = Theme(
+        Border(
+            "rounded_double",
+            "─",
+            "│",
+            "╭",
+            "╮",
+            "╰",
+            "╯",
+            "├",
+            "┤",
+            "┬",
+            "┴",
+            "┼",
+            "╞",
+            "═",
+            "╪",
+            "╡",
+        ),
+    )
+    thick: Theme = Theme(
+        Border(
+            "thick",
+            "━",
+            "┃",
+            "┏",
+            "┓",
+            "┗",
+            "┛",
+            "┣",
+            "┫",
+            "┳",
+            "┻",
+            "╋",
+            "┣",
+            "━",
+            "╋",
+            "┫",
+        ),
+    )
+    thick_thin: Theme = Theme(
+        Border(
+            "thick_thin",
+            "─",
+            "│",
+            "┌",
+            "┐",
+            "└",
+            "┘",
+            "├",
+            "┤",
+            "┬",
+            "┴",
+            "┼",
+            "┠",
+            "━",
+            "╂",
+            "┨",
+        ),
+    )
+    double: Theme = Theme(
+        Border(
+            "double",
+            "═",
+            "║",
+            "╔",
+            "╗",
+            "╚",
+            "╝",
+            "╠",
+            "╣",
+            "╦",
+            "╩",
+            "╬",
+            "╠",
+            "═",
+            "╬",
+            "╣",
+        ),
+    )
+    double_thin: Theme = Theme(
+        Border(
+            "double_thin",
+            "═",
+            "║",
+            "╔",
+            "╗",
+            "╚",
+            "╝",
+            "╠",
+            "╣",
+            "╦",
+            "╩",
+            "╬",
+            "╟",
+            "─",
+            "╫",
+            "╢",
+        ),
+    )
+    booktabs: Theme = Theme(
+        Border(
+            "booktabs",
+            "─",
+            " ",
+            " ",
+            " ",
+            " ",
+            " ",
+            " ",
+            " ",
+            "─",
+            "─",
+            "─",
+            " ",
+            "━",
+            "━",
+            " ",
+        ),
+    )
+    markdown: Theme = Theme(
+        Border(
+            "markdown",
+            " ",
+            "|",
+            " ",
+            " ",
+            " ",
+            " ",
+            " ",
+            " ",
+            " ",
+            " ",
+            " ",
+            "|",
+            "-",
+            "|",
+            "|",
+        ),
+    )
 
 
 def get_text_width_in_console(text: str) -> int:
@@ -615,3 +627,20 @@ def fill_line(
         lines.append(template.format(*row))
 
     return "\n".join(lines)
+
+
+def get_row_lengths(table: Sequence[Sequence]) -> List[int]:
+    return [
+        max(
+            (
+                max(
+                    get_text_width_in_console(line)
+                    for line in str(cell).splitlines() or [""]
+                )
+                if cell
+                else 1
+            )
+            for cell in column
+        )
+        for column in zip(*table)
+    ]

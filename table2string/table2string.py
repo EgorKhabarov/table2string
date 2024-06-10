@@ -3,9 +3,9 @@ from io import TextIOWrapper, StringIO
 from typing import Union, Tuple, Any, Sequence
 
 from table2string.utils import (
-    get_text_width_in_console,
     transform_align,
     transform_width,
+    get_row_lengths,
     ALLOWED_ALIGNS,
     line_spliter,
     fill_line,
@@ -82,21 +82,7 @@ def print_table(
 
     table = list(table)
     border = theme.border
-    row_lengths = [
-        max(
-            (
-                max(
-                    get_text_width_in_console(line)
-                    for line in str(cell).splitlines() or [""]
-                )
-                if cell
-                else 1
-            )
-            for cell in column
-        )
-        for column in zip(*table)
-    ]
-
+    row_lengths = get_row_lengths(table)
     max_widths = transform_width(max_width, column_count, row_lengths)
     align_t = transform_align(column_count, align)
 
@@ -152,7 +138,8 @@ def print_table(
             )
         )
         print(
-            fill_line(rows, symbols, [max_name_width], name_align_t, theme), file=file
+            fill_line(rows, symbols, [max_name_width], name_align_t, theme),
+            file=file,
         )
 
     # Trimming long lines
@@ -202,6 +189,8 @@ def print_table(
 
     if down_separator.strip():
         print("\n" + down_separator.rstrip("\n"), file=file, end=end)
+    elif end:
+        print(file=file, end=end)
 
 
 def stringify_table(
