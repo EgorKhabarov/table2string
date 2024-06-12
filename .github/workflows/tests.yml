@@ -40,7 +40,9 @@ jobs:
         ruff check . --ignore=E501
     - name: Lint with Flake8
       run: |
-        flake8 . --ignore=E501,E203,W291,W503
+        flake8 . --ignore=E501,W503
+        # E501 line too long
+        # W503 line break before binary operator
     - name: Test with Pytest
       run: |
         pytest
