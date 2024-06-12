@@ -836,11 +836,11 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert stringify_table(table_19, theme=Themes.ascii_booktabs) == (
-        " --------------- "
-        "    1     2   3  "
-        " =============== "
-        "  qwe   rty      "
-        "        uio      "
+        " --------------- \n"
+        "    1     2   3  \n"
+        " =============== \n"
+        "  qwe   rty      \n"
+        "        uio      \n"
         " --------------- "
     )
     assert stringify_table(
@@ -848,13 +848,13 @@ Never gonna tell a lie and hurt you
         theme=Themes.ascii_booktabs,
         name=name_1,
     ) == (
-        " --------------- "
-        "   Table Name    "
-        " --------------- "
-        "    1     2   3  "
-        " =============== "
-        "  qwe   rty      "
-        "        uio      "
+        " --------------- \n"
+        "   Table Name    \n"
+        " --------------- \n"
+        "    1     2   3  \n"
+        " =============== \n"
+        "  qwe   rty      \n"
+        "        uio      \n"
         " --------------- "
     )
     assert (
@@ -1098,21 +1098,21 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert stringify_table(table_19, theme=Themes.booktabs) == (
-        " ─────────────── "
-        "    1     2   3  "
-        " ━━━━━━━━━━━━━━━ "
-        "  qwe   rty      "
-        "        uio      "
+        " ─────────────── \n"
+        "    1     2   3  \n"
+        " ━━━━━━━━━━━━━━━ \n"
+        "  qwe   rty      \n"
+        "        uio      \n"
         " ─────────────── "
     )
     assert stringify_table(table_19, theme=Themes.booktabs, name=name_1) == (
-        " ─────────────── "
-        "   Table Name    "
-        " ─────────────── "
-        "    1     2   3  "
-        " ━━━━━━━━━━━━━━━ "
-        "  qwe   rty      "
-        "        uio      "
+        " ─────────────── \n"
+        "   Table Name    \n"
+        " ─────────────── \n"
+        "    1     2   3  \n"
+        " ━━━━━━━━━━━━━━━ \n"
+        "  qwe   rty      \n"
+        "        uio      \n"
         " ─────────────── "
     )
     assert (
