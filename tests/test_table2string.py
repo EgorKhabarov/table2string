@@ -1,213 +1,49 @@
+import sys
 import sqlite3
 from io import StringIO
+from typing import Callable
+from functools import wraps
 
-from table2string import stringify_table, Table, Themes
-from table2string.utils import (
-    decrease_numbers,
-    transform_align,
-    transform_width,
-    line_spliter,
-    fill_line,
-)
+from table2string import print_table, stringify_table, Table, Themes
 
 
-def test_decrease_numbers():
-    assert decrease_numbers([2, 2, 3], 10) == [3, 3, 4]
-    assert decrease_numbers([2, 2, 3], 11) == [3, 3, 5]
-    assert decrease_numbers([20, 2, 3], 10) == [8, 1, 1]
-    assert decrease_numbers([20, 2, 3], 100) == [80, 8, 12]
+def test_print_table():
+    def decorator(func: Callable):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            sys.stdout = StringIO()
+            func(*args, **kwargs)
+            pos = sys.stdout.tell()
+            sys.stdout.seek(0)
+            output = sys.stdout.read(pos)
+            sys.stdout = sys.__stdout__
+            return output
 
+        return wrapper
 
-def test_transform_align():
-    assert transform_align(2, "*") == ("*", "*")
-    assert transform_align(2, "<>") == ("<>", "<>")
-    assert transform_align(3, "<") == ("<", "<", "<")
-    assert transform_align(2, ("*",)) == ("*", "*")
-    assert transform_align(2, ("<>",)) == ("<>", "*")
-    assert transform_align(3, ("<",)) == ("<", "*", "*")
-    assert transform_align(3, ("<", "<", "<")) == ("<", "<", "<")
+    print_table_d = decorator(print_table)
 
-
-def test_transform_width():
-    assert transform_width(1, 1, [1]) == [1]
-    assert transform_width(1, 2, [2, 2]) == [1, 1]
-    assert transform_width((1, 2), 1, [1]) == [1]
-    assert transform_width((1, 2), 2, [2, 2]) == [1, 2]
-    assert transform_width((3, 2), 2, [2, 2]) == [3, 2]
-
-
-def test_line_spliter():
-    assert line_spliter("", 1) == [[" "], [" "]]
-    assert line_spliter("1", 1) == [["1"], [" "]]
-    assert line_spliter("123\n456", 1) == [
-        ["1", "2", "3", "4", "5", "6"],
-        ["↩", "↩", " ", "↩", "↩", " "],
-    ]
-    assert line_spliter("123\n\n456", 1) == [
-        ["1", "2", "3", " ", "4", "5", "6"],
-        ["↩", "↩", " ", " ", "↩", "↩", " "],
-    ]
-    assert line_spliter("123\n456", 2) == [["12", "3", "45", "6"], ["↩", " ", "↩", " "]]
-    assert line_spliter("123\n456", 3) == [["123", "456"], [" ", " "]]
-    assert line_spliter("123\n\n456", 3) == [["123", " ", "456"], [" ", " ", " "]]
-
-    assert line_spliter(
-        text="123\n456\n789",
-        width=3,
-        height=2,
-    ) == [["123", "456"], [" ", "…"]]
-
-    assert line_spliter(
-        text="123\n456\n789",
-        width=3,
-        height=3,
-    ) == [["123", "456", "789"], [" ", " ", " "]]
-
-    assert line_spliter(
-        text="123\n456",
-        width=3,
-        height=3,
-    ) == [["123", "456"], [" ", " "]]
-    assert line_spliter(text="12345\n123456\n1") == [
-        ["12345", "123456", "1"],
-        [" ", " ", " "],
-    ]
-
-
-def test_fill_line():
+    table_1 = [("1", "2", "3"), ("123", "456\n567", "")]
     assert (
-        fill_line(
-            [["1", "2", "3", "4", "5", "6"]],
-            [["↩", "↩", " ", "↩", "↩", " "]],
-            [1],
-            ("<",),
-        )
+        print_table_d(table_1)
         == """
++-----+-----+---+
+|   1 |   2 | 3 |
++-----+-----+---+
+| 123 | 456 |   |
+|     | 567 |   |
++-----+-----+---+
+""".lstrip()
+    )
+    table_2 = [("123",)]
+    assert (
+        print_table_d(table_2, max_width=(1,), max_height=2)
+        == """
++---+
 | 1↩|
-| 2↩|
-| 3 |
-| 4↩|
-| 5↩|
-| 6 |
-""".strip()
-    )
-    assert (
-        fill_line(
-            [["1", "2", "3", " ", "4", "5", "6"]],
-            [["↩", "↩", " ", " ", "↩", "↩", " "]],
-            [1],
-            ("<",),
-        )
-        == """
-| 1↩|
-| 2↩|
-| 3 |
-|   |
-| 4↩|
-| 5↩|
-| 6 |
-""".strip()
-    )
-    assert (
-        fill_line([["12", "3", "45", "6"]], [["↩", " ", "↩", " "]], [2], ("<",))
-        == """
-| 12↩|
-| 3  |
-| 45↩|
-| 6  |
-""".strip()
-    )
-    assert (
-        fill_line([["12", "3", "45", "6"]], [["↩", " ", "↩", " "]], [2], (">",))
-        == """
-| 12↩|
-|  3 |
-| 45↩|
-|  6 |
-""".strip()
-    )
-    assert (
-        fill_line([["123", "456"]], [[" ", " "]], [3], ("<",))
-        == """
-| 123 |
-| 456 |
-""".strip()
-    )
-    assert (
-        fill_line([["123"], ["456"]], [[" "], [" "]], [3, 3], ("<", "<"))
-        == "| 123 | 456 |"
-    )
-    assert (
-        fill_line([["1234567", "34", "787878"]], [[" ", " ", " "]], [11], ("^<",))
-        == """
-|   1234567   |
-|   34        |
-|   787878    |
-""".strip()
-    )
-    assert (
-        fill_line([["1234567", "34", "787878"]], [[" ", " ", " "]], [12], ("^<",))
-        == """
-|   1234567    |
-|   34         |
-|   787878     |
-""".strip()
-    )
-    assert (
-        fill_line([["1234567", "34", "787878"]], [[" ", " ", " "]], [13], ("^<",))
-        == """
-|    1234567    |
-|    34         |
-|    787878     |
-""".strip()
-    )
-    assert (
-        fill_line([["1234567", "34", "787878"]], [[" ", " ", " "]], [11], ("^>",))
-        == """
-|   1234567   |
-|        34   |
-|    787878   |
-""".strip()
-    )
-    assert (
-        fill_line([["1234567", "34", "787878"]], [[" ", " ", " "]], [12], ("^>",))
-        == """
-|   1234567    |
-|        34    |
-|    787878    |
-""".strip()
-    )
-    assert (
-        fill_line([["34", "1234567", "787878"]], [[" ", " ", " "]], [11], ("^<",))
-        == """
-|   34        |
-|   1234567   |
-|   787878    |
-""".strip()
-    )
-    assert (
-        fill_line([["34", "1234567", "787878"]], [[" ", " ", " "]], [12], ("^<",))
-        == """
-|   34         |
-|   1234567    |
-|   787878     |
-""".strip()
-    )
-    assert (
-        fill_line([["34", "1234567", "787878"]], [[" ", " ", " "]], [11], ("^>",))
-        == """
-|        34   |
-|   1234567   |
-|    787878   |
-""".strip()
-    )
-    assert (
-        fill_line([["34", "1234567", "787878"]], [[" ", " ", " "]], [12], ("^>",))
-        == """
-|        34    |
-|   1234567    |
-|    787878    |
-""".strip()
+| 2…|
++---+
+""".lstrip()
     )
 
 
@@ -224,7 +60,11 @@ def test_stringify_table():
 +-----+-----+---+
 """.strip()
     )
-    table_2 = [("1", "2", "3"), ("12345", "456\n\n567", ""), ("q", "NULL", "NULL")]
+    table_2 = [
+        ("1", "2", "3"),
+        ("12345", "456\n\n567", ""),
+        ("q", "NULL", "NULL"),
+    ]
     assert (
         stringify_table(table_2)
         == """
@@ -995,33 +835,27 @@ Never gonna tell a lie and hurt you
 +=====+=====+===+
 """.strip()
     )
-    assert (
-        stringify_table(table_19, theme=Themes.ascii_booktabs)
-        == """
- --------------- 
-    1     2   3  
- =============== 
-  qwe   rty      
-        uio      
- --------------- 
-""".strip(
-            "\n"
-        )
+    assert stringify_table(table_19, theme=Themes.ascii_booktabs) == (
+        " --------------- "
+        "    1     2   3  "
+        " =============== "
+        "  qwe   rty      "
+        "        uio      "
+        " --------------- "
     )
-    assert (
-        stringify_table(table_19, theme=Themes.ascii_booktabs, name=name_1)
-        == """
- --------------- 
-   Table Name    
- --------------- 
-    1     2   3  
- =============== 
-  qwe   rty      
-        uio      
- --------------- 
-""".strip(
-            "\n"
-        )
+    assert stringify_table(
+        table_19,
+        theme=Themes.ascii_booktabs,
+        name=name_1,
+    ) == (
+        " --------------- "
+        "   Table Name    "
+        " --------------- "
+        "    1     2   3  "
+        " =============== "
+        "  qwe   rty      "
+        "        uio      "
+        " --------------- "
     )
     assert (
         stringify_table(table_19, theme=Themes.thin)
@@ -1263,33 +1097,23 @@ Never gonna tell a lie and hurt you
 ╚═════╩═════╩═══╝
 """.strip()
     )
-    assert (
-        stringify_table(table_19, theme=Themes.booktabs)
-        == """
- ─────────────── 
-    1     2   3  
- ━━━━━━━━━━━━━━━ 
-  qwe   rty      
-        uio      
- ─────────────── 
-""".strip(
-            "\n"
-        )
+    assert stringify_table(table_19, theme=Themes.booktabs) == (
+        " ─────────────── "
+        "    1     2   3  "
+        " ━━━━━━━━━━━━━━━ "
+        "  qwe   rty      "
+        "        uio      "
+        " ─────────────── "
     )
-    assert (
-        stringify_table(table_19, theme=Themes.booktabs, name=name_1)
-        == """
- ─────────────── 
-   Table Name    
- ─────────────── 
-    1     2   3  
- ━━━━━━━━━━━━━━━ 
-  qwe   rty      
-        uio      
- ─────────────── 
-""".strip(
-            "\n"
-        )
+    assert stringify_table(table_19, theme=Themes.booktabs, name=name_1) == (
+        " ─────────────── "
+        "   Table Name    "
+        " ─────────────── "
+        "    1     2   3  "
+        " ━━━━━━━━━━━━━━━ "
+        "  qwe   rty      "
+        "        uio      "
+        " ─────────────── "
     )
     assert (
         stringify_table(table_19, theme=Themes.markdown)
@@ -1312,7 +1136,11 @@ Never gonna tell a lie and hurt you
     )
     assert (
         stringify_table(
-            table_19, name=name_1, max_width=(10,), max_height=5, maximize_height=True
+            table_19,
+            name=name_1,
+            max_width=(10,),
+            max_height=5,
+            maximize_height=True,
         )
         == """
 +--------------------------------------+
@@ -1388,7 +1216,11 @@ uio",
     )
     file_1.seek(0)
     assert (
-        Table.from_csv(file_1, name="Table Name", skip_first_line=True).stringify()
+        Table.from_csv(
+            file_1,
+            name="Table Name",
+            skip_first_line=True,
+        ).stringify()
         == """
 +---------------+
 |  Table Name   |
@@ -1423,7 +1255,11 @@ uio",
     )
     cursor.execute("SELECT c1, c2, c3 FROM data;")
     assert (
-        Table.from_db_cursor(cursor, name="Table Name", column_names=True).stringify()
+        Table.from_db_cursor(
+            cursor,
+            name="Table Name",
+            column_names=True,
+        ).stringify()
         == """
 +----------------+
 |   Table Name   |
