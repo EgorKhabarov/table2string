@@ -73,6 +73,7 @@ def print_table(
     column_count = max(map(len, table))
 
     if column_names:
+        column_names = list(column_names)
         column_names_len = len(column_names)
 
         if column_names_len > column_count:
