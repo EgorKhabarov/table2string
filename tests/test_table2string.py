@@ -1219,7 +1219,7 @@ uio",
         Table.from_csv(
             file_1,
             name="Table Name",
-            skip_first_line=True,
+            column_names=False,
         ).stringify()
         == """
 +---------------+
@@ -1271,5 +1271,230 @@ uio",
 | qwe | rty |    |
 |     | uio |    |
 +-----+-----+----+
+""".strip()
+    )
+
+
+def test_column_names():
+    table_1 = [("1", "2", "3"), ("qwe", "rty\nuio", "")]
+    assert (
+        stringify_table(
+            table_1,
+            column_names=["q", "w", "e", "r"],
+            theme=Themes.rounded_double,
+        ) == """
+╭─────┬─────┬───╮
+│  q  │  w  │ e │
+╞═════╪═════╪═══╡
+│   1 │   2 │ 3 │
+├─────┼─────┼───┤
+│ qwe │ rty │   │
+│     │ uio │   │
+╰─────┴─────┴───╯
+""".strip()
+    )
+    assert (
+        stringify_table(
+            table_1,
+            name="Name",
+            column_names=["q", "w", "e", "r"],
+            theme=Themes.rounded_double,
+        ) == """
+╭───────────────╮
+│     Name      │
+├─────┬─────┬───┤
+│  q  │  w  │ e │
+╞═════╪═════╪═══╡
+│   1 │   2 │ 3 │
+├─────┼─────┼───┤
+│ qwe │ rty │   │
+│     │ uio │   │
+╰─────┴─────┴───╯
+""".strip()
+    )
+    table_2 = [("1"*5, "2"*6, "3"*7), ("qwe", "rty\nuio", "")]
+    assert (
+        stringify_table(
+            table_2,
+            name="Name",
+            column_names=["q", "w", "e", "r"],
+            column_names_align="*",
+            theme=Themes.rounded_double,
+        ) == """
+╭──────────────────────────╮
+│           Name           │
+├───────┬────────┬─────────┤
+│ q     │ w      │ e       │
+╞═══════╪════════╪═════════╡
+│ 11111 │ 222222 │ 3333333 │
+├───────┼────────┼─────────┤
+│ qwe   │ rty    │         │
+│       │ uio    │         │
+╰───────┴────────┴─────────╯
+""".strip()
+    )
+    assert (
+        stringify_table(
+            table_2,
+            name="Name",
+            column_names=["q", "w", "e", "r"],
+            column_names_align="^",
+            theme=Themes.rounded_double,
+        ) == """
+╭──────────────────────────╮
+│           Name           │
+├───────┬────────┬─────────┤
+│   q   │   w    │    e    │
+╞═══════╪════════╪═════════╡
+│ 11111 │ 222222 │ 3333333 │
+├───────┼────────┼─────────┤
+│ qwe   │ rty    │         │
+│       │ uio    │         │
+╰───────┴────────┴─────────╯
+""".strip()
+    )
+    assert (
+        stringify_table(
+            table_2,
+            name="Name",
+            column_names=["q", "w", "e", "r"],
+            column_names_align="<",
+            theme=Themes.rounded_double,
+        ) == """
+╭──────────────────────────╮
+│           Name           │
+├───────┬────────┬─────────┤
+│ q     │ w      │ e       │
+╞═══════╪════════╪═════════╡
+│ 11111 │ 222222 │ 3333333 │
+├───────┼────────┼─────────┤
+│ qwe   │ rty    │         │
+│       │ uio    │         │
+╰───────┴────────┴─────────╯
+""".strip()
+    )
+    assert (
+        stringify_table(
+            table_2,
+            name="Name",
+            column_names=["q", "w", "e", "r"],
+            column_names_align=">",
+            theme=Themes.rounded_double,
+        ) == """
+╭──────────────────────────╮
+│           Name           │
+├───────┬────────┬─────────┤
+│     q │      w │       e │
+╞═══════╪════════╪═════════╡
+│ 11111 │ 222222 │ 3333333 │
+├───────┼────────┼─────────┤
+│ qwe   │ rty    │         │
+│       │ uio    │         │
+╰───────┴────────┴─────────╯
+""".strip()
+    )
+
+    assert (
+        stringify_table(
+            table_2,
+            column_names=["q", "w", "e", "r"],
+            column_names_align="*",
+            theme=Themes.rounded_double,
+        ) == """
+╭───────┬────────┬─────────╮
+│ q     │ w      │ e       │
+╞═══════╪════════╪═════════╡
+│ 11111 │ 222222 │ 3333333 │
+├───────┼────────┼─────────┤
+│ qwe   │ rty    │         │
+│       │ uio    │         │
+╰───────┴────────┴─────────╯
+""".strip()
+    )
+    assert (
+        stringify_table(
+            table_2,
+            column_names=["q", "1", "e", "r"],
+            column_names_align="*",
+            theme=Themes.rounded_double,
+        ) == """
+╭───────┬────────┬─────────╮
+│ q     │      1 │ e       │
+╞═══════╪════════╪═════════╡
+│ 11111 │ 222222 │ 3333333 │
+├───────┼────────┼─────────┤
+│ qwe   │ rty    │         │
+│       │ uio    │         │
+╰───────┴────────┴─────────╯
+""".strip()
+    )
+    assert (
+        stringify_table(
+            table_2,
+            column_names=["q", "w", "e", "r"],
+            column_names_align="^",
+            theme=Themes.rounded_double,
+        ) == """
+╭───────┬────────┬─────────╮
+│   q   │   w    │    e    │
+╞═══════╪════════╪═════════╡
+│ 11111 │ 222222 │ 3333333 │
+├───────┼────────┼─────────┤
+│ qwe   │ rty    │         │
+│       │ uio    │         │
+╰───────┴────────┴─────────╯
+""".strip()
+    )
+    assert (
+        stringify_table(
+            table_2,
+            column_names=["q", "w", "e", "r"],
+            column_names_align="<",
+            theme=Themes.rounded_double,
+        ) == """
+╭───────┬────────┬─────────╮
+│ q     │ w      │ e       │
+╞═══════╪════════╪═════════╡
+│ 11111 │ 222222 │ 3333333 │
+├───────┼────────┼─────────┤
+│ qwe   │ rty    │         │
+│       │ uio    │         │
+╰───────┴────────┴─────────╯
+""".strip()
+    )
+    assert (
+        stringify_table(
+            table_2,
+            column_names=["q", "w", "e", "r"],
+            column_names_align=">",
+            theme=Themes.rounded_double,
+        ) == """
+╭───────┬────────┬─────────╮
+│     q │      w │       e │
+╞═══════╪════════╪═════════╡
+│ 11111 │ 222222 │ 3333333 │
+├───────┼────────┼─────────┤
+│ qwe   │ rty    │         │
+│       │ uio    │         │
+╰───────┴────────┴─────────╯
+""".strip()
+    )
+    assert (
+        stringify_table(
+            table_2,
+            column_names=["q\nw\ne", "w", "e", "r"],
+            column_names_align=("<", ">"),
+            theme=Themes.rounded_double,
+        ) == """
+╭───────┬────────┬─────────╮
+│ q     │      w │ e       │
+│ w     │        │         │
+│ e     │        │         │
+╞═══════╪════════╪═════════╡
+│ 11111 │ 222222 │ 3333333 │
+├───────┼────────┼─────────┤
+│ qwe   │ rty    │         │
+│       │ uio    │         │
+╰───────┴────────┴─────────╯
 """.strip()
     )

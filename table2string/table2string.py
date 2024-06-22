@@ -1,6 +1,6 @@
 import csv
 from io import TextIOWrapper, StringIO
-from typing import Union, Tuple, Any, Sequence
+from typing import Union, Tuple, Any, Sequence, List
 
 from table2string.utils import (
     transform_align,
@@ -20,6 +20,8 @@ def print_table(
     align: Union[Tuple[str, ...], str] = "*",
     name: Union[str, None] = None,
     name_align: str = "^",
+    column_names: Union[List[str], None] = None,
+    column_names_align: Union[Tuple[str, ...], str] = "^",
     max_width: Union[int, Tuple[int, ...], None] = None,
     max_height: Union[int, None] = None,
     maximize_height: bool = False,
@@ -38,6 +40,8 @@ def print_table(
     :param align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
     :param name: Table name
     :param name_align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
+    :param column_names:
+    :param column_names_align:
     :param max_width: Table width or width of individual columns
     :param max_height: The maximum number of lines in one line
     :param maximize_height: Make all lines of the same height max_height
@@ -52,6 +56,9 @@ def print_table(
     """
     assert any(table), table
     assert sum(hasattr(row, "__getitem__") for row in table)
+    if column_names is not None:
+        assert column_names and column_names[0], column_names
+
     assert max_height >= 1 if max_height else True, max_height
     assert len(line_break_symbol) == 1, len(line_break_symbol)
     assert len(cell_break_symbol) == 1, len(cell_break_symbol)
@@ -59,10 +66,21 @@ def print_table(
     not_allowed_aligns = {
         *((align,) if isinstance(align, str) else align),
         name_align,
+        *column_names_align,
     } - set(ALLOWED_ALIGNS)
     assert not not_allowed_aligns, not_allowed_aligns
 
     column_count = max(map(len, table))
+
+    if column_names:
+        column_names_len = len(column_names)
+
+        if column_names_len > column_count:
+            column_names = column_names[:column_names_len - 1]
+        else:
+            column_names.extend((" ",) * (column_count - column_names_len))
+
+        table = [column_names, *table]
 
     if max_width is not None and not ignore_width_errors:
         if isinstance(max_width, int):
@@ -85,37 +103,53 @@ def print_table(
     row_lengths = get_row_lengths(table)
     max_widths = transform_width(max_width, column_count, row_lengths)
     align_t = transform_align(column_count, align)
+    column_names_align_t = transform_align(column_count, column_names_align)
 
     horizontally = [(border.horizontal * (i + 2)) for i in max_widths]
-    up_separator = (
-        border.top_left
-        + "".join(horizontally)
-        + border.horizontal * (len(max_widths) - 1)
-        + border.top_right
+    up_separator = "{}{}{}{}".format(
+        border.top_left,
+        "".join(horizontally),
+        border.horizontal * (len(max_widths) - 1),
+        border.top_right
     )
-    under_name_separator = (
-        border.vertical_left
-        + border.top_horizontal.join(horizontally)
-        + border.vertical_right
+    under_name_separator = "{}{}{}".format(
+        border.vertical_left,
+        border.top_horizontal.join(horizontally),
+        border.vertical_right
     )
-    up_noname_separator = (
-        border.top_left + border.top_horizontal.join(horizontally) + border.top_right
+    up_noname_separator = "{}{}{}".format(
+        border.top_left,
+        border.top_horizontal.join(horizontally),
+        border.top_right
     )
-    line_separator = (
-        border.vertical_left + border.central.join(horizontally) + border.vertical_right
+    line_separator = "{}{}{}".format(
+        border.vertical_left,
+        border.central.join(horizontally),
+        border.vertical_right
     )
-    line_separator_plus = (
-        border.vertical_left_plus
-        + border.central_plus.join(
+    line_separator_plus = "{}{}{}".format(
+        border.vertical_left_plus,
+        border.central_plus.join(
             (border.horizontal_plus * (i + 2)) for i in max_widths
-        )
-        + border.vertical_right_plus
+        ),
+        border.vertical_right_plus
     )
-    down_separator = (
-        border.bottom_left
-        + border.bottom_horizontal.join(horizontally)
-        + border.bottom_right
+    down_separator = "{}{}{}".format(
+        border.bottom_left,
+        border.bottom_horizontal.join(horizontally),
+        border.bottom_right
     )
+    """
+# EXAMPLE
+
+theme                = Themes.thin_double
+up_separator         = '┌─────┐'
+under_name_separator = '├─┬─┬─┤'
+up_noname_separator  = '┌─┬─┬─┐'
+line_separator       = '├─┼─┼─┤'
+line_separator_plus  = '╞═╪═╪═╡'
+down_separator       = '└─┴─┴─┘'
+    """
 
     if name:
         name_align_t = transform_align(1, name_align)
@@ -164,15 +198,21 @@ def print_table(
         if (sep is True or n == 0) or (isinstance(sep, (range, tuple)) and n in sep):
             if (name and n == 1) or ((not name) and n == 1):
                 s = line_separator_plus
+                a = align_t
             elif name and n == 0:
                 s = under_name_separator
+                a = column_names_align_t if column_names else align_t
             elif (not name) and n == 0:
                 s = up_noname_separator
+                a = column_names_align_t if column_names else align_t
             else:
                 s = line_separator
+                a = align_t
 
             if s.strip():
                 print(s, file=file)
+        else:
+            a = align_t
 
         if maximize_height and max_height:
             max_row_height = max_height
@@ -185,7 +225,7 @@ def print_table(
             column[1].extend(extend_data)
 
         rows, symbols = zip(*row)
-        print(fill_line(rows, symbols, max_widths, align_t, theme), file=file, end="")
+        print(fill_line(rows, symbols, max_widths, a, theme), file=file, end="")
 
     if down_separator.strip():
         print("\n" + down_separator.rstrip("\n"), file=file, end=end)
@@ -199,6 +239,8 @@ def stringify_table(
     align: Union[Tuple[str, ...], str] = "*",
     name: Union[str, None] = None,
     name_align: str = "^",
+    column_names: Union[List[str], None] = None,
+    column_names_align: Union[Tuple[str, ...], str] = "^",
     max_width: Union[int, Tuple[int, ...], None] = None,
     max_height: Union[int, None] = None,
     maximize_height: bool = False,
@@ -215,6 +257,8 @@ def stringify_table(
     :param align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
     :param name: Table name
     :param name_align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
+    :param column_names:
+    :param column_names_align:
     :param max_width: Table width or width of individual columns
     :param max_height: The maximum number of lines in one line
     :param maximize_height: Make all lines of the same height max_height
@@ -232,6 +276,8 @@ def stringify_table(
         align=align,
         name=name,
         name_align=name_align,
+        column_names=column_names,
+        column_names_align=column_names_align,
         max_width=max_width,
         max_height=max_height,
         maximize_height=maximize_height,
@@ -248,42 +294,60 @@ def stringify_table(
 
 
 class Table:
-    def __init__(self, table: Sequence[Sequence[Any]], name: Union[str, None] = None):
+    def __init__(
+        self,
+        table: Sequence[Sequence[Any]],
+        name: Union[str, None] = None,
+        column_names: Union[List[str], None] = None,
+    ):
         self.table = table
         self.name = name
+        self.column_names = column_names
 
     @classmethod
     def from_table(
-        cls, table: Sequence[Sequence[Any]], name: Union[str, None] = None
+        cls,
+        table: Sequence[Sequence[Any]],
+        name: Union[str, None] = None,
+        column_names: Union[List[str], None] = None,
     ) -> "Table":
-        return cls(table=table, name=name)
+        return cls(table=table, name=name, column_names=column_names)
 
     @classmethod
     def from_db_cursor(
-        cls, cursor, name: Union[str, None] = None, column_names: bool = False
+        cls,
+        cursor,
+        name: Union[str, None] = None,
+        column_names: bool = False,
     ) -> "Table":
         table = cursor.fetchall()
 
         if column_names and getattr(cursor, "description"):
-            table = [[column[0] for column in cursor.description], *table]
+            column_names_ = [column[0] for column in cursor.description] or None
+        else:
+            column_names_ = None
 
-        return cls(table=table, name=name)
+        return cls(table=table, name=name, column_names=column_names_)
 
     @classmethod
     def from_csv(
         cls,
         file: TextIOWrapper,
         name: Union[str, None] = None,
-        skip_first_line: bool = False,
+        column_names: bool = True,
         **kwargs,
     ) -> "Table":
-        return cls(table=list(csv.reader(file, **kwargs))[skip_first_line:], name=name)
+        csv_table = list(csv.reader(file, **kwargs))
+        table = csv_table[1:]
+        column_names_ = csv_table[0] if column_names else None
+        return cls(table=table, name=name, column_names=column_names_)
 
     def stringify(
         self,
         *,
         align: Union[Tuple[str, ...], str] = "*",
         name_align: str = "^",
+        column_names_align: Union[Tuple[str, ...], str] = "^",
         max_width: Union[int, Tuple[int, ...], None] = None,
         max_height: Union[int, None] = None,
         maximize_height: bool = False,
@@ -299,6 +363,8 @@ class Table:
             align=align,
             name=self.name,
             name_align=name_align,
+            column_names=self.column_names,
+            column_names_align=column_names_align,
             max_width=max_width,
             max_height=max_height,
             maximize_height=maximize_height,
@@ -315,6 +381,7 @@ class Table:
         *,
         align: Union[Tuple[str, ...], str] = "*",
         name_align: str = "^",
+        column_names_align: Union[Tuple[str, ...], str] = "^",
         max_width: Union[int, Tuple[int, ...], None] = None,
         max_height: Union[int, None] = None,
         maximize_height: bool = False,
@@ -331,6 +398,8 @@ class Table:
             align=align,
             name=self.name,
             name_align=name_align,
+            column_names=self.column_names,
+            column_names_align=column_names_align,
             max_width=max_width,
             max_height=max_height,
             maximize_height=maximize_height,
