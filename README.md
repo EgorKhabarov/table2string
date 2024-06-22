@@ -68,7 +68,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 | qwe | rty |    |
 |     | uio |    |
 +-----+-----+----+
->>> Table.from_csv(StringIO('c1,c2,c3\n1,2,3\nqwe,"rty\nuio",'), name="Table Name", skip_first_line=True).print()
+>>> Table.from_csv(StringIO('c1,c2,c3\n1,2,3\nqwe,"rty\nuio",'), name="Table Name", column_names=False).print()
 +---------------+
 |  Table Name   |
 +-----+-----+---+
