@@ -40,8 +40,8 @@ def print_table(
     :param align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
     :param name: Table name
     :param name_align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
-    :param column_names:
-    :param column_names_align:
+    :param column_names: Column names
+    :param column_names_align: Column names align
     :param max_width: Table width or width of individual columns
     :param max_height: The maximum number of lines in one line
     :param maximize_height: Make all lines of the same height max_height
@@ -76,7 +76,7 @@ def print_table(
         column_names_len = len(column_names)
 
         if column_names_len > column_count:
-            column_names = column_names[:column_names_len - 1]
+            column_names = column_names[: column_names_len - 1]
         else:
             column_names.extend((" ",) * (column_count - column_names_len))
 
@@ -110,34 +110,34 @@ def print_table(
         border.top_left,
         "".join(horizontally),
         border.horizontal * (len(max_widths) - 1),
-        border.top_right
+        border.top_right,
     )
     under_name_separator = "{}{}{}".format(
         border.vertical_left,
         border.top_horizontal.join(horizontally),
-        border.vertical_right
+        border.vertical_right,
     )
     up_noname_separator = "{}{}{}".format(
         border.top_left,
         border.top_horizontal.join(horizontally),
-        border.top_right
+        border.top_right,
     )
     line_separator = "{}{}{}".format(
         border.vertical_left,
         border.central.join(horizontally),
-        border.vertical_right
+        border.vertical_right,
     )
     line_separator_plus = "{}{}{}".format(
         border.vertical_left_plus,
         border.central_plus.join(
             (border.horizontal_plus * (i + 2)) for i in max_widths
         ),
-        border.vertical_right_plus
+        border.vertical_right_plus,
     )
     down_separator = "{}{}{}".format(
         border.bottom_left,
         border.bottom_horizontal.join(horizontally),
-        border.bottom_right
+        border.bottom_right,
     )
     """
 # EXAMPLE
@@ -257,8 +257,8 @@ def stringify_table(
     :param align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
     :param name: Table name
     :param name_align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
-    :param column_names:
-    :param column_names_align:
+    :param column_names: Column names
+    :param column_names_align: Column names align
     :param max_width: Table width or width of individual columns
     :param max_height: The maximum number of lines in one line
     :param maximize_height: Make all lines of the same height max_height
@@ -358,6 +358,22 @@ class Table:
         theme: Theme = Themes.ascii_thin,
         ignore_width_errors: bool = False,
     ) -> str:
+        """
+
+        :param align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
+        :param name_align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
+        :param column_names_align: Column names align
+        :param max_width: Table width or width of individual columns
+        :param max_height: The maximum number of lines in one line
+        :param maximize_height: Make all lines of the same height max_height
+        :param line_break_symbol: "↩" or chr(8617) or "\\U000021a9"
+        :param cell_break_symbol: "…" or chr(8230) or "\\U00002026"
+        :param sep: Settings of dividers. You can specify specific lines with dividers.
+        :param end: Configure the last symbol of the table. \\n or nothing
+        :param theme:
+        :param ignore_width_errors:
+        :return: String table
+        """
         return stringify_table(
             table=self.table,
             align=align,
@@ -393,6 +409,24 @@ class Table:
         theme: Theme = Themes.ascii_thin,
         ignore_width_errors: bool = False,
     ) -> None:
+        """
+        Print the table in sys.stdout or file
+
+        :param align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
+        :param name_align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
+        :param column_names_align: Column names align
+        :param max_width: Table width or width of individual columns
+        :param max_height: The maximum number of lines in one line
+        :param maximize_height: Make all lines of the same height max_height
+        :param line_break_symbol: "↩" or chr(8617) or "\\U000021a9"
+        :param cell_break_symbol: "…" or chr(8230) or "\\U00002026"
+        :param sep: Settings of dividers. You can specify specific lines with dividers.
+        :param end: Configure the last symbol of the table. \\n or nothing
+        :param file: File where you can record the table by .write method.
+        :param theme:
+        :param ignore_width_errors:
+        :return: None
+        """
         print_table(
             table=self.table,
             align=align,

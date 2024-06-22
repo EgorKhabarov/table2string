@@ -1282,7 +1282,8 @@ def test_column_names():
             table_1,
             column_names=["q", "w", "e", "r"],
             theme=Themes.rounded_double,
-        ) == """
+        )
+        == """
 ╭─────┬─────┬───╮
 │  q  │  w  │ e │
 ╞═════╪═════╪═══╡
@@ -1299,7 +1300,8 @@ def test_column_names():
             name="Name",
             column_names=["q", "w", "e", "r"],
             theme=Themes.rounded_double,
-        ) == """
+        )
+        == """
 ╭───────────────╮
 │     Name      │
 ├─────┬─────┬───┤
@@ -1312,7 +1314,7 @@ def test_column_names():
 ╰─────┴─────┴───╯
 """.strip()
     )
-    table_2 = [("1"*5, "2"*6, "3"*7), ("qwe", "rty\nuio", "")]
+    table_2 = [("1" * 5, "2" * 6, "3" * 7), ("qwe", "rty\nuio", "")]
     assert (
         stringify_table(
             table_2,
@@ -1320,7 +1322,8 @@ def test_column_names():
             column_names=["q", "w", "e", "r"],
             column_names_align="*",
             theme=Themes.rounded_double,
-        ) == """
+        )
+        == """
 ╭──────────────────────────╮
 │           Name           │
 ├───────┬────────┬─────────┤
@@ -1340,7 +1343,8 @@ def test_column_names():
             column_names=["q", "w", "e", "r"],
             column_names_align="^",
             theme=Themes.rounded_double,
-        ) == """
+        )
+        == """
 ╭──────────────────────────╮
 │           Name           │
 ├───────┬────────┬─────────┤
@@ -1360,7 +1364,8 @@ def test_column_names():
             column_names=["q", "w", "e", "r"],
             column_names_align="<",
             theme=Themes.rounded_double,
-        ) == """
+        )
+        == """
 ╭──────────────────────────╮
 │           Name           │
 ├───────┬────────┬─────────┤
@@ -1380,7 +1385,8 @@ def test_column_names():
             column_names=["q", "w", "e", "r"],
             column_names_align=">",
             theme=Themes.rounded_double,
-        ) == """
+        )
+        == """
 ╭──────────────────────────╮
 │           Name           │
 ├───────┬────────┬─────────┤
@@ -1400,7 +1406,8 @@ def test_column_names():
             column_names=["q", "w", "e", "r"],
             column_names_align="*",
             theme=Themes.rounded_double,
-        ) == """
+        )
+        == """
 ╭───────┬────────┬─────────╮
 │ q     │ w      │ e       │
 ╞═══════╪════════╪═════════╡
@@ -1417,7 +1424,8 @@ def test_column_names():
             column_names=["q", "1", "e", "r"],
             column_names_align="*",
             theme=Themes.rounded_double,
-        ) == """
+        )
+        == """
 ╭───────┬────────┬─────────╮
 │ q     │      1 │ e       │
 ╞═══════╪════════╪═════════╡
@@ -1434,7 +1442,8 @@ def test_column_names():
             column_names=["q", "w", "e", "r"],
             column_names_align="^",
             theme=Themes.rounded_double,
-        ) == """
+        )
+        == """
 ╭───────┬────────┬─────────╮
 │   q   │   w    │    e    │
 ╞═══════╪════════╪═════════╡
@@ -1451,7 +1460,8 @@ def test_column_names():
             column_names=["q", "w", "e", "r"],
             column_names_align="<",
             theme=Themes.rounded_double,
-        ) == """
+        )
+        == """
 ╭───────┬────────┬─────────╮
 │ q     │ w      │ e       │
 ╞═══════╪════════╪═════════╡
@@ -1468,7 +1478,8 @@ def test_column_names():
             column_names=["q", "w", "e", "r"],
             column_names_align=">",
             theme=Themes.rounded_double,
-        ) == """
+        )
+        == """
 ╭───────┬────────┬─────────╮
 │     q │      w │       e │
 ╞═══════╪════════╪═════════╡
@@ -1485,7 +1496,8 @@ def test_column_names():
             column_names=["q\nw\ne", "w", "e", "r"],
             column_names_align=("<", ">"),
             theme=Themes.rounded_double,
-        ) == """
+        )
+        == """
 ╭───────┬────────┬─────────╮
 │ q     │      w │ e       │
 │ w     │        │         │
