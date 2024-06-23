@@ -1,6 +1,6 @@
 import csv
 from io import TextIOWrapper, StringIO
-from typing import Union, Tuple, Any, Sequence, List
+from typing import Union, Tuple, Any, Sequence
 
 from table2string.utils import (
     transform_align,
@@ -20,7 +20,7 @@ def print_table(
     align: Union[Tuple[str, ...], str] = "*",
     name: Union[str, None] = None,
     name_align: str = "^",
-    column_names: Union[List[str], None] = None,
+    column_names: Union[Sequence[str], None] = None,
     column_names_align: Union[Tuple[str, ...], str] = "^",
     max_width: Union[int, Tuple[int, ...], None] = None,
     max_height: Union[int, None] = None,
@@ -41,11 +41,11 @@ def print_table(
     :param name: Table name
     :param name_align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
     :param column_names: Column names
-    :param column_names_align: Column names align
+    :param column_names_align: Aligns for column names
     :param max_width: Table width or width of individual columns
     :param max_height: The maximum number of lines in one line
     :param maximize_height: Make all lines of the same height max_height
-    :param line_break_symbol: "↩" or chr(8617) or "\\U000021a9"
+    :param line_break_symbol: "\" or "↩" or chr(8617) or "\\U000021a9"
     :param cell_break_symbol: "…" or chr(8230) or "\\U00002026"
     :param sep: Settings of dividers. You can specify specific lines with dividers.
     :param end: Configure the last symbol of the table. \\n or nothing
@@ -68,7 +68,7 @@ def print_table(
         name_align,
         *column_names_align,
     } - set(ALLOWED_ALIGNS)
-    assert not not_allowed_aligns, not_allowed_aligns
+    assert not not_allowed_aligns, f"not allowed alignments: {tuple(not_allowed_aligns)}"
 
     column_count = max(map(len, table))
 
@@ -107,38 +107,50 @@ def print_table(
     column_names_align_t = transform_align(column_count, column_names_align)
 
     horizontally = [(border.horizontal * (i + 2)) for i in max_widths]
-    up_separator = "{}{}{}{}".format(
-        border.top_left,
-        "".join(horizontally),
-        border.horizontal * (len(max_widths) - 1),
-        border.top_right,
+    up_separator = "".join(
+        (
+            border.top_left,
+            "".join(horizontally),
+            border.horizontal * (len(max_widths) - 1),
+            border.top_right,
+        )
     )
-    under_name_separator = "{}{}{}".format(
-        border.vertical_left,
-        border.top_horizontal.join(horizontally),
-        border.vertical_right,
+    under_name_separator = "".join(
+        (
+            border.vertical_left,
+            border.top_horizontal.join(horizontally),
+            border.vertical_right,
+        )
     )
-    up_noname_separator = "{}{}{}".format(
-        border.top_left,
-        border.top_horizontal.join(horizontally),
-        border.top_right,
+    up_noname_separator = "".join(
+        (
+            border.top_left,
+            border.top_horizontal.join(horizontally),
+            border.top_right,
+        )
     )
-    line_separator = "{}{}{}".format(
-        border.vertical_left,
-        border.central.join(horizontally),
-        border.vertical_right,
+    line_separator = "".join(
+        (
+            border.vertical_left,
+            border.central.join(horizontally),
+            border.vertical_right,
+        )
     )
-    line_separator_plus = "{}{}{}".format(
-        border.vertical_left_plus,
-        border.central_plus.join(
-            (border.horizontal_plus * (i + 2)) for i in max_widths
-        ),
-        border.vertical_right_plus,
+    line_separator_plus = "".join(
+        (
+            border.vertical_left_plus,
+            border.central_plus.join(
+                (border.horizontal_plus * (i + 2)) for i in max_widths
+            ),
+            border.vertical_right_plus,
+        )
     )
-    down_separator = "{}{}{}".format(
-        border.bottom_left,
-        border.bottom_horizontal.join(horizontally),
-        border.bottom_right,
+    down_separator = "".join(
+        (
+            border.bottom_left,
+            border.bottom_horizontal.join(horizontally),
+            border.bottom_right,
+        )
     )
     """
 # EXAMPLE
@@ -196,7 +208,17 @@ down_separator       = '└─┴─┴─┘'
         if n != 0:
             print(file=file)
 
-        if (sep is True or n == 0) or (isinstance(sep, (range, tuple)) and n in sep):
+        def n_in_sep():
+            if column_names:
+                return n - 1 in sep
+            else:
+                return n in sep
+
+        if (
+            (sep is True or n == 0)
+            or (isinstance(sep, (range, tuple)) and n_in_sep())
+            or (n == 1 and column_names)
+        ):
             if (name and n == 1) or ((not name) and n == 1):
                 s = line_separator_plus
                 a = align_t
@@ -240,7 +262,7 @@ def stringify_table(
     align: Union[Tuple[str, ...], str] = "*",
     name: Union[str, None] = None,
     name_align: str = "^",
-    column_names: Union[List[str], None] = None,
+    column_names: Union[Sequence[str], None] = None,
     column_names_align: Union[Tuple[str, ...], str] = "^",
     max_width: Union[int, Tuple[int, ...], None] = None,
     max_height: Union[int, None] = None,
@@ -259,7 +281,7 @@ def stringify_table(
     :param name: Table name
     :param name_align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
     :param column_names: Column names
-    :param column_names_align: Column names align
+    :param column_names_align: Aligns for column names
     :param max_width: Table width or width of individual columns
     :param max_height: The maximum number of lines in one line
     :param maximize_height: Make all lines of the same height max_height
@@ -299,7 +321,7 @@ class Table:
         self,
         table: Sequence[Sequence[Any]],
         name: Union[str, None] = None,
-        column_names: Union[List[str], None] = None,
+        column_names: Union[Sequence[str], None] = None,
     ):
         self.table = table
         self.name = name
@@ -310,7 +332,7 @@ class Table:
         cls,
         table: Sequence[Sequence[Any]],
         name: Union[str, None] = None,
-        column_names: Union[List[str], None] = None,
+        column_names: Union[Sequence[str], None] = None,
     ) -> "Table":
         return cls(table=table, name=name, column_names=column_names)
 
@@ -363,7 +385,7 @@ class Table:
 
         :param align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
         :param name_align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
-        :param column_names_align: Column names align
+        :param column_names_align: Aligns for column names
         :param max_width: Table width or width of individual columns
         :param max_height: The maximum number of lines in one line
         :param maximize_height: Make all lines of the same height max_height
@@ -415,7 +437,7 @@ class Table:
 
         :param align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
         :param name_align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
-        :param column_names_align: Column names align
+        :param column_names_align: Aligns for column names
         :param max_width: Table width or width of individual columns
         :param max_height: The maximum number of lines in one line
         :param maximize_height: Make all lines of the same height max_height

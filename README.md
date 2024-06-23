@@ -113,6 +113,13 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 
 ## Custom width and height settings
 
+| Width                               | Example        | Description                                                                                                                 |
+|-------------------------------------|----------------|-----------------------------------------------------------------------------------------------------------------------------|
+| `<width>`                           | `10`           | Setting `width` (`10`) for the whole table                                                                                  |
+| `(<width>,)`                        | `(10,)`        | Setting `width_1` (`10`) for all column                                                                                     |
+| `(<width_1>, <width_2>)`            | `(10, 20)`     | Setting `width_1` (`10`) for the first column and `width_2` (`20`) for all other columns                                    |
+| `(<width_1>, <width_2>, <width_3>)` | `(10, 20, 30)` | Setting `width_1` (`10`) for the first column and `width_2` (`20`) for the second and `width_3` (`30`) for the third column |
+
 <details>
 <summary>Example</summary>
 
@@ -177,6 +184,27 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 
 ## Text alignment
 
+| Align                                     | Example           | Description                                                                                                                    |
+|-------------------------------------------|-------------------|--------------------------------------------------------------------------------------------------------------------------------|
+| `"<align>"` or `("<align>",)`             | `"^"` or `("^",)` | Setting `align` (`"^"`) for all columns                                                                                        |
+| `("<align_1>", "<align_2>")`              | `("^", "<")`      | Setting `align_1` (`"^"`) for the first column and `align_2` (`"<"`) for all other columns                                     |
+| `("<align_1>", "<align_2>", "<align_3>")` | `("^", "<", ">")` | Setting `align_1` (`"^"`) for the first column and `align_2` (`"<"`) for the second and `align_3` (`">"`) for the third column |
+
+### ALLOWED_ALIGNS
+
+|    Align    | Description                                                                                                                                          |
+|:-----------:|------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `*` or `**` | Alignment depends on the type. If this is a number and there are no line breaks in this cell, then align to the right; otherwise, align to the left. |
+| `<` or `<<` | All lines are left aligned                                                                                                                           |
+| `^` or `^^` | All lines are center aligned                                                                                                                         |
+| `>` or `>>` | All lines are right aligned                                                                                                                          |
+|    `<^`     | The first line is left aligned and the remaining lines are centered                                                                                  |
+|    `<>`     | The first line is left aligned and the remaining lines are right aligned                                                                             |
+|    `^<`     | The first line is aligned to the center, and the remaining lines are aligned to the left of the first line.                                          |
+|    `^>`     | The first line is aligned to the center, and the remaining lines are aligned to the right of the first line.                                         |
+|    `><`     | The first line is right aligned and the remaining lines are left aligned                                                                             |
+|    `>^`     | The first line is right aligned and the remaining lines are centered                                                                                 |
+
 <details>
 <summary>Example</summary>
 
@@ -184,6 +212,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 >>> kwargs_1 = {
 ...     "table": [("1", "123456789\nqwerty\nasdfghjklzxcvb")],
 ...     "name": "Table Name\nName\nNaaaaame",
+...     "column_names": ("1", "col 2\nc2"),
 ...     "max_width": (5, 15),
 ... }
 >>> print_table(**kwargs_1)
@@ -192,65 +221,86 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 |          Name           |
 |        Naaaaame         |
 +-------+-----------------+
-|     1 | 123456789       |
-|       | qwerty          |
-|       | asdfghjklzxcvb  |
-+-------+-----------------+
->>> print_table(**kwargs_1, align="*", name_align="*")  # align="**", name_align="**"
-+-------------------------+
-| Table Name              |
-| Name                    |
-| Naaaaame                |
+|   1   |      col 2      |
+|       |       c2        |
 +-------+-----------------+
 |     1 | 123456789       |
 |       | qwerty          |
 |       | asdfghjklzxcvb  |
 +-------+-----------------+
->>> print_table(**kwargs_1, align="<", name_align="<")  # align="<<", name_align="<<"
+>>> print_table(**kwargs_1, align="*", name_align="*", column_names_align="*")  # align="**", name_align="**", column_names_align="**"
 +-------------------------+
 | Table Name              |
 | Name                    |
 | Naaaaame                |
++-------+-----------------+
+|     1 | col 2           |
+|       | c2              |
++-------+-----------------+
+|     1 | 123456789       |
+|       | qwerty          |
+|       | asdfghjklzxcvb  |
++-------+-----------------+
+>>> print_table(**kwargs_1, align="<", name_align="<", column_names_align="<")  # align="<<", name_align="<<", column_names_align="<<"
++-------------------------+
+| Table Name              |
+| Name                    |
+| Naaaaame                |
++-------+-----------------+
+| 1     | col 2           |
+|       | c2              |
 +-------+-----------------+
 | 1     | 123456789       |
 |       | qwerty          |
 |       | asdfghjklzxcvb  |
 +-------+-----------------+
->>> print_table(**kwargs_1, align=">", name_align=">")  # align=">>", name_align=">>"
+>>> print_table(**kwargs_1, align=">", name_align=">", column_names_align=">")  # align=">>", name_align=">>", column_names_align=">>"
 +-------------------------+
 |              Table Name |
 |                    Name |
 |                Naaaaame |
 +-------+-----------------+
+|     1 |           col 2 |
+|       |              c2 |
++-------+-----------------+
 |     1 |       123456789 |
 |       |          qwerty |
 |       |  asdfghjklzxcvb |
 +-------+-----------------+
->>> print_table(**kwargs_1, align="^", name_align="^")  # align="^^", name_align="^^"
+>>> print_table(**kwargs_1, align="^", name_align="^", column_names_align="^")  # align="^^", name_align="^^", column_names_align="^^"
 +-------------------------+
 |       Table Name        |
 |          Name           |
 |        Naaaaame         |
 +-------+-----------------+
+|   1   |      col 2      |
+|       |       c2        |
++-------+-----------------+
 |   1   |    123456789    |
 |       |     qwerty      |
 |       | asdfghjklzxcvb  |
 +-------+-----------------+
->>> print_table(**kwargs_1, align="^<", name_align="^<")
+>>> print_table(**kwargs_1, align="^<", name_align="^<", column_names_align="^<")
 +-------------------------+
 |       Table Name        |
 |       Name              |
 |       Naaaaame          |
 +-------+-----------------+
+|   1   |      col 2      |
+|       |      c2         |
++-------+-----------------+
 |   1   | 123456789       |
 |       | qwerty          |
 |       | asdfghjklzxcvb  |
 +-------+-----------------+
->>> print_table(**kwargs_1, align="^>", name_align="^>")
+>>> print_table(**kwargs_1, align="^>", name_align="^>", column_names_align="^>")
 +-------------------------+
 |       Table Name        |
 |             Name        |
 |         Naaaaame        |
++-------+-----------------+
+|   1   |      col 2      |
+|       |         c2      |
 +-------+-----------------+
 |   1   |      123456789  |
 |       |         qwerty  |
@@ -274,6 +324,14 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 
 ## Separator settings
 
+| Separator              | Description                                |
+|------------------------|--------------------------------------------|
+| `sep=True`             | All horizontal dividers included           |
+| `sep=False`            | All horizontal dividers are disabled       |
+| `sep=(1,)`             | Only first delimiter                       |
+| `sep=(1, 3, 5)`        | Only first third and fifth separator       |
+| `sep=range(1, 100, 5)` | Delimiter every five lines first 100 lines |
+
 <details>
 <summary>Example</summary>
 
@@ -282,15 +340,13 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 >>> kwargs = {
 ...     "max_width": (3, 4),
 ...     "max_height": 4,
-...     "line_break_symbol": "/",
-...     "cell_break_symbol": "…",
 ... }
 >>> print_table(table_1, **kwargs, sep=True)
 +-----+------+
 | qwe | rty  |
 |     | uio  |
 +-----+------+
-| 123/| exam/|
+| 123↩| exam↩|
 | 456 | ple  |
 |     |      |
 | 789…|      |
@@ -299,7 +355,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 +-----+------+
 | qwe | rty  |
 |     | uio  |
-| 123/| exam/|
+| 123↩| exam↩|
 | 456 | ple  |
 |     |      |
 | 789…|      |
@@ -834,4 +890,57 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 
 ```
 
+</details>
+
+## Emojis
+
+<details>
+<summary>Example</summary>
+
+```python
+from prettytable import PrettyTable
+from table2string import Table
+
+names = ("plain text", "emoji")
+table = [
+    (
+        "text\ntext",
+        "👨‍👩‍👧‍👦👨‍👩‍👦‍👦👨‍👩‍👧‍👧\n"
+        "👨‍👨‍👧‍👦👨‍👨‍👧‍👧👨‍👩‍👧👩‍❤️‍👨\n"
+        "👨‍❤️‍👨👯👩‍🦼👭👨‍👩‍👧‍👦\n"
+        "👨‍👨‍👧‍👦👨‍👨‍👦👩‍👩‍👧\n"
+        "👨‍👨‍👧‍👧👨‍👩‍👦‍👦",
+    ),
+]
+t = PrettyTable(title="prettytable", field_names=names, align="c")
+t.add_rows(table)
+print(t)
+
+t = Table(table, name="table2string", column_names=names)
+t.print(align="^", sep=(1,))
+```
+
+<details>
+<summary>Windows Terminal</summary>
+
+![emoji_example_1.png](images/emoji_example_Windows_Terminal.png)
+</details>
+
+<details>
+<summary>Windows 10</summary>
+
+![emoji_example_windows_10_terminal.png](images/emoji_example_windows_10_terminal.png)
+</details>
+
+<details>
+<summary>Windows 11</summary>
+
+![emoji_example_windows_11_terminal.png](images/emoji_example_windows_11_terminal.png)
+</details>
+
+<details>
+<summary>VT100 terminal emulator</summary>
+
+![emoji_example_VT100_terminal_emulator.png](images/emoji_example_VT100_terminal_emulator.png)
+</details>
 </details>
