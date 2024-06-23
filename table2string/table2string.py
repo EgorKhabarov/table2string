@@ -68,7 +68,9 @@ def print_table(
         name_align,
         *column_names_align,
     } - set(ALLOWED_ALIGNS)
-    assert not not_allowed_aligns, f"not allowed alignments: {tuple(not_allowed_aligns)}"
+    assert (
+        not not_allowed_aligns
+    ), f"not allowed alignments: {tuple(not_allowed_aligns)}"
 
     column_count = max(map(len, table))
 
