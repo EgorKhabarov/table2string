@@ -17,8 +17,12 @@ def test_get_text_width_in_console():
 def test_decrease_numbers():
     assert decrease_numbers([2, 2, 3], 10) == [3, 3, 4]
     assert decrease_numbers([2, 2, 3], 11) == [3, 3, 5]
-    assert decrease_numbers([20, 2, 3], 10) == [8, 1, 1]
-    assert decrease_numbers([20, 2, 3], 100) == [80, 8, 12]
+    assert decrease_numbers([20, 2, 3], 10) == [5, 2, 3]
+    assert decrease_numbers([20, 2, 3], 100) == [59, 19, 22]
+    assert decrease_numbers(
+        [19, 10, 7, 4, 12, 4, 4, 4, 1, 1168],
+        185,
+    ) == [7, 8, 8, 9, 9, 10, 10, 12, 13, 99]
 
 
 def test_transform_align():

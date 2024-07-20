@@ -401,54 +401,64 @@ def get_text_width_in_console(text: str) -> int:
     return width
 
 
-def decrease_numbers(
-    row_lengths: List[int],
-    max_width: int = 120,
-    min_width: int = 1,
-) -> List[int]:
-    current_sum = sum(row_lengths)
-    difference = max_width - current_sum
+def decrease_numbers(widths: List[int], total_width: int = 120) -> List[int]:
+    widths_sum = sum(widths)
 
-    if difference == 0 and all(n >= min_width for n in row_lengths):
-        return row_lengths
+    for i, width in enumerate(widths):
+        if width < 1:
+            widths[i] = 1
 
-    proportions = [n / current_sum for n in row_lengths]
-    distributed = [n + round(difference * p) for n, p in zip(row_lengths, proportions)]
+    # Scaling
+    if widths_sum != total_width:
+        scale_factor = total_width / widths_sum
+        widths = [max(1, round(w * scale_factor)) for w in widths]
+    else:
+        widths = widths
 
-    total = sum(distributed)
-    final_difference = max_width - total
+    # Correction of scaled values to exact summation
+    while sum(widths) != total_width:
+        diff = total_width - sum(widths)
+        if diff > 0:
+            for i in range(len(widths)):
+                if widths[i] < total_width - (len(widths) - 1):
+                    widths[i] += 1
+                    if sum(widths) == total_width:
+                        break
+        elif diff < 0:
+            for i in range(len(widths)):
+                if widths[i] > 1:
+                    widths[i] -= 1
+                    if sum(widths) == total_width:
+                        break
 
-    if final_difference > 0:
-        for i in range(final_difference):
-            distributed[i % len(distributed)] += 1
-    elif final_difference < 0:
-        for i in range(-final_difference):
-            if distributed[i % len(distributed)] > min_width:
-                distributed[i % len(distributed)] -= 1
+    # Correction of proportions
+    k = 0.5  # correction parameter
+    for i in range(len(widths)):
+        widths[i] = max(
+            1, widths[i] - round(widths[i] * k) + round(sum(widths) * k / len(widths))
+        )
 
-    # Ensure all values are at least min_value
-    for i in range(len(distributed)):
-        if distributed[i] < min_width:
-            distributed[i] = min_width
+    # Checking and final adjustment
+    while sum(widths) != total_width:
+        diff = total_width - sum(widths)
+        if diff > 0:
+            for i in range(len(widths)):
+                if widths[i] < total_width - (len(widths) - 1):
+                    widths[i] += 1
+                    if sum(widths) == total_width:
+                        break
+        elif diff < 0:
+            for i in range(len(widths)):
+                if widths[i] > 1:
+                    widths[i] -= 1
+                    if sum(widths) == total_width:
+                        break
 
-    # Adjust again if min_value correction breaks the total sum
-    total = sum(distributed)
-    final_difference = max_width - total
-
-    if final_difference > 0:
-        for i in range(final_difference):
-            distributed[i % len(distributed)] += 1
-    elif final_difference < 0:
-        for i in range(-final_difference):
-            if distributed[i % len(distributed)] > min_width:
-                distributed[i % len(distributed)] -= 1
-
-    return distributed
+    return widths
 
 
 def transform_align(
-    column_count: int,
-    align: Union[Tuple[str, ...], str] = "*",
+    column_count: int, align: Union[Tuple[str, ...], str] = "*"
 ) -> Tuple[str, ...]:
     """
     Convert align to a suitable view

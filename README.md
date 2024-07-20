@@ -36,17 +36,8 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 # Usage example
 
 ```pycon
->>> from table2string import print_table, stringify_table
->>> print_table([("1", "2", "3"), ("qwe", "rty\nuio", "")], name="Table Name")
-+---------------+
-|  Table Name   |
-+-----+-----+---+
-|   1 |   2 | 3 |
-+-----+-----+---+
-| qwe | rty |   |
-|     | uio |   |
-+-----+-----+---+
->>> print(stringify_table([("1", "2", "3"), ("qwe", "rty\nuio", "")], name="Table Name"))
+>>> from table2string import Table
+>>> Table([("1", "2", "3"), ("qwe", "rty\nuio", "")], name="Table Name").print()
 +---------------+
 |  Table Name   |
 +-----+-----+---+
@@ -56,7 +47,6 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 |     | uio |   |
 +-----+-----+---+
 >>> from io import StringIO
->>> from table2string import Table
 >>> Table.from_csv(StringIO('c1,c2,c3\n1,2,3\nqwe,"rty\nuio",'), name="Table Name").print()
 +----------------+
 |   Table Name   |
@@ -78,15 +68,14 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 |     | uio |   |
 +-----+-----+---+
 >>> import sqlite3
->>> cursor = sqlite3.connect(":memory:").cursor()
->>> cursor.execute(
+>>> cursor = sqlite3.connect(":memory:").cursor().execute(
 ...     "CREATE TABLE data (c1 TEXT, c2 TEXT, c3 TEXT);"
 ... ).executemany(
 ...     "INSERT INTO data (c1, c2, c3) VALUES (?, ?, ?);",
 ...     [("1", "2", "3"), ("qwe", "rty\nuio", "")],
 ... ).execute(
 ...     "SELECT c1, c2, c3 FROM data;"
-... ) and None  # because this method returns a cursor
+... )
 >>> Table.from_db_cursor(cursor, name="Table Name").print()
 +---------------+
 |  Table Name   |
@@ -96,8 +85,11 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 | qwe | rty |   |
 |     | uio |   |
 +-----+-----+---+
->>> cursor.execute("SELECT c1, c2, c3 FROM data;") and None
->>> Table.from_db_cursor(cursor, name="Table Name", column_names=True).print()
+>>> Table.from_db_cursor(
+...     cursor.execute("SELECT c1, c2, c3 FROM data;"),
+...     name="Table Name",
+...     column_names=True,
+... ).print()
 +----------------+
 |   Table Name   |
 +-----+-----+----+
@@ -108,6 +100,25 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 | qwe | rty |    |
 |     | uio |    |
 +-----+-----+----+
+>>> from table2string import print_table, stringify_table
+>>> print_table([("1", "2", "3"), ("qwe", "rty\nuio", "")], name="Table Name")
++---------------+
+|  Table Name   |
++-----+-----+---+
+|   1 |   2 | 3 |
++-----+-----+---+
+| qwe | rty |   |
+|     | uio |   |
++-----+-----+---+
+>>> print(stringify_table([("1", "2", "3"), ("qwe", "rty\nuio", "")], name="Table Name"))
++---------------+
+|  Table Name   |
++-----+-----+---+
+|   1 |   2 | 3 |
++-----+-----+---+
+| qwe | rty |   |
+|     | uio |   |
++-----+-----+---+
 
 ```
 
@@ -443,173 +454,85 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 <summary>Border types</summary>
 
 ```text
-╭───────────────────┬───────────────────────┬───────────────────────╮
-│    ascii_thin     │ +---------+---------+ │ +-------------------+ │
-│                   │ |    _    |    _    | │ |    ascii_thin     | │
-│                   │ +---------+---------+ │ +---------+---------+ │
-│                   │ |    _    |    _    | │ |    _    |    _    | │
-│                   │ +---------+---------+ │ +---------+---------+ │
-│                   │ |    _    |    _    | │ |    _    |    _    | │
-│                   │ +---------+---------+ │ +---------+---------+ │
-│                   │                       │ |    _    |    _    | │
-│                   │                       │ +---------+---------+ │
-├───────────────────┼───────────────────────┼───────────────────────┤
-│ ascii_thin_double │ +---------+---------+ │ +-------------------+ │
-│                   │ |    _    |    _    | │ | ascii_thin_double | │
-│                   │ +=========+=========+ │ +---------+---------+ │
-│                   │ |    _    |    _    | │ |    _    |    _    | │
-│                   │ +---------+---------+ │ +=========+=========+ │
-│                   │ |    _    |    _    | │ |    _    |    _    | │
-│                   │ +---------+---------+ │ +---------+---------+ │
-│                   │                       │ |    _    |    _    | │
-│                   │                       │ +---------+---------+ │
-├───────────────────┼───────────────────────┼───────────────────────┤
-│   ascii_double    │ +=========+=========+ │ +===================+ │
-│                   │ ‖    _    ‖    _    ‖ │ ‖   ascii_double    ‖ │
-│                   │ +=========+=========+ │ +=========+=========+ │
-│                   │ ‖    _    ‖    _    ‖ │ ‖    _    ‖    _    ‖ │
-│                   │ +=========+=========+ │ +=========+=========+ │
-│                   │ ‖    _    ‖    _    ‖ │ ‖    _    ‖    _    ‖ │
-│                   │ +=========+=========+ │ +=========+=========+ │
-│                   │                       │ ‖    _    ‖    _    ‖ │
-│                   │                       │ +=========+=========+ │
-├───────────────────┼───────────────────────┼───────────────────────┤
-│ ascii_double_thin │ +=========+=========+ │ +===================+ │
-│                   │ ‖    _    ‖    _    ‖ │ ‖ ascii_double_thin ‖ │
-│                   │ +---------+---------+ │ +=========+=========+ │
-│                   │ ‖    _    ‖    _    ‖ │ ‖    _    ‖    _    ‖ │
-│                   │ +=========+=========+ │ +---------+---------+ │
-│                   │ ‖    _    ‖    _    ‖ │ ‖    _    ‖    _    ‖ │
-│                   │ +=========+=========+ │ +=========+=========+ │
-│                   │                       │ ‖    _    ‖    _    ‖ │
-│                   │                       │ +=========+=========+ │
-├───────────────────┼───────────────────────┼───────────────────────┤
-│  ascii_booktabs   │  -------------------  │  -------------------  │
-│                   │      _         _      │    ascii_booktabs     │
-│                   │  ===================  │  -------------------  │
-│                   │      _         _      │      _         _      │
-│                   │  -------------------  │  ===================  │
-│                   │      _         _      │      _         _      │
-│                   │  -------------------  │  -------------------  │
-│                   │                       │      _         _      │
-│                   │                       │  -------------------  │
-├───────────────────┼───────────────────────┼───────────────────────┤
-│       thin        │ ┌─────────┬─────────┐ │ ┌───────────────────┐ │
-│                   │ │    _    │    _    │ │ │       thin        │ │
-│                   │ ├─────────┼─────────┤ │ ├─────────┬─────────┤ │
-│                   │ │    _    │    _    │ │ │    _    │    _    │ │
-│                   │ ├─────────┼─────────┤ │ ├─────────┼─────────┤ │
-│                   │ │    _    │    _    │ │ │    _    │    _    │ │
-│                   │ └─────────┴─────────┘ │ ├─────────┼─────────┤ │
-│                   │                       │ │    _    │    _    │ │
-│                   │                       │ └─────────┴─────────┘ │
-├───────────────────┼───────────────────────┼───────────────────────┤
-│    thin_thick     │ ┌─────────┬─────────┐ │ ┌───────────────────┐ │
-│                   │ │    _    │    _    │ │ │    thin_thick     │ │
-│                   │ ┝━━━━━━━━━┿━━━━━━━━━┥ │ ├─────────┬─────────┤ │
-│                   │ │    _    │    _    │ │ │    _    │    _    │ │
-│                   │ ├─────────┼─────────┤ │ ┝━━━━━━━━━┿━━━━━━━━━┥ │
-│                   │ │    _    │    _    │ │ │    _    │    _    │ │
-│                   │ └─────────┴─────────┘ │ ├─────────┼─────────┤ │
-│                   │                       │ │    _    │    _    │ │
-│                   │                       │ └─────────┴─────────┘ │
-├───────────────────┼───────────────────────┼───────────────────────┤
-│    thin_double    │ ┌─────────┬─────────┐ │ ┌───────────────────┐ │
-│                   │ │    _    │    _    │ │ │    thin_double    │ │
-│                   │ ╞═════════╪═════════╡ │ ├─────────┬─────────┤ │
-│                   │ │    _    │    _    │ │ │    _    │    _    │ │
-│                   │ ├─────────┼─────────┤ │ ╞═════════╪═════════╡ │
-│                   │ │    _    │    _    │ │ │    _    │    _    │ │
-│                   │ └─────────┴─────────┘ │ ├─────────┼─────────┤ │
-│                   │                       │ │    _    │    _    │ │
-│                   │                       │ └─────────┴─────────┘ │
-├───────────────────┼───────────────────────┼───────────────────────┤
-│      rounded      │ ╭─────────┬─────────╮ │ ╭───────────────────╮ │
-│                   │ │    _    │    _    │ │ │      rounded      │ │
-│                   │ ├─────────┼─────────┤ │ ├─────────┬─────────┤ │
-│                   │ │    _    │    _    │ │ │    _    │    _    │ │
-│                   │ ├─────────┼─────────┤ │ ├─────────┼─────────┤ │
-│                   │ │    _    │    _    │ │ │    _    │    _    │ │
-│                   │ ╰─────────┴─────────╯ │ ├─────────┼─────────┤ │
-│                   │                       │ │    _    │    _    │ │
-│                   │                       │ ╰─────────┴─────────╯ │
-├───────────────────┼───────────────────────┼───────────────────────┤
-│   rounded_thick   │ ╭─────────┬─────────╮ │ ╭───────────────────╮ │
-│                   │ │    _    │    _    │ │ │   rounded_thick   │ │
-│                   │ ┝━━━━━━━━━┿━━━━━━━━━┥ │ ├─────────┬─────────┤ │
-│                   │ │    _    │    _    │ │ │    _    │    _    │ │
-│                   │ ├─────────┼─────────┤ │ ┝━━━━━━━━━┿━━━━━━━━━┥ │
-│                   │ │    _    │    _    │ │ │    _    │    _    │ │
-│                   │ ╰─────────┴─────────╯ │ ├─────────┼─────────┤ │
-│                   │                       │ │    _    │    _    │ │
-│                   │                       │ ╰─────────┴─────────╯ │
-├───────────────────┼───────────────────────┼───────────────────────┤
-│  rounded_double   │ ╭─────────┬─────────╮ │ ╭───────────────────╮ │
-│                   │ │    _    │    _    │ │ │  rounded_double   │ │
-│                   │ ╞═════════╪═════════╡ │ ├─────────┬─────────┤ │
-│                   │ │    _    │    _    │ │ │    _    │    _    │ │
-│                   │ ├─────────┼─────────┤ │ ╞═════════╪═════════╡ │
-│                   │ │    _    │    _    │ │ │    _    │    _    │ │
-│                   │ ╰─────────┴─────────╯ │ ├─────────┼─────────┤ │
-│                   │                       │ │    _    │    _    │ │
-│                   │                       │ ╰─────────┴─────────╯ │
-├───────────────────┼───────────────────────┼───────────────────────┤
-│       thick       │ ┏━━━━━━━━━┳━━━━━━━━━┓ │ ┏━━━━━━━━━━━━━━━━━━━┓ │
-│                   │ ┃    _    ┃    _    ┃ │ ┃       thick       ┃ │
-│                   │ ┣━━━━━━━━━╋━━━━━━━━━┫ │ ┣━━━━━━━━━┳━━━━━━━━━┫ │
-│                   │ ┃    _    ┃    _    ┃ │ ┃    _    ┃    _    ┃ │
-│                   │ ┣━━━━━━━━━╋━━━━━━━━━┫ │ ┣━━━━━━━━━╋━━━━━━━━━┫ │
-│                   │ ┃    _    ┃    _    ┃ │ ┃    _    ┃    _    ┃ │
-│                   │ ┗━━━━━━━━━┻━━━━━━━━━┛ │ ┣━━━━━━━━━╋━━━━━━━━━┫ │
-│                   │                       │ ┃    _    ┃    _    ┃ │
-│                   │                       │ ┗━━━━━━━━━┻━━━━━━━━━┛ │
-├───────────────────┼───────────────────────┼───────────────────────┤
-│    thick_thin     │ ┌─────────┬─────────┐ │ ┌───────────────────┐ │
-│                   │ │    _    │    _    │ │ │    thick_thin     │ │
-│                   │ ┠━━━━━━━━━╂━━━━━━━━━┨ │ ├─────────┬─────────┤ │
-│                   │ │    _    │    _    │ │ │    _    │    _    │ │
-│                   │ ├─────────┼─────────┤ │ ┠━━━━━━━━━╂━━━━━━━━━┨ │
-│                   │ │    _    │    _    │ │ │    _    │    _    │ │
-│                   │ └─────────┴─────────┘ │ ├─────────┼─────────┤ │
-│                   │                       │ │    _    │    _    │ │
-│                   │                       │ └─────────┴─────────┘ │
-├───────────────────┼───────────────────────┼───────────────────────┤
-│      double       │ ╔═════════╦═════════╗ │ ╔═══════════════════╗ │
-│                   │ ║    _    ║    _    ║ │ ║      double       ║ │
-│                   │ ╠═════════╬═════════╣ │ ╠═════════╦═════════╣ │
-│                   │ ║    _    ║    _    ║ │ ║    _    ║    _    ║ │
-│                   │ ╠═════════╬═════════╣ │ ╠═════════╬═════════╣ │
-│                   │ ║    _    ║    _    ║ │ ║    _    ║    _    ║ │
-│                   │ ╚═════════╩═════════╝ │ ╠═════════╬═════════╣ │
-│                   │                       │ ║    _    ║    _    ║ │
-│                   │                       │ ╚═════════╩═════════╝ │
-├───────────────────┼───────────────────────┼───────────────────────┤
-│    double_thin    │ ╔═════════╦═════════╗ │ ╔═══════════════════╗ │
-│                   │ ║    _    ║    _    ║ │ ║    double_thin    ║ │
-│                   │ ╟─────────╫─────────╢ │ ╠═════════╦═════════╣ │
-│                   │ ║    _    ║    _    ║ │ ║    _    ║    _    ║ │
-│                   │ ╠═════════╬═════════╣ │ ╟─────────╫─────────╢ │
-│                   │ ║    _    ║    _    ║ │ ║    _    ║    _    ║ │
-│                   │ ╚═════════╩═════════╝ │ ╠═════════╬═════════╣ │
-│                   │                       │ ║    _    ║    _    ║ │
-│                   │                       │ ╚═════════╩═════════╝ │
-├───────────────────┼───────────────────────┼───────────────────────┤
-│     booktabs      │  ───────────────────  │  ───────────────────  │
-│                   │      _         _      │       booktabs        │
-│                   │  ━━━━━━━━━━━━━━━━━━━  │  ───────────────────  │
-│                   │      _         _      │      _         _      │
-│                   │  ───────────────────  │  ━━━━━━━━━━━━━━━━━━━  │
-│                   │      _         _      │      _         _      │
-│                   │  ───────────────────  │  ───────────────────  │
-│                   │                       │      _         _      │
-│                   │                       │  ───────────────────  │
-├───────────────────┼───────────────────────┼───────────────────────┤
-│     markdown      │ |    _    |    _    | │ |     markdown      | │
-│                   │ |---------|---------| │ |    _    |    _    | │
-│                   │ |    _    |    _    | │ |---------|---------| │
-│                   │ |    _    |    _    | │ |    _    |    _    | │
-│                   │                       │ |    _    |    _    | │
-╰───────────────────┴───────────────────────┴───────────────────────╯
+┌──────────────┬───────────────────┐
+│  ascii_thin  │ ascii_thin_double │
+│  +---+---+   │     +---+---+     │
+│  |   |   |   │     |   |   |     │
+│  +---+---+   │     +===+===+     │
+│  |   |   |   │     |   |   |     │
+│  +---+---+   │     +---+---+     │
+│  |   |   |   │     |   |   |     │
+│  +---+---+   │     +---+---+     │
+├──────────────┼───────────────────┤
+│ ascii_double │ ascii_double_thin │
+│  +===+===+   │     +===+===+     │
+│  ‖   ‖   ‖   │     ‖   ‖   ‖     │
+│  +===+===+   │     +---+---+     │
+│  ‖   ‖   ‖   │     ‖   ‖   ‖     │
+│  +===+===+   │     +===+===+     │
+│  ‖   ‖   ‖   │     ‖   ‖   ‖     │
+│  +===+===+   │     +===+===+     │
+├──────────────┼───────────────────┤
+│     thin     │    thin_thick     │
+│  ┌───┬───┐   │     ┌───┬───┐     │
+│  │   │   │   │     │   │   │     │
+│  ├───┼───┤   │     ┝━━━┿━━━┥     │
+│  │   │   │   │     │   │   │     │
+│  ├───┼───┤   │     ├───┼───┤     │
+│  │   │   │   │     │   │   │     │
+│  └───┴───┘   │     └───┴───┘     │
+├──────────────┼───────────────────┤
+│ thin_double  │  rounded_double   │
+│  ┌───┬───┐   │     ╭───┬───╮     │
+│  │   │   │   │     │   │   │     │
+│  ╞═══╪═══╡   │     ╞═══╪═══╡     │
+│  │   │   │   │     │   │   │     │
+│  ├───┼───┤   │     ├───┼───┤     │
+│  │   │   │   │     │   │   │     │
+│  └───┴───┘   │     ╰───┴───╯     │
+├──────────────┼───────────────────┤
+│   rounded    │   rounded_thick   │
+│  ╭───┬───╮   │     ╭───┬───╮     │
+│  │   │   │   │     │   │   │     │
+│  ├───┼───┤   │     ┝━━━┿━━━┥     │
+│  │   │   │   │     │   │   │     │
+│  ├───┼───┤   │     ├───┼───┤     │
+│  │   │   │   │     │   │   │     │
+│  ╰───┴───╯   │     ╰───┴───╯     │
+├──────────────┼───────────────────┤
+│    thick     │    thick_thin     │
+│  ┏━━━┳━━━┓   │     ┌───┬───┐     │
+│  ┃   ┃   ┃   │     │   │   │     │
+│  ┣━━━╋━━━┫   │     ┠━━━╂━━━┨     │
+│  ┃   ┃   ┃   │     │   │   │     │
+│  ┣━━━╋━━━┫   │     ├───┼───┤     │
+│  ┃   ┃   ┃   │     │   │   │     │
+│  ┗━━━┻━━━┛   │     └───┴───┘     │
+├──────────────┼───────────────────┤
+│    double    │    double_thin    │
+│  ╔═══╦═══╗   │     ╔═══╦═══╗     │
+│  ║   ║   ║   │     ║   ║   ║     │
+│  ╠═══╬═══╣   │     ╟───╫───╢     │
+│  ║   ║   ║   │     ║   ║   ║     │
+│  ╠═══╬═══╣   │     ╠═══╬═══╣     │
+│  ║   ║   ║   │     ║   ║   ║     │
+│  ╚═══╩═══╝   │     ╚═══╩═══╝     │
+├──────────────┼───────────────────┤
+│   booktabs   │  ascii_booktabs   │
+│   ───────    │      -------      │
+│              │                   │
+│   ━━━━━━━    │      =======      │
+│              │                   │
+│   ───────    │      -------      │
+│              │                   │
+│   ───────    │      -------      │
+├──────────────┼───────────────────┤
+│   markdown   │                   │
+│  |   |   |   │                   │
+│  |---|---|   │                   │
+│  |   |   |   │                   │
+│  |   |   |   │                   │
+└──────────────┴───────────────────┘
 ```
 </details>
 
@@ -617,17 +540,39 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 <summary>Example</summary>
 
 ```pycon
->>> from table2string import Themes
->>> table_1 = [("1", "2", "3"), ("qwe", "rty\nuio", "")]
->>> name_1 = "Table Name"
->>> print_table(table_1, theme=Themes.ascii_thin)
+>>> from table2string import Table, Themes
+>>> name = "Table Name"
+>>> column_names = ("c1", "c2", "3")
+>>> table = [("1", "2", "3"), ("qwe", "rty\nuio", "")]
+>>> t = Table(table)
+>>> t_name = Table(table, name=name)
+>>> t_column_names = Table(table, column_names=column_names)
+>>> t_name_column_names = Table(table, name=name, column_names=column_names)
+
+```
+
+<details>
+<summary>Themes.ascii_thin</summary>
+
+```pycon
+
+>>> t.print(theme=Themes.ascii_thin)
 +-----+-----+---+
 |   1 |   2 | 3 |
 +-----+-----+---+
 | qwe | rty |   |
 |     | uio |   |
 +-----+-----+---+
->>> print_table(table_1, theme=Themes.ascii_thin, name=name_1)
+>>> t_column_names.print(theme=Themes.ascii_thin)
++-----+-----+---+
+| c1  | c2  | 3 |
++-----+-----+---+
+|   1 |   2 | 3 |
++-----+-----+---+
+| qwe | rty |   |
+|     | uio |   |
++-----+-----+---+
+>>> t_name.print(theme=Themes.ascii_thin)
 +---------------+
 |  Table Name   |
 +-----+-----+---+
@@ -636,14 +581,43 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 | qwe | rty |   |
 |     | uio |   |
 +-----+-----+---+
->>> print_table(table_1, theme=Themes.ascii_thin_double)
+>>> t_name_column_names.print(theme=Themes.ascii_thin)
++---------------+
+|  Table Name   |
++-----+-----+---+
+| c1  | c2  | 3 |
++-----+-----+---+
+|   1 |   2 | 3 |
++-----+-----+---+
+| qwe | rty |   |
+|     | uio |   |
++-----+-----+---+
+
+```
+</details>
+
+
+<details>
+<summary>Themes.ascii_thin_double</summary>
+
+```pycon
+>>> t.print(theme=Themes.ascii_thin_double)
 +-----+-----+---+
 |   1 |   2 | 3 |
 +=====+=====+===+
 | qwe | rty |   |
 |     | uio |   |
 +-----+-----+---+
->>> print_table(table_1, theme=Themes.ascii_thin_double, name=name_1)
+>>> t_column_names.print(theme=Themes.ascii_thin_double)
++-----+-----+---+
+| c1  | c2  | 3 |
++=====+=====+===+
+|   1 |   2 | 3 |
++-----+-----+---+
+| qwe | rty |   |
+|     | uio |   |
++-----+-----+---+
+>>> t_name.print(theme=Themes.ascii_thin_double)
 +---------------+
 |  Table Name   |
 +-----+-----+---+
@@ -652,14 +626,43 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 | qwe | rty |   |
 |     | uio |   |
 +-----+-----+---+
->>> print_table(table_1, theme=Themes.ascii_double)
+>>> t_name_column_names.print(theme=Themes.ascii_thin_double)
++---------------+
+|  Table Name   |
++-----+-----+---+
+| c1  | c2  | 3 |
++=====+=====+===+
+|   1 |   2 | 3 |
++-----+-----+---+
+| qwe | rty |   |
+|     | uio |   |
++-----+-----+---+
+
+```
+</details>
+
+
+<details>
+<summary>Themes.ascii_double</summary>
+
+```pycon
+>>> t.print(theme=Themes.ascii_double)
 +=====+=====+===+
 ‖   1 ‖   2 ‖ 3 ‖
 +=====+=====+===+
 ‖ qwe ‖ rty ‖   ‖
 ‖     ‖ uio ‖   ‖
 +=====+=====+===+
->>> print_table(table_1, theme=Themes.ascii_double, name=name_1)
+>>> t_column_names.print(theme=Themes.ascii_double)
++=====+=====+===+
+‖ c1  ‖ c2  ‖ 3 ‖
++=====+=====+===+
+‖   1 ‖   2 ‖ 3 ‖
++=====+=====+===+
+‖ qwe ‖ rty ‖   ‖
+‖     ‖ uio ‖   ‖
++=====+=====+===+
+>>> t_name.print(theme=Themes.ascii_double)
 +===============+
 ‖  Table Name   ‖
 +=====+=====+===+
@@ -668,14 +671,43 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 ‖ qwe ‖ rty ‖   ‖
 ‖     ‖ uio ‖   ‖
 +=====+=====+===+
->>> print_table(table_1, theme=Themes.ascii_double_thin)
+>>> t_name_column_names.print(theme=Themes.ascii_double)
++===============+
+‖  Table Name   ‖
++=====+=====+===+
+‖ c1  ‖ c2  ‖ 3 ‖
++=====+=====+===+
+‖   1 ‖   2 ‖ 3 ‖
++=====+=====+===+
+‖ qwe ‖ rty ‖   ‖
+‖     ‖ uio ‖   ‖
++=====+=====+===+
+
+```
+</details>
+
+
+<details>
+<summary>Themes.ascii_double_thin</summary>
+
+```pycon
+>>> t.print(theme=Themes.ascii_double_thin)
 +=====+=====+===+
 ‖   1 ‖   2 ‖ 3 ‖
 +-----+-----+---+
 ‖ qwe ‖ rty ‖   ‖
 ‖     ‖ uio ‖   ‖
 +=====+=====+===+
->>> print_table(table_1, theme=Themes.ascii_double_thin, name=name_1)
+>>> t_column_names.print(theme=Themes.ascii_double_thin)
++=====+=====+===+
+‖ c1  ‖ c2  ‖ 3 ‖
++-----+-----+---+
+‖   1 ‖   2 ‖ 3 ‖
++=====+=====+===+
+‖ qwe ‖ rty ‖   ‖
+‖     ‖ uio ‖   ‖
++=====+=====+===+
+>>> t_name.print(theme=Themes.ascii_double_thin)
 +===============+
 ‖  Table Name   ‖
 +=====+=====+===+
@@ -684,14 +716,43 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 ‖ qwe ‖ rty ‖   ‖
 ‖     ‖ uio ‖   ‖
 +=====+=====+===+
->>> print_table(table_1, theme=Themes.ascii_booktabs)
+>>> t_name_column_names.print(theme=Themes.ascii_double_thin)
++===============+
+‖  Table Name   ‖
++=====+=====+===+
+‖ c1  ‖ c2  ‖ 3 ‖
++-----+-----+---+
+‖   1 ‖   2 ‖ 3 ‖
++=====+=====+===+
+‖ qwe ‖ rty ‖   ‖
+‖     ‖ uio ‖   ‖
++=====+=====+===+
+
+```
+</details>
+
+
+<details>
+<summary>Themes.ascii_booktabs</summary>
+
+```pycon
+>>> t.print(theme=Themes.ascii_booktabs)
  --------------- 
     1     2   3  
  =============== 
   qwe   rty      
         uio      
  --------------- 
->>> print_table(table_1, theme=Themes.ascii_booktabs, name=name_1)
+>>> t_column_names.print(theme=Themes.ascii_booktabs)
+ --------------- 
+  c1    c2    3  
+ =============== 
+    1     2   3  
+ --------------- 
+  qwe   rty      
+        uio      
+ --------------- 
+>>> t_name.print(theme=Themes.ascii_booktabs)
  --------------- 
    Table Name    
  --------------- 
@@ -700,14 +761,43 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
   qwe   rty      
         uio      
  --------------- 
->>> print_table(table_1, theme=Themes.thin)
+>>> t_name_column_names.print(theme=Themes.ascii_booktabs)
+ --------------- 
+   Table Name    
+ --------------- 
+  c1    c2    3  
+ =============== 
+    1     2   3  
+ --------------- 
+  qwe   rty      
+        uio      
+ --------------- 
+
+```
+</details>
+
+
+<details>
+<summary>Themes.thin</summary>
+
+```pycon
+>>> t.print(theme=Themes.thin)
 ┌─────┬─────┬───┐
 │   1 │   2 │ 3 │
 ├─────┼─────┼───┤
 │ qwe │ rty │   │
 │     │ uio │   │
 └─────┴─────┴───┘
->>> print_table(table_1, theme=Themes.thin, name=name_1)
+>>> t_column_names.print(theme=Themes.thin)
+┌─────┬─────┬───┐
+│ c1  │ c2  │ 3 │
+├─────┼─────┼───┤
+│   1 │   2 │ 3 │
+├─────┼─────┼───┤
+│ qwe │ rty │   │
+│     │ uio │   │
+└─────┴─────┴───┘
+>>> t_name.print(theme=Themes.thin)
 ┌───────────────┐
 │  Table Name   │
 ├─────┬─────┬───┤
@@ -716,14 +806,43 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 │ qwe │ rty │   │
 │     │ uio │   │
 └─────┴─────┴───┘
->>> print_table(table_1, theme=Themes.thin_thick)
+>>> t_name_column_names.print(theme=Themes.thin)
+┌───────────────┐
+│  Table Name   │
+├─────┬─────┬───┤
+│ c1  │ c2  │ 3 │
+├─────┼─────┼───┤
+│   1 │   2 │ 3 │
+├─────┼─────┼───┤
+│ qwe │ rty │   │
+│     │ uio │   │
+└─────┴─────┴───┘
+
+```
+</details>
+
+
+<details>
+<summary>Themes.thin_thick</summary>
+
+```pycon
+>>> t.print(theme=Themes.thin_thick)
 ┌─────┬─────┬───┐
 │   1 │   2 │ 3 │
 ┝━━━━━┿━━━━━┿━━━┥
 │ qwe │ rty │   │
 │     │ uio │   │
 └─────┴─────┴───┘
->>> print_table(table_1, theme=Themes.thin_thick, name=name_1)
+>>> t_column_names.print(theme=Themes.thin_thick)
+┌─────┬─────┬───┐
+│ c1  │ c2  │ 3 │
+┝━━━━━┿━━━━━┿━━━┥
+│   1 │   2 │ 3 │
+├─────┼─────┼───┤
+│ qwe │ rty │   │
+│     │ uio │   │
+└─────┴─────┴───┘
+>>> t_name.print(theme=Themes.thin_thick)
 ┌───────────────┐
 │  Table Name   │
 ├─────┬─────┬───┤
@@ -732,14 +851,43 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 │ qwe │ rty │   │
 │     │ uio │   │
 └─────┴─────┴───┘
->>> print_table(table_1, theme=Themes.thin_double)
+>>> t_name_column_names.print(theme=Themes.thin_thick)
+┌───────────────┐
+│  Table Name   │
+├─────┬─────┬───┤
+│ c1  │ c2  │ 3 │
+┝━━━━━┿━━━━━┿━━━┥
+│   1 │   2 │ 3 │
+├─────┼─────┼───┤
+│ qwe │ rty │   │
+│     │ uio │   │
+└─────┴─────┴───┘
+
+```
+</details>
+
+
+<details>
+<summary>Themes.thin_double</summary>
+
+```pycon
+>>> t.print(theme=Themes.thin_double)
 ┌─────┬─────┬───┐
 │   1 │   2 │ 3 │
 ╞═════╪═════╪═══╡
 │ qwe │ rty │   │
 │     │ uio │   │
 └─────┴─────┴───┘
->>> print_table(table_1, theme=Themes.thin_double, name=name_1)
+>>> t_column_names.print(theme=Themes.thin_double)
+┌─────┬─────┬───┐
+│ c1  │ c2  │ 3 │
+╞═════╪═════╪═══╡
+│   1 │   2 │ 3 │
+├─────┼─────┼───┤
+│ qwe │ rty │   │
+│     │ uio │   │
+└─────┴─────┴───┘
+>>> t_name.print(theme=Themes.thin_double)
 ┌───────────────┐
 │  Table Name   │
 ├─────┬─────┬───┤
@@ -748,14 +896,43 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 │ qwe │ rty │   │
 │     │ uio │   │
 └─────┴─────┴───┘
->>> print_table(table_1, theme=Themes.rounded)
+>>> t_name_column_names.print(theme=Themes.thin_double)
+┌───────────────┐
+│  Table Name   │
+├─────┬─────┬───┤
+│ c1  │ c2  │ 3 │
+╞═════╪═════╪═══╡
+│   1 │   2 │ 3 │
+├─────┼─────┼───┤
+│ qwe │ rty │   │
+│     │ uio │   │
+└─────┴─────┴───┘
+
+```
+</details>
+
+
+<details>
+<summary>Themes.rounded</summary>
+
+```pycon
+>>> t.print(theme=Themes.rounded)
 ╭─────┬─────┬───╮
 │   1 │   2 │ 3 │
 ├─────┼─────┼───┤
 │ qwe │ rty │   │
 │     │ uio │   │
 ╰─────┴─────┴───╯
->>> print_table(table_1, theme=Themes.rounded, name=name_1)
+>>> t_column_names.print(theme=Themes.rounded)
+╭─────┬─────┬───╮
+│ c1  │ c2  │ 3 │
+├─────┼─────┼───┤
+│   1 │   2 │ 3 │
+├─────┼─────┼───┤
+│ qwe │ rty │   │
+│     │ uio │   │
+╰─────┴─────┴───╯
+>>> t_name.print(theme=Themes.rounded)
 ╭───────────────╮
 │  Table Name   │
 ├─────┬─────┬───┤
@@ -764,14 +941,43 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 │ qwe │ rty │   │
 │     │ uio │   │
 ╰─────┴─────┴───╯
->>> print_table(table_1, theme=Themes.rounded_thick)
+>>> t_name_column_names.print(theme=Themes.rounded)
+╭───────────────╮
+│  Table Name   │
+├─────┬─────┬───┤
+│ c1  │ c2  │ 3 │
+├─────┼─────┼───┤
+│   1 │   2 │ 3 │
+├─────┼─────┼───┤
+│ qwe │ rty │   │
+│     │ uio │   │
+╰─────┴─────┴───╯
+
+```
+</details>
+
+
+<details>
+<summary>Themes.rounded_thick</summary>
+
+```pycon
+>>> t.print(theme=Themes.rounded_thick)
 ╭─────┬─────┬───╮
 │   1 │   2 │ 3 │
 ┝━━━━━┿━━━━━┿━━━┥
 │ qwe │ rty │   │
 │     │ uio │   │
 ╰─────┴─────┴───╯
->>> print_table(table_1, theme=Themes.rounded_thick, name=name_1)
+>>> t_column_names.print(theme=Themes.rounded_thick)
+╭─────┬─────┬───╮
+│ c1  │ c2  │ 3 │
+┝━━━━━┿━━━━━┿━━━┥
+│   1 │   2 │ 3 │
+├─────┼─────┼───┤
+│ qwe │ rty │   │
+│     │ uio │   │
+╰─────┴─────┴───╯
+>>> t_name.print(theme=Themes.rounded_thick)
 ╭───────────────╮
 │  Table Name   │
 ├─────┬─────┬───┤
@@ -780,14 +986,43 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 │ qwe │ rty │   │
 │     │ uio │   │
 ╰─────┴─────┴───╯
->>> print_table(table_1, theme=Themes.rounded_double)
+>>> t_name_column_names.print(theme=Themes.rounded_thick)
+╭───────────────╮
+│  Table Name   │
+├─────┬─────┬───┤
+│ c1  │ c2  │ 3 │
+┝━━━━━┿━━━━━┿━━━┥
+│   1 │   2 │ 3 │
+├─────┼─────┼───┤
+│ qwe │ rty │   │
+│     │ uio │   │
+╰─────┴─────┴───╯
+
+```
+</details>
+
+
+<details>
+<summary>Themes.rounded_double</summary>
+
+```pycon
+>>> t.print(theme=Themes.rounded_double)
 ╭─────┬─────┬───╮
 │   1 │   2 │ 3 │
 ╞═════╪═════╪═══╡
 │ qwe │ rty │   │
 │     │ uio │   │
 ╰─────┴─────┴───╯
->>> print_table(table_1, theme=Themes.rounded_double, name=name_1)
+>>> t_column_names.print(theme=Themes.rounded_double)
+╭─────┬─────┬───╮
+│ c1  │ c2  │ 3 │
+╞═════╪═════╪═══╡
+│   1 │   2 │ 3 │
+├─────┼─────┼───┤
+│ qwe │ rty │   │
+│     │ uio │   │
+╰─────┴─────┴───╯
+>>> t_name.print(theme=Themes.rounded_double)
 ╭───────────────╮
 │  Table Name   │
 ├─────┬─────┬───┤
@@ -796,14 +1031,43 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 │ qwe │ rty │   │
 │     │ uio │   │
 ╰─────┴─────┴───╯
->>> print_table(table_1, theme=Themes.thick)
+>>> t_name_column_names.print(theme=Themes.rounded_double)
+╭───────────────╮
+│  Table Name   │
+├─────┬─────┬───┤
+│ c1  │ c2  │ 3 │
+╞═════╪═════╪═══╡
+│   1 │   2 │ 3 │
+├─────┼─────┼───┤
+│ qwe │ rty │   │
+│     │ uio │   │
+╰─────┴─────┴───╯
+
+```
+</details>
+
+
+<details>
+<summary>Themes.thick</summary>
+
+```pycon
+>>> t.print(theme=Themes.thick)
 ┏━━━━━┳━━━━━┳━━━┓
 ┃   1 ┃   2 ┃ 3 ┃
 ┣━━━━━╋━━━━━╋━━━┫
 ┃ qwe ┃ rty ┃   ┃
 ┃     ┃ uio ┃   ┃
 ┗━━━━━┻━━━━━┻━━━┛
->>> print_table(table_1, theme=Themes.thick, name=name_1)
+>>> t_column_names.print(theme=Themes.thick)
+┏━━━━━┳━━━━━┳━━━┓
+┃ c1  ┃ c2  ┃ 3 ┃
+┣━━━━━╋━━━━━╋━━━┫
+┃   1 ┃   2 ┃ 3 ┃
+┣━━━━━╋━━━━━╋━━━┫
+┃ qwe ┃ rty ┃   ┃
+┃     ┃ uio ┃   ┃
+┗━━━━━┻━━━━━┻━━━┛
+>>> t_name.print(theme=Themes.thick)
 ┏━━━━━━━━━━━━━━━┓
 ┃  Table Name   ┃
 ┣━━━━━┳━━━━━┳━━━┫
@@ -812,14 +1076,43 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 ┃ qwe ┃ rty ┃   ┃
 ┃     ┃ uio ┃   ┃
 ┗━━━━━┻━━━━━┻━━━┛
->>> print_table(table_1, theme=Themes.thick_thin)
+>>> t_name_column_names.print(theme=Themes.thick)
+┏━━━━━━━━━━━━━━━┓
+┃  Table Name   ┃
+┣━━━━━┳━━━━━┳━━━┫
+┃ c1  ┃ c2  ┃ 3 ┃
+┣━━━━━╋━━━━━╋━━━┫
+┃   1 ┃   2 ┃ 3 ┃
+┣━━━━━╋━━━━━╋━━━┫
+┃ qwe ┃ rty ┃   ┃
+┃     ┃ uio ┃   ┃
+┗━━━━━┻━━━━━┻━━━┛
+
+```
+</details>
+
+
+<details>
+<summary>Themes.thick_thin</summary>
+
+```pycon
+>>> t.print(theme=Themes.thick_thin)
 ┌─────┬─────┬───┐
 │   1 │   2 │ 3 │
 ┠━━━━━╂━━━━━╂━━━┨
 │ qwe │ rty │   │
 │     │ uio │   │
 └─────┴─────┴───┘
->>> print_table(table_1, theme=Themes.thick_thin, name=name_1)
+>>> t_column_names.print(theme=Themes.thick_thin)
+┌─────┬─────┬───┐
+│ c1  │ c2  │ 3 │
+┠━━━━━╂━━━━━╂━━━┨
+│   1 │   2 │ 3 │
+├─────┼─────┼───┤
+│ qwe │ rty │   │
+│     │ uio │   │
+└─────┴─────┴───┘
+>>> t_name.print(theme=Themes.thick_thin)
 ┌───────────────┐
 │  Table Name   │
 ├─────┬─────┬───┤
@@ -828,14 +1121,43 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 │ qwe │ rty │   │
 │     │ uio │   │
 └─────┴─────┴───┘
->>> print_table(table_1, theme=Themes.double)
+>>> t_name_column_names.print(theme=Themes.thick_thin)
+┌───────────────┐
+│  Table Name   │
+├─────┬─────┬───┤
+│ c1  │ c2  │ 3 │
+┠━━━━━╂━━━━━╂━━━┨
+│   1 │   2 │ 3 │
+├─────┼─────┼───┤
+│ qwe │ rty │   │
+│     │ uio │   │
+└─────┴─────┴───┘
+
+```
+</details>
+
+
+<details>
+<summary>Themes.double</summary>
+
+```pycon
+>>> t.print(theme=Themes.double)
 ╔═════╦═════╦═══╗
 ║   1 ║   2 ║ 3 ║
 ╠═════╬═════╬═══╣
 ║ qwe ║ rty ║   ║
 ║     ║ uio ║   ║
 ╚═════╩═════╩═══╝
->>> print_table(table_1, theme=Themes.double, name=name_1)
+>>> t_column_names.print(theme=Themes.double)
+╔═════╦═════╦═══╗
+║ c1  ║ c2  ║ 3 ║
+╠═════╬═════╬═══╣
+║   1 ║   2 ║ 3 ║
+╠═════╬═════╬═══╣
+║ qwe ║ rty ║   ║
+║     ║ uio ║   ║
+╚═════╩═════╩═══╝
+>>> t_name.print(theme=Themes.double)
 ╔═══════════════╗
 ║  Table Name   ║
 ╠═════╦═════╦═══╣
@@ -844,14 +1166,43 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 ║ qwe ║ rty ║   ║
 ║     ║ uio ║   ║
 ╚═════╩═════╩═══╝
->>> print_table(table_1, theme=Themes.double_thin)
+>>> t_name_column_names.print(theme=Themes.double)
+╔═══════════════╗
+║  Table Name   ║
+╠═════╦═════╦═══╣
+║ c1  ║ c2  ║ 3 ║
+╠═════╬═════╬═══╣
+║   1 ║   2 ║ 3 ║
+╠═════╬═════╬═══╣
+║ qwe ║ rty ║   ║
+║     ║ uio ║   ║
+╚═════╩═════╩═══╝
+
+```
+</details>
+
+
+<details>
+<summary>Themes.double_thin</summary>
+
+```pycon
+>>> t.print(theme=Themes.double_thin)
 ╔═════╦═════╦═══╗
 ║   1 ║   2 ║ 3 ║
 ╟─────╫─────╫───╢
 ║ qwe ║ rty ║   ║
 ║     ║ uio ║   ║
 ╚═════╩═════╩═══╝
->>> print_table(table_1, theme=Themes.double_thin, name=name_1)
+>>> t_column_names.print(theme=Themes.double_thin)
+╔═════╦═════╦═══╗
+║ c1  ║ c2  ║ 3 ║
+╟─────╫─────╫───╢
+║   1 ║   2 ║ 3 ║
+╠═════╬═════╬═══╣
+║ qwe ║ rty ║   ║
+║     ║ uio ║   ║
+╚═════╩═════╩═══╝
+>>> t_name.print(theme=Themes.double_thin)
 ╔═══════════════╗
 ║  Table Name   ║
 ╠═════╦═════╦═══╣
@@ -860,14 +1211,43 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 ║ qwe ║ rty ║   ║
 ║     ║ uio ║   ║
 ╚═════╩═════╩═══╝
->>> print_table(table_1, theme=Themes.booktabs)
+>>> t_name_column_names.print(theme=Themes.double_thin)
+╔═══════════════╗
+║  Table Name   ║
+╠═════╦═════╦═══╣
+║ c1  ║ c2  ║ 3 ║
+╟─────╫─────╫───╢
+║   1 ║   2 ║ 3 ║
+╠═════╬═════╬═══╣
+║ qwe ║ rty ║   ║
+║     ║ uio ║   ║
+╚═════╩═════╩═══╝
+
+```
+</details>
+
+
+<details>
+<summary>Themes.booktabs</summary>
+
+```pycon
+>>> t.print(theme=Themes.booktabs)
  ─────────────── 
     1     2   3  
  ━━━━━━━━━━━━━━━ 
   qwe   rty      
         uio      
  ─────────────── 
->>> print_table(table_1, theme=Themes.booktabs, name=name_1)
+>>> t_column_names.print(theme=Themes.booktabs)
+ ─────────────── 
+  c1    c2    3  
+ ━━━━━━━━━━━━━━━ 
+    1     2   3  
+ ─────────────── 
+  qwe   rty      
+        uio      
+ ─────────────── 
+>>> t_name.print(theme=Themes.booktabs)
  ─────────────── 
    Table Name    
  ─────────────── 
@@ -876,20 +1256,53 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
   qwe   rty      
         uio      
  ─────────────── 
->>> print_table(table_1, theme=Themes.markdown)
+>>> t_name_column_names.print(theme=Themes.booktabs)
+ ─────────────── 
+   Table Name    
+ ─────────────── 
+  c1    c2    3  
+ ━━━━━━━━━━━━━━━ 
+    1     2   3  
+ ─────────────── 
+  qwe   rty      
+        uio      
+ ─────────────── 
+
+```
+</details>
+
+
+<details>
+<summary>Themes.markdown</summary>
+
+```pycon
+>>> t.print(theme=Themes.markdown)
 |   1 |   2 | 3 |
 |-----|-----|---|
 | qwe | rty |   |
 |     | uio |   |
->>> print_table(table_1, theme=Themes.markdown, name=name_1)
+>>> t_column_names.print(theme=Themes.markdown)
+| c1  | c2  | 3 |
+|-----|-----|---|
+|   1 |   2 | 3 |
+| qwe | rty |   |
+|     | uio |   |
+>>> t_name.print(theme=Themes.markdown)
 |  Table Name   |
 |   1 |   2 | 3 |
 |-----|-----|---|
 | qwe | rty |   |
 |     | uio |   |
+>>> t_name_column_names.print(theme=Themes.markdown)
+|  Table Name   |
+| c1  | c2  | 3 |
+|-----|-----|---|
+|   1 |   2 | 3 |
+| qwe | rty |   |
+|     | uio |   |
 
 ```
-
+</details>
 </details>
 
 ## Emojis
