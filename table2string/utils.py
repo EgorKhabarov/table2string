@@ -1,6 +1,9 @@
+import inspect
+
 import unicodedata
 from dataclasses import dataclass
-from typing import Union, List, Tuple, Sequence
+from cachetools import cached, LRUCache
+from typing import Union, List, Tuple, Sequence, Optional
 
 ALLOWED_ALIGNS = [
     "<",
@@ -38,354 +41,463 @@ class Border:
     horizontal_plus: str = "-"
     central_plus: str = "+"
     vertical_right_plus: str = "+"
+    top_horizontal_plus: str = "+"
+    bottom_horizontal_plus: str = "+"
+
+    reverse_dist = {
+        bottom_horizontal_plus: "bottom_horizontal_plus",
+        top_horizontal_plus: "top_horizontal_plus",
+        vertical_right_plus: "vertical_right_plus",
+        central_plus: "central_plus",
+        horizontal_plus: "horizontal_plus",
+        vertical_left_plus: "vertical_left_plus",
+        central: "central",
+        bottom_horizontal: "bottom_horizontal",
+        top_horizontal: "top_horizontal",
+        vertical_right: "vertical_right",
+        vertical_left: "vertical_left",
+        bottom_right: "bottom_right",
+        bottom_left: "bottom_left",
+        top_right: "top_right",
+        top_left: "top_left",
+        vertical: "vertical",
+        horizontal: "horizontal",
+    }
 
 
 class Theme:
-    def __init__(self, border: Border = Border()):
+    def __init__(self, border: Border = Border(), custom_sub_table_theme: Optional["Theme"] = None):
         self.border = border
+        self.custom_sub_table_theme = custom_sub_table_theme or self
+
+    def __repr__(self):
+        return f"<table2string.utils.Theme<Border({self.border.name!r})> at 0x{id(self):#x}>"
 
 
 class Themes:
-    ascii_thin: Theme = Theme(
-        Border(
-            "ascii_thin",
-            "-",
-            "|",
-            "+",
-            "+",
-            "+",
-            "+",
-            "+",
-            "+",
-            "+",
-            "+",
-            "+",
-            "+",
-            "-",
-            "+",
-            "+",
-        ),
-    )
+    ascii_thin: Theme = Theme()
     ascii_thin_double: Theme = Theme(
         Border(
-            "ascii_thin_double",
-            "-",
-            "|",
-            "+",
-            "+",
-            "+",
-            "+",
-            "+",
-            "+",
-            "+",
-            "+",
-            "+",
-            "+",
-            "=",
-            "+",
-            "+",
+            name="ascii_thin_double",
+            horizontal="-",
+            vertical="|",
+            top_left="+",
+            top_right="+",
+            bottom_left="+",
+            bottom_right="+",
+            vertical_left="+",
+            vertical_right="+",
+            top_horizontal="+",
+            bottom_horizontal="+",
+            central="+",
+            vertical_left_plus="+",
+            horizontal_plus="=",
+            central_plus="+",
+            vertical_right_plus="+",
+            top_horizontal_plus="+",
+            bottom_horizontal_plus="+",
         ),
     )
     ascii_double: Theme = Theme(
         Border(
-            "ascii_double",
-            "=",
-            "‖",
-            "+",
-            "+",
-            "+",
-            "+",
-            "+",
-            "+",
-            "+",
-            "+",
-            "+",
-            "+",
-            "=",
-            "+",
-            "+",
+            name="ascii_double",
+            horizontal="=",
+            vertical="‖",
+            top_left="+",
+            top_right="+",
+            bottom_left="+",
+            bottom_right="+",
+            vertical_left="+",
+            vertical_right="+",
+            top_horizontal="+",
+            bottom_horizontal="+",
+            central="+",
+            vertical_left_plus="+",
+            horizontal_plus="=",
+            central_plus="+",
+            vertical_right_plus="+",
+            top_horizontal_plus="+",
+            bottom_horizontal_plus="+",
         ),
     )
     ascii_double_thin: Theme = Theme(
         Border(
-            "ascii_double_thin",
-            "=",
-            "‖",
-            "+",
-            "+",
-            "+",
-            "+",
-            "+",
-            "+",
-            "+",
-            "+",
-            "+",
-            "+",
-            "-",
-            "+",
-            "+",
+            name="ascii_double_thin",
+            horizontal="=",
+            vertical="‖",
+            top_left="+",
+            top_right="+",
+            bottom_left="+",
+            bottom_right="+",
+            vertical_left="+",
+            vertical_right="+",
+            top_horizontal="+",
+            bottom_horizontal="+",
+            central="+",
+            vertical_left_plus="+",
+            horizontal_plus="-",
+            central_plus="+",
+            vertical_right_plus="+",
+            top_horizontal_plus="-",
+            bottom_horizontal_plus="-",
         ),
     )
     ascii_booktabs: Theme = Theme(
         Border(
-            "ascii_booktabs",
-            "-",
-            " ",
-            " ",
-            " ",
-            " ",
-            " ",
-            " ",
-            " ",
-            "-",
-            "-",
-            "-",
-            " ",
-            "=",
-            "=",
-            " ",
+            name="ascii_booktabs",
+            horizontal="-",
+            vertical=" ",
+            top_left=" ",
+            top_right=" ",
+            bottom_left=" ",
+            bottom_right=" ",
+            vertical_left=" ",
+            vertical_right=" ",
+            top_horizontal="-",
+            bottom_horizontal="-",
+            central="-",
+            vertical_left_plus=" ",
+            horizontal_plus="=",
+            central_plus="=",
+            vertical_right_plus=" ",
+            top_horizontal_plus=" ",
+            bottom_horizontal_plus=" ",
         ),
     )
     thin: Theme = Theme(
         Border(
-            "thin",
-            "─",
-            "│",
-            "┌",
-            "┐",
-            "└",
-            "┘",
-            "├",
-            "┤",
-            "┬",
-            "┴",
-            "┼",
-            "├",
-            "─",
-            "┼",
-            "┤",
+            name="thin",
+            horizontal="─",
+            vertical="│",
+            top_left="┌",
+            top_right="┐",
+            bottom_left="└",
+            bottom_right="┘",
+            vertical_left="├",
+            vertical_right="┤",
+            top_horizontal="┬",
+            bottom_horizontal="┴",
+            central="┼",
+            vertical_left_plus="├",
+            horizontal_plus="─",
+            central_plus="┼",
+            vertical_right_plus="┤",
+            top_horizontal_plus="┬",
+            bottom_horizontal_plus="┴",
         ),
     )
     thin_thick: Theme = Theme(
         Border(
-            "thin_thick",
-            "─",
-            "│",
-            "┌",
-            "┐",
-            "└",
-            "┘",
-            "├",
-            "┤",
-            "┬",
-            "┴",
-            "┼",
-            "┝",
-            "━",
-            "┿",
-            "┥",
+            name="thin_thick",
+            horizontal="─",
+            vertical="│",
+            top_left="┌",
+            top_right="┐",
+            bottom_left="└",
+            bottom_right="┘",
+            vertical_left="├",
+            vertical_right="┤",
+            top_horizontal="┬",
+            bottom_horizontal="┴",
+            central="┼",
+            vertical_left_plus="┝",
+            horizontal_plus="━",
+            central_plus="┿",
+            vertical_right_plus="┥",
+            top_horizontal_plus="┯",
+            bottom_horizontal_plus="┷",
         ),
     )
     thin_double: Theme = Theme(
         Border(
-            "thin_double",
-            "─",
-            "│",
-            "┌",
-            "┐",
-            "└",
-            "┘",
-            "├",
-            "┤",
-            "┬",
-            "┴",
-            "┼",
-            "╞",
-            "═",
-            "╪",
-            "╡",
+            name="thin_double",
+            horizontal="─",
+            vertical="│",
+            top_left="┌",
+            top_right="┐",
+            bottom_left="└",
+            bottom_right="┘",
+            vertical_left="├",
+            vertical_right="┤",
+            top_horizontal="┬",
+            bottom_horizontal="┴",
+            central="┼",
+            vertical_left_plus="╞",
+            horizontal_plus="═",
+            central_plus="╪",
+            vertical_right_plus="╡",
+            top_horizontal_plus="╤",
+            bottom_horizontal_plus="╧",
         ),
+        thin,
     )
     rounded: Theme = Theme(
         Border(
-            "rounded",
-            "─",
-            "│",
-            "╭",
-            "╮",
-            "╰",
-            "╯",
-            "├",
-            "┤",
-            "┬",
-            "┴",
-            "┼",
-            "├",
-            "─",
-            "┼",
-            "┤",
+            name="rounded",
+            horizontal="─",
+            vertical="│",
+            top_left="╭",
+            top_right="╮",
+            bottom_left="╰",
+            bottom_right="╯",
+            vertical_left="├",
+            vertical_right="┤",
+            top_horizontal="┬",
+            bottom_horizontal="┴",
+            central="┼",
+            vertical_left_plus="├",
+            horizontal_plus="─",
+            central_plus="┼",
+            vertical_right_plus="┤",
+            top_horizontal_plus="┬",
+            bottom_horizontal_plus="┴",
         ),
     )
     rounded_thick: Theme = Theme(
         Border(
-            "rounded_thick",
-            "─",
-            "│",
-            "╭",
-            "╮",
-            "╰",
-            "╯",
-            "├",
-            "┤",
-            "┬",
-            "┴",
-            "┼",
-            "┝",
-            "━",
-            "┿",
-            "┥",
+            name="rounded_thick",
+            horizontal="─",
+            vertical="│",
+            top_left="╭",
+            top_right="╮",
+            bottom_left="╰",
+            bottom_right="╯",
+            vertical_left="├",
+            vertical_right="┤",
+            top_horizontal="┬",
+            bottom_horizontal="┴",
+            central="┼",
+            vertical_left_plus="┝",
+            horizontal_plus="━",
+            central_plus="┿",
+            vertical_right_plus="┥",
+            top_horizontal_plus="┯",
+            bottom_horizontal_plus="┷",
         ),
     )
     rounded_double: Theme = Theme(
         Border(
-            "rounded_double",
-            "─",
-            "│",
-            "╭",
-            "╮",
-            "╰",
-            "╯",
-            "├",
-            "┤",
-            "┬",
-            "┴",
-            "┼",
-            "╞",
-            "═",
-            "╪",
-            "╡",
+            name="rounded_double",
+            horizontal="─",
+            vertical="│",
+            top_left="╭",
+            top_right="╮",
+            bottom_left="╰",
+            bottom_right="╯",
+            vertical_left="├",
+            vertical_right="┤",
+            top_horizontal="┬",
+            bottom_horizontal="┴",
+            central="┼",
+            vertical_left_plus="╞",
+            horizontal_plus="═",
+            central_plus="╪",
+            vertical_right_plus="╡",
+            top_horizontal_plus="╤",
+            bottom_horizontal_plus="╧",
         ),
     )
     thick: Theme = Theme(
         Border(
-            "thick",
-            "━",
-            "┃",
-            "┏",
-            "┓",
-            "┗",
-            "┛",
-            "┣",
-            "┫",
-            "┳",
-            "┻",
-            "╋",
-            "┣",
-            "━",
-            "╋",
-            "┫",
+            name="thick",
+            horizontal="━",
+            vertical="┃",
+            top_left="┏",
+            top_right="┓",
+            bottom_left="┗",
+            bottom_right="┛",
+            vertical_left="┣",
+            vertical_right="┫",
+            top_horizontal="┳",
+            bottom_horizontal="┻",
+            central="╋",
+            vertical_left_plus="┣",
+            horizontal_plus="━",
+            central_plus="╋",
+            vertical_right_plus="┫",
+            top_horizontal_plus="┳",
+            bottom_horizontal_plus="┻",
         ),
     )
     thick_thin: Theme = Theme(
         Border(
-            "thick_thin",
-            "─",
-            "│",
-            "┌",
-            "┐",
-            "└",
-            "┘",
-            "├",
-            "┤",
-            "┬",
-            "┴",
-            "┼",
-            "┠",
-            "━",
-            "╂",
-            "┨",
+            name="thick_thin",
+            horizontal="─",
+            vertical="│",
+            top_left="┌",
+            top_right="┐",
+            bottom_left="└",
+            bottom_right="┘",
+            vertical_left="├",
+            vertical_right="┤",
+            top_horizontal="┬",
+            bottom_horizontal="┴",
+            central="┼",
+            vertical_left_plus="┠",
+            horizontal_plus="━",
+            central_plus="╂",
+            vertical_right_plus="┨",
+            top_horizontal_plus="┳",
+            bottom_horizontal_plus="┻",
         ),
     )
     double: Theme = Theme(
         Border(
-            "double",
-            "═",
-            "║",
-            "╔",
-            "╗",
-            "╚",
-            "╝",
-            "╠",
-            "╣",
-            "╦",
-            "╩",
-            "╬",
-            "╠",
-            "═",
-            "╬",
-            "╣",
+            name="double",
+            horizontal="═",
+            vertical="║",
+            top_left="╔",
+            top_right="╗",
+            bottom_left="╚",
+            bottom_right="╝",
+            vertical_left="╠",
+            vertical_right="╣",
+            top_horizontal="╦",
+            bottom_horizontal="╩",
+            central="╬",
+            vertical_left_plus="╠",
+            horizontal_plus="═",
+            central_plus="╬",
+            vertical_right_plus="╣",
+            top_horizontal_plus="╦",
+            bottom_horizontal_plus="╩",
         ),
     )
     double_thin: Theme = Theme(
         Border(
-            "double_thin",
-            "═",
-            "║",
-            "╔",
-            "╗",
-            "╚",
-            "╝",
-            "╠",
-            "╣",
-            "╦",
-            "╩",
-            "╬",
-            "╟",
-            "─",
-            "╫",
-            "╢",
+            name="double_thin",
+            horizontal="═",
+            vertical="║",
+            top_left="╔",
+            top_right="╗",
+            bottom_left="╚",
+            bottom_right="╝",
+            vertical_left="╠",
+            vertical_right="╣",
+            top_horizontal="╦",
+            bottom_horizontal="╩",
+            central="╬",
+            vertical_left_plus="╟",
+            horizontal_plus="─",
+            central_plus="╫",
+            vertical_right_plus="╢",
+            top_horizontal_plus="╦",
+            bottom_horizontal_plus="╩",
         ),
     )
     booktabs: Theme = Theme(
         Border(
-            "booktabs",
-            "─",
-            " ",
-            " ",
-            " ",
-            " ",
-            " ",
-            " ",
-            " ",
-            "─",
-            "─",
-            "─",
-            " ",
-            "━",
-            "━",
-            " ",
+            name="booktabs",
+            horizontal="─",
+            vertical=" ",
+            top_left=" ",
+            top_right=" ",
+            bottom_left=" ",
+            bottom_right=" ",
+            vertical_left=" ",
+            vertical_right=" ",
+            top_horizontal="─",
+            bottom_horizontal="─",
+            central="─",
+            vertical_left_plus=" ",
+            horizontal_plus="━",
+            central_plus="━",
+            vertical_right_plus=" ",
+            top_horizontal_plus=" ",
+            bottom_horizontal_plus=" ",
         ),
     )
     markdown: Theme = Theme(
         Border(
-            "markdown",
-            " ",
-            "|",
-            " ",
-            " ",
-            " ",
-            " ",
-            " ",
-            " ",
-            " ",
-            " ",
-            " ",
-            "|",
-            "-",
-            "|",
-            "|",
+            name="markdown",
+            horizontal=" ",
+            vertical="|",
+            top_left=" ",
+            top_right=" ",
+            bottom_left=" ",
+            bottom_right=" ",
+            vertical_left=" ",
+            vertical_right=" ",
+            top_horizontal=" ",
+            bottom_horizontal=" ",
+            central=" ",
+            vertical_left_plus="|",
+            horizontal_plus="-",
+            central_plus="|",
+            vertical_right_plus="|",
+            top_horizontal_plus=" ",
+            bottom_horizontal_plus=" ",
         ),
     )
+
+
+class MutableString:
+    def __init__(self, seq=""):
+        self.data = list(seq)
+
+    def __getitem__(self, index):
+        return self.data[index]
+
+    def __setitem__(self, index, value):
+        if isinstance(index, slice):
+            self.data[index] = list(value)
+        else:
+            self.data[index] = value
+
+    def __str__(self):
+        return "".join(self.data)
+
+    def __repr__(self):
+        return f"MutableString({str(self)!r})"
+
+
+translate_border_dict = {
+    "border_left": {
+        ("vertical", "vertical"): "vertical",
+        ("vertical", "horizontal"): "vertical_left",
+        ("vertical_left", ""): "vertical_left",
+        ("vertical_left", "horizontal"): "vertical_left",
+        ("vertical_right", ""): "vertical_right",
+        ("vertical_right", "horizontal"): "central",
+        ("vertical_right", "vertical"): "vertical_right",
+        ("vertical_right", "vertical_left"): "central",
+
+        ("vertical", "horizontal_plus"): "vertical_left_plus",
+        ("vertical_left_plus", ""): "vertical_left_plus",
+        ("vertical_left_plus", "horizontal_plus"): "vertical_left_plus",
+        ("vertical_right_plus", "horizontal_plus"): "central_plus",
+        ("vertical_right_plus", "vertical"): "vertical_right_plus",
+        ("vertical_right_plus", "vertical_left_plus"): "central_plus",
+    },
+    "border_right": {
+    },
+    "border_top": {
+        ("horizontal", ""): "horizontal",
+        ("horizontal", "vertical"): "top_horizontal",
+        ("top_horizontal", ""): "",
+        ("top_horizontal", "vertical"): "top_horizontal",
+        ("bottom_horizontal", ""): "bottom_horizontal",
+        ("bottom_horizontal", "vertical"): "central",
+        ("horizontal", "top_horizontal"): "top_horizontal",
+        ("horizontal_plus", ""): "horizontal_plus",
+        ("horizontal_plus", "top_horizontal"): "top_horizontal_plus",
+    },
+    "border_bottom": {
+        ("", "horizontal"): "horizontal",
+        ("vertical", "horizontal"): "bottom_horizontal",
+        ("vertical", "bottom_horizontal"): "bottom_horizontal",
+        ("", "bottom_horizontal"): "bottom_horizontal",
+        ("", "top_horizontal"): "top_horizontal",
+        ("vertical", "top_horizontal"): "central",
+        ("bottom_horizontal", "horizontal"): "bottom_horizontal",
+    },
+}
+border_translate_cache = LRUCache(maxsize=100)
+
+
+@cached(border_translate_cache)
+def translate_theme_border(side: str, theme: Theme, border_from: str, border_to: str) -> str:
+    return border_from
 
 
 def get_text_width_in_console(text: str) -> int:
@@ -401,60 +513,49 @@ def get_text_width_in_console(text: str) -> int:
     return width
 
 
-def decrease_numbers(widths: List[int], total_width: int = 120) -> List[int]:
-    widths_sum = sum(widths)
+def decrease_numbers(
+    row_lengths: List[int],
+    max_width: int = 120,
+    min_width: int = 1,
+) -> List[int]:
+    current_sum = sum(row_lengths)
+    difference = max_width - current_sum
 
-    for i, width in enumerate(widths):
-        if width < 1:
-            widths[i] = 1
+    if difference == 0 and all(n >= min_width for n in row_lengths):
+        return row_lengths
 
-    # Scaling
-    if widths_sum != total_width:
-        scale_factor = total_width / widths_sum
-        widths = [max(1, round(w * scale_factor)) for w in widths]
-    else:
-        widths = widths
+    proportions = [n / current_sum for n in row_lengths]
+    distributed = [n + round(difference * p) for n, p in zip(row_lengths, proportions)]
 
-    # Correction of scaled values to exact summation
-    while sum(widths) != total_width:
-        diff = total_width - sum(widths)
-        if diff > 0:
-            for i in range(len(widths)):
-                if widths[i] < total_width - (len(widths) - 1):
-                    widths[i] += 1
-                    if sum(widths) == total_width:
-                        break
-        elif diff < 0:
-            for i in range(len(widths)):
-                if widths[i] > 1:
-                    widths[i] -= 1
-                    if sum(widths) == total_width:
-                        break
+    total = sum(distributed)
+    final_difference = max_width - total
 
-    # Correction of proportions
-    k = 0.5  # correction parameter
-    for i in range(len(widths)):
-        widths[i] = max(
-            1, widths[i] - round(widths[i] * k) + round(sum(widths) * k / len(widths))
-        )
+    if final_difference > 0:
+        for i in range(final_difference):
+            distributed[i % len(distributed)] += 1
+    elif final_difference < 0:
+        for i in range(-final_difference):
+            if distributed[i % len(distributed)] > min_width:
+                distributed[i % len(distributed)] -= 1
 
-    # Checking and final adjustment
-    while sum(widths) != total_width:
-        diff = total_width - sum(widths)
-        if diff > 0:
-            for i in range(len(widths)):
-                if widths[i] < total_width - (len(widths) - 1):
-                    widths[i] += 1
-                    if sum(widths) == total_width:
-                        break
-        elif diff < 0:
-            for i in range(len(widths)):
-                if widths[i] > 1:
-                    widths[i] -= 1
-                    if sum(widths) == total_width:
-                        break
+    # Ensure all values are at least min_value
+    for i in range(len(distributed)):
+        if distributed[i] < min_width:
+            distributed[i] = min_width
 
-    return widths
+    # Adjust again if min_value correction breaks the total sum
+    total = sum(distributed)
+    final_difference = max_width - total
+
+    if final_difference > 0:
+        for i in range(final_difference):
+            distributed[i % len(distributed)] += 1
+    elif final_difference < 0:
+        for i in range(-final_difference):
+            if distributed[i % len(distributed)] > min_width:
+                distributed[i % len(distributed)] -= 1
+
+    return distributed
 
 
 def transform_align(
@@ -572,23 +673,29 @@ def line_spliter(
         result_breaks = result_breaks[:height]
         result_breaks[-1] = cell_break_symbol
 
-    return [result_lines, result_breaks]
+    return [result_lines, result_breaks, False, None]
 
 
 def fill_line(
     rows: List[List[str]],
     symbols: List[List[str]],
+    lines_without_border: list[bool],
+    metadata_list: tuple[dict[str, str] | None, ...],
     widths: List[int],
     align: Tuple[str, ...],
     theme: Theme = Themes.ascii_thin,
+    without_border: bool = False,
 ) -> str:
     """
 
     :param rows:
     :param symbols:
+    :param lines_without_border:
+    :param metadata_list:
     :param widths:
     :param align:
     :param theme:
+    :param without_border:
     :return:
     """
     border = theme.border
@@ -617,40 +724,125 @@ def fill_line(
 
     lines = []
     symbol = list(zip(*symbols))
+    vertical = border.vertical
+    vertical_without_border = "" if without_border else border.vertical
 
-    for rn, row in enumerate(zip(*rows)):
-        if rn == 0:
+    for ri, row in enumerate(zip(*rows)):  # ri - row index
+        row = list(row)
+
+        if ri == 0:
             current_align = align_left
         else:
             current_align = align_right
 
-        def get_width(index: int):
-            return widths[index] - (
-                get_text_width_in_console(row[index]) - len(row[index])
+        def get_width(ci: int):
+            return widths[ci] - (
+                get_text_width_in_console(row[ci]) - len(row[ci])
             )
 
-        template = border.vertical + "".join(
-            f" {{:{current_align[cn]}{get_width(cn)}}}{symbol[rn][cn]}"
-            + border.vertical
-            for cn in range(len(row))
-        )
+        def get_template() -> str:
+            template_list = []
+            row_length = len(row)
+            for ci in range(row_length):  # ci - column index
+                if lines_without_border[ci]:
+                    metadata = metadata_list[ci]
+                    if not without_border:
+                        if ci == 0:
+                            template_list.append(translate_theme_border("border_left", theme, vertical, metadata["border_left"][0]))
+                        elif ci == row_length - 1:
+                            template_list[-1] = translate_theme_border("border_right", theme, vertical, metadata["border_right"][-1])
+
+                    if template_list:
+                        template_list[-1] = translate_theme_border("border_left", theme, template_list[-1] or vertical, metadata["border_left"][ri]) or template_list[-1]
+
+                    template_list.append(f"{metadata['border_left'][ri]}{{}}{metadata['border_right'][ri]}")
+
+                    border_right = translate_theme_border("border_right", theme, vertical, metadata["border_right"][ri])
+                    template_list.append(border_right)
+                    if without_border and ci == row_length - 1:
+                        del template_list[-1]
+                else:
+                    if not without_border:
+                        if ci == 0:
+                            template_list.append(vertical_without_border)
+                    template_list.append(f" {{:{current_align[ci]}{get_width(ci)}}}{symbol[ri][ci]}")
+
+                    template_list.append(vertical)
+                    if without_border and ci == row_length - 1:
+                        del template_list[-1]
+
+            return "".join(template_list)
+
+        template = get_template()
         lines.append(template.format(*row))
 
     return "\n".join(lines)
 
 
-def get_row_lengths(table: Sequence[Sequence]) -> List[int]:
+def check_cell(cell) -> bool:
+    if not hasattr(cell, "stringify"):
+        return False
+
+    if not callable(cell.stringify):
+        return False
+
+    if not {"max_width", "max_height", "without_border"}.issubset(
+        {param.name for param in inspect.signature(cell.stringify).parameters.values()}
+    ):
+        return False
+
+    return True
+
+
+def get_row_lengths(
+    table: Sequence[Sequence],
+    max_width: tuple[int, ...] | None = None,
+    max_height: int | None = None,
+) -> List[int]:
+    def get_sub_table_max_width(ci: int):
+        if not max_width or isinstance(ci, int):
+            return max_width
+
+        return max_width[ci]
+
     return [
         max(
-            (
+            len(
+                cell.stringify(
+                    max_width=get_sub_table_max_width(ci),
+                    max_height=max_height,
+                    without_border=True,
+                ).split("\n", maxsplit=1)[0]
+            ) - 2
+            if check_cell(cell)
+            else (
                 max(
                     get_text_width_in_console(line)
-                    for line in str(cell).splitlines() or [""]
+                    for line in str_cell.splitlines() or [""]
                 )
-                if cell
+                if (str_cell := str(cell))
                 else 1
             )
             for cell in column
         )
-        for column in zip(*table)
+        for ci, column in enumerate(zip(*table))
     ]
+
+
+def apply_metadata(string: str, style: str, theme: Theme, metadata_list: list) -> str:
+    return string
+    string = MutableString(string)
+    index = 2
+    for current_metadata in metadata_list:
+        if current_metadata:
+            metadata = current_metadata[style]
+            for border_r in metadata:
+                border_l = string[index]
+                if style == "border_top":
+                    string[index] = translate_theme_border(style, theme, border_l, border_r) or border_l
+                elif style == "border_bottom":
+                    string[index] = translate_theme_border(style, theme, border_l, border_r) or border_l
+                index += 1
+        index += 3
+
+    return str(string)

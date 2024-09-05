@@ -7,7 +7,9 @@ from table2string.utils import (
     transform_width,
     get_row_lengths,
     ALLOWED_ALIGNS,
+    apply_metadata,
     line_spliter,
+    check_cell,
     fill_line,
     Themes,
     Theme,
@@ -32,6 +34,7 @@ def print_table(
     file: Union[TextIOWrapper, None] = None,
     theme: Theme = Themes.ascii_thin,
     ignore_width_errors: bool = False,
+    without_border: bool = False,
 ) -> None:
     """
     Print the table in sys.stdout or file
@@ -52,8 +55,10 @@ def print_table(
     :param file: File where you can record the table by .write method.
     :param theme:
     :param ignore_width_errors:
+    :param without_border:
     :return: None
     """
+    table: list[list[Any]] = list(list(row) for row in table)
     assert any(table), table
     assert sum(hasattr(row, "__getitem__") for row in table)
     if column_names is not None:
@@ -73,6 +78,8 @@ def print_table(
     ), f"not allowed alignments: {tuple(not_allowed_aligns)}"
 
     column_count = max(map(len, table))
+    if without_border and max_width:
+        max_width += 4
 
     if column_names:
         column_names = list(column_names)
@@ -83,7 +90,7 @@ def print_table(
         else:
             column_names.extend((" ",) * (column_count - column_names_len))
 
-        table = [column_names, *table]
+        table.insert(0, column_names)
 
     if max_width is not None and not ignore_width_errors:
         if isinstance(max_width, int):
@@ -101,9 +108,8 @@ def print_table(
             min_width = column_count
             assert sum(max_width) >= min_width, f"{sum(max_width)} >= {min_width}"
 
-    table = list(table)
     border = theme.border
-    row_lengths = get_row_lengths(table)
+    row_lengths = get_row_lengths(table, max_width, max_height)
     max_widths = transform_width(max_width, column_count, row_lengths)
     align_t = transform_align(column_count, align)
     column_names_align_t = transform_align(column_count, column_names_align)
@@ -154,22 +160,31 @@ def print_table(
             border.bottom_right,
         )
     )
+
+    if without_border:
+        up_separator = up_separator[1:-1].replace(border.horizontal, " ")
+        under_name_separator = under_name_separator[1:-1]
+        up_noname_separator = up_noname_separator[1:-1].replace(border.horizontal, " ")
+        line_separator = line_separator[1:-1]
+        line_separator_plus = line_separator_plus[1:-1]
+        down_separator = down_separator[1:-1].replace(border.horizontal, " ")
+
     """
 # EXAMPLE
 
 theme                = Themes.thin_double
-up_separator         = '┌─────┐'
-under_name_separator = '├─┬─┬─┤'
-up_noname_separator  = '┌─┬─┬─┐'
-line_separator       = '├─┼─┼─┤'
-line_separator_plus  = '╞═╪═╪═╡'
-down_separator       = '└─┴─┴─┘'
+up_separator         = "┌───────────┐"
+under_name_separator = "├───┬───┬───┤"
+up_noname_separator  = "┌───┬───┬───┐"
+line_separator       = "├───┼───┼───┤"
+line_separator_plus  = "╞═══╪═══╪═══╡"
+down_separator       = "└───┴───┴───┘"
     """
 
     if name:
         name_align_t = transform_align(1, name_align)
 
-        if up_separator.strip():
+        if up_separator.strip() or without_border:
             print(up_separator, file=file)
 
         if not max_widths:
@@ -177,7 +192,7 @@ down_separator       = '└─┴─┴─┘'
         else:
             max_name_width = sum(max_widths) + (3 * column_count) + 1 - 4
 
-        rows, symbols = zip(
+        rows, symbols, lines_without_border, metadata_list = zip(
             line_spliter(
                 name,
                 max_name_width,
@@ -187,28 +202,70 @@ down_separator       = '└─┴─┴─┘'
             )
         )
         print(
-            fill_line(rows, symbols, [max_name_width], name_align_t, theme),
+            fill_line(rows, symbols, lines_without_border, metadata_list, [max_name_width], name_align_t, theme, without_border),
             file=file,
         )
 
     # Trimming long lines
+    # TODO переделать в table[i] = ...
+    def line_spliter_for_sub_table(sub_table: Table, ci: int) -> list[list[str]]:
+        sub_table_lines = sub_table.stringify(
+            align="^",
+            max_width=max_widths[ci],
+            max_height=max_height,
+            line_break_symbol=line_break_symbol,
+            cell_break_symbol=cell_break_symbol,
+            theme=theme.custom_sub_table_theme,
+            without_border=True,
+            ignore_width_errors=True,
+        )
+        sub_table_lines = sub_table_lines.splitlines()
+        sub_table_symbols = list(("",) * len(sub_table_lines))
+        return [
+            list(line[1:-1] for line in sub_table_lines[1:-1]),
+            sub_table_symbols,
+            True,
+            {
+                "border_top": tuple(sub_table_lines[0])[1:-1],
+                "border_bottom": tuple(sub_table_lines[-1])[1:-1],
+                "border_left": tuple(line[0] for line in sub_table_lines)[1:-1],
+                "border_right": tuple(line[-1] for line in sub_table_lines)[1:-1],
+            },
+        ]
+
     table_g = (
         [
-            line_spliter(
-                column,
-                max_widths[n],
+            line_spliter_for_sub_table(cell, ci)
+            if check_cell(cell)
+            else line_spliter(
+                str(cell),
+                max_widths[ci],
                 max_height,
                 line_break_symbol,
                 cell_break_symbol,
             )
-            for n, column in enumerate(map(str, row))
+            for ci, cell in enumerate(row)
         ]
         for row in table
     )
+    table_g = list(table_g)
+    metadata_list = None  # TODO убрать
 
     for n, row in enumerate(table_g):
         if n != 0:
             print(file=file)
+
+        if maximize_height and max_height:
+            max_row_height = max_height
+        else:
+            max_row_height = max(map(len, tuple(zip(*row))[0]))
+
+        for column in row:
+            extend_data = (" ",) * (max_row_height - len(column[0]))
+            column[0].extend(extend_data)
+            column[1].extend(extend_data)
+
+        rows, symbols, lines_without_border, metadata_list = zip(*row)
 
         def n_in_sep():
             if column_names:
@@ -221,39 +278,36 @@ down_separator       = '└─┴─┴─┘'
             or (isinstance(sep, (range, tuple)) and n_in_sep())
             or (n == 1 and column_names)
         ):
+            tag = False
             if (name and n == 1) or ((not name) and n == 1):
                 s = line_separator_plus
                 a = align_t
             elif name and n == 0:
                 s = under_name_separator
                 a = column_names_align_t if column_names else align_t
+                tag = without_border
             elif (not name) and n == 0:
                 s = up_noname_separator
                 a = column_names_align_t if column_names else align_t
+                tag = without_border
             else:
                 s = line_separator
                 a = align_t
 
-            if s.strip():
+            if s.strip() or tag:
+                if s in (under_name_separator, up_noname_separator, line_separator_plus, line_separator):
+                    s = apply_metadata(s, "border_top", theme, metadata_list)
+                elif s == down_separator:
+                    s = apply_metadata(s, "border_bottom", theme, metadata_list)
                 print(s, file=file)
         else:
             a = align_t
 
-        if maximize_height and max_height:
-            max_row_height = max_height
-        else:
-            max_row_height = max(map(len, tuple(zip(*row))[0]))
+        print(fill_line(rows, symbols, lines_without_border, metadata_list, max_widths, a, theme, without_border), file=file, end="")
 
-        for column in row:
-            extend_data = (" ",) * (max_row_height - len(column[0]))
-            column[0].extend(extend_data)
-            column[1].extend(extend_data)
-
-        rows, symbols = zip(*row)
-        print(fill_line(rows, symbols, max_widths, a, theme), file=file, end="")
-
-    if down_separator.strip():
-        print("\n" + down_separator.rstrip("\n"), file=file, end=end)
+    if down_separator.strip() or without_border:
+        s = apply_metadata(down_separator.rstrip("\n"), "border_bottom", theme, metadata_list)
+        print("\n" + s, file=file, end=end)
     elif end:
         print(file=file, end=end)
 
@@ -275,6 +329,7 @@ def stringify_table(
     end: Union[str, None] = "",
     theme: Theme = Themes.ascii_thin,
     ignore_width_errors: bool = False,
+    without_border: bool = False,
 ) -> str:
     """
 
@@ -293,6 +348,7 @@ def stringify_table(
     :param end: Configure the last symbol of the table. \\n or nothing
     :param theme:
     :param ignore_width_errors:
+    :param without_border:
     :return: String table
     """
     file = StringIO()
@@ -313,6 +369,7 @@ def stringify_table(
         file=file,
         theme=theme,
         ignore_width_errors=ignore_width_errors,
+        without_border=without_border,
     )
     file.seek(0)
     return file.read()
@@ -382,6 +439,7 @@ class Table:
         end: Union[str, None] = "",
         theme: Theme = Themes.ascii_thin,
         ignore_width_errors: bool = False,
+        without_border: bool = False,
     ) -> str:
         """
 
@@ -397,6 +455,7 @@ class Table:
         :param end: Configure the last symbol of the table. \\n or nothing
         :param theme:
         :param ignore_width_errors:
+        :param without_border:
         :return: String table
         """
         return stringify_table(
@@ -415,6 +474,7 @@ class Table:
             end=end,
             theme=theme,
             ignore_width_errors=ignore_width_errors,
+            without_border=without_border,
         )
 
     def print(
@@ -433,6 +493,7 @@ class Table:
         file: Union[TextIOWrapper, None] = None,
         theme: Theme = Themes.ascii_thin,
         ignore_width_errors: bool = False,
+        without_border: bool = False,
     ) -> None:
         """
         Print the table in sys.stdout or file
@@ -450,6 +511,7 @@ class Table:
         :param file: File where you can record the table by .write method.
         :param theme:
         :param ignore_width_errors:
+        :param without_border:
         :return: None
         """
         print_table(
@@ -469,6 +531,7 @@ class Table:
             file=file,
             theme=theme,
             ignore_width_errors=ignore_width_errors,
+            without_border=without_border,
         )
 
     def __str__(self):

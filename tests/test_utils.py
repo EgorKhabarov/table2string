@@ -17,12 +17,12 @@ def test_get_text_width_in_console():
 def test_decrease_numbers():
     assert decrease_numbers([2, 2, 3], 10) == [3, 3, 4]
     assert decrease_numbers([2, 2, 3], 11) == [3, 3, 5]
-    assert decrease_numbers([20, 2, 3], 10) == [5, 2, 3]
-    assert decrease_numbers([20, 2, 3], 100) == [59, 19, 22]
+    assert decrease_numbers([20, 2, 3], 10) == [8, 1, 1]
+    assert decrease_numbers([20, 2, 3], 100) == [80, 8, 12]
     assert decrease_numbers(
         [19, 10, 7, 4, 12, 4, 4, 4, 1, 1168],
         185,
-    ) == [7, 8, 8, 9, 9, 10, 10, 12, 13, 99]
+    ) == [1, 1, 1, 1, 2, 1, 1, 1, 1, 175]
 
 
 def test_transform_align():
@@ -44,46 +44,56 @@ def test_transform_width():
 
 
 def test_line_spliter():
-    assert line_spliter("", 1) == [[" "], [" "]]
-    assert line_spliter("1", 1) == [["1"], [" "]]
+    assert line_spliter("", 1) == [[" "], [" "], False, None]
+    assert line_spliter("1", 1) == [["1"], [" "], False, None]
     assert line_spliter("123\n456", 1) == [
         ["1", "2", "3", "4", "5", "6"],
         ["↩", "↩", " ", "↩", "↩", " "],
+        False,
+        None,
     ]
     assert line_spliter("123\n\n456", 1) == [
         ["1", "2", "3", " ", "4", "5", "6"],
         ["↩", "↩", " ", " ", "↩", "↩", " "],
+        False,
+        None,
     ]
     assert line_spliter("123\n456", 2) == [
         ["12", "3", "45", "6"],
         ["↩", " ", "↩", " "],
+        False,
+        None,
     ]
-    assert line_spliter("123\n456", 3) == [["123", "456"], [" ", " "]]
+    assert line_spliter("123\n456", 3) == [["123", "456"], [" ", " "], False, None]
     assert line_spliter("123\n\n456", 3) == [
         ["123", " ", "456"],
         [" ", " ", " "],
+        False,
+        None,
     ]
 
     assert line_spliter(
         text="123\n456\n789",
         width=3,
         height=2,
-    ) == [["123", "456"], [" ", "…"]]
+    ) == [["123", "456"], [" ", "…"], False, None]
 
     assert line_spliter(
         text="123\n456\n789",
         width=3,
         height=3,
-    ) == [["123", "456", "789"], [" ", " ", " "]]
+    ) == [["123", "456", "789"], [" ", " ", " "], False, None]
 
     assert line_spliter(
         text="123\n456",
         width=3,
         height=3,
-    ) == [["123", "456"], [" ", " "]]
+    ) == [["123", "456"], [" ", " "], False, None]
     assert line_spliter(text="12345\n123456\n1") == [
         ["12345", "123456", "1"],
         [" ", " ", " "],
+        False,
+        None,
     ]
 
 
@@ -92,6 +102,8 @@ def test_fill_line():
         fill_line(
             [["1", "2", "3", "4", "5", "6"]],
             [["↩", "↩", " ", "↩", "↩", " "]],
+            [False],
+            (None,),
             [1],
             ("<",),
         )
@@ -108,6 +120,8 @@ def test_fill_line():
         fill_line(
             [["1", "2", "3", " ", "4", "5", "6"]],
             [["↩", "↩", " ", " ", "↩", "↩", " "]],
+            [False],
+            (None,),
             [1],
             ("<",),
         )
@@ -125,6 +139,8 @@ def test_fill_line():
         fill_line(
             [["12", "3", "45", "6"]],
             [["↩", " ", "↩", " "]],
+            [False],
+            (None,),
             [2],
             ("<",),
         )
@@ -139,6 +155,8 @@ def test_fill_line():
         fill_line(
             [["12", "3", "45", "6"]],
             [["↩", " ", "↩", " "]],
+            [False],
+            (None,),
             [2],
             (">",),
         )
@@ -150,20 +168,22 @@ def test_fill_line():
 """.strip()
     )
     assert (
-        fill_line([["123", "456"]], [[" ", " "]], [3], ("<",))
+        fill_line([["123", "456"]], [[" ", " "]], [False, False], (None, None), [3], ("<",))
         == """
 | 123 |
 | 456 |
 """.strip()
     )
     assert (
-        fill_line([["123"], ["456"]], [[" "], [" "]], [3, 3], ("<", "<"))
+        fill_line([["123"], ["456"]], [[" "], [" "]], [False, False], (None, None), [3, 3], ("<", "<"))
         == "| 123 | 456 |"
     )
     assert (
         fill_line(
             [["1234567", "34", "787878"]],
             [[" ", " ", " "]],
+            [False],
+            (None,),
             [11],
             ("^<",),
         )
@@ -177,6 +197,8 @@ def test_fill_line():
         fill_line(
             [["1234567", "34", "787878"]],
             [[" ", " ", " "]],
+            [False],
+            (None,),
             [12],
             ("^<",),
         )
@@ -190,6 +212,8 @@ def test_fill_line():
         fill_line(
             [["1234567", "34", "787878"]],
             [[" ", " ", " "]],
+            [False],
+            (None,),
             [13],
             ("^<",),
         )
@@ -203,6 +227,8 @@ def test_fill_line():
         fill_line(
             [["1234567", "34", "787878"]],
             [[" ", " ", " "]],
+            [False],
+            (None,),
             [11],
             ("^>",),
         )
@@ -216,6 +242,8 @@ def test_fill_line():
         fill_line(
             [["1234567", "34", "787878"]],
             [[" ", " ", " "]],
+            [False],
+            (None,),
             [12],
             ("^>",),
         )
@@ -229,6 +257,8 @@ def test_fill_line():
         fill_line(
             [["34", "1234567", "787878"]],
             [[" ", " ", " "]],
+            [False],
+            (None,),
             [11],
             ("^<",),
         )
@@ -242,6 +272,8 @@ def test_fill_line():
         fill_line(
             [["34", "1234567", "787878"]],
             [[" ", " ", " "]],
+            [False],
+            (None,),
             [12],
             ("^<",),
         )
@@ -255,6 +287,8 @@ def test_fill_line():
         fill_line(
             [["34", "1234567", "787878"]],
             [[" ", " ", " "]],
+            [False],
+            (None,),
             [11],
             ("^>",),
         )
@@ -268,6 +302,8 @@ def test_fill_line():
         fill_line(
             [["34", "1234567", "787878"]],
             [[" ", " ", " "]],
+            [False],
+            (None,),
             [12],
             ("^>",),
         )
