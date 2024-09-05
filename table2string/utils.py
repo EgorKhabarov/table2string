@@ -44,25 +44,42 @@ class Border:
     top_horizontal_plus: str = "+"
     bottom_horizontal_plus: str = "+"
 
-    reverse_dist = {
-        bottom_horizontal_plus: "bottom_horizontal_plus",
-        top_horizontal_plus: "top_horizontal_plus",
-        vertical_right_plus: "vertical_right_plus",
-        central_plus: "central_plus",
-        horizontal_plus: "horizontal_plus",
-        vertical_left_plus: "vertical_left_plus",
-        central: "central",
-        bottom_horizontal: "bottom_horizontal",
-        top_horizontal: "top_horizontal",
-        vertical_right: "vertical_right",
-        vertical_left: "vertical_left",
-        bottom_right: "bottom_right",
-        bottom_left: "bottom_left",
-        top_right: "top_right",
-        top_left: "top_left",
-        vertical: "vertical",
-        horizontal: "horizontal",
-    }
+    def get_border_name(self, border: str) -> str:
+        match border:
+            case self.horizontal:
+                return "horizontal"
+            case self.vertical:
+                return "vertical"
+            case self.central:
+                return "central"
+            case self.top_left:
+                return "top_left"
+            case self.top_right:
+                return "top_right"
+            case self.bottom_left:
+                return "bottom_left"
+            case self.bottom_right:
+                return "bottom_right"
+            case self.vertical_left:
+                return "vertical_left"
+            case self.vertical_right:
+                return "vertical_right"
+            case self.top_horizontal:
+                return "top_horizontal"
+            case self.bottom_horizontal:
+                return "bottom_horizontal"
+            case self.vertical_left_plus:
+                return "vertical_left_plus"
+            case self.horizontal_plus:
+                return "horizontal_plus"
+            case self.central_plus:
+                return "central_plus"
+            case self.vertical_right_plus:
+                return "vertical_right_plus"
+            case self.top_horizontal_plus:
+                return "top_horizontal_plus"
+            case self.bottom_horizontal_plus:
+                return "bottom_horizontal_plus"
 
 
 class Theme:
@@ -453,23 +470,16 @@ class MutableString:
 
 translate_border_dict = {
     "border_left": {
-        ("vertical", "vertical"): "vertical",
         ("vertical", "horizontal"): "vertical_left",
-        ("vertical_left", ""): "vertical_left",
-        ("vertical_left", "horizontal"): "vertical_left",
-        ("vertical_right", ""): "vertical_right",
-        ("vertical_right", "horizontal"): "central",
-        ("vertical_right", "vertical"): "vertical_right",
-        ("vertical_right", "vertical_left"): "central",
-
         ("vertical", "horizontal_plus"): "vertical_left_plus",
-        ("vertical_left_plus", ""): "vertical_left_plus",
-        ("vertical_left_plus", "horizontal_plus"): "vertical_left_plus",
-        ("vertical_right_plus", "horizontal_plus"): "central_plus",
-        ("vertical_right_plus", "vertical"): "vertical_right_plus",
-        ("vertical_right_plus", "vertical_left_plus"): "central_plus",
+        ("vertical_right", "horizontal"): "central",
+        ("vertical_right", "horizontal_plus"): "central_plus",
     },
     "border_right": {
+        ("vertical", "horizontal"): "vertical_right",
+        ("vertical", "horizontal_plus"): "vertical_right_plus",
+        ("vertical_left", "horizontal"): "central",
+        ("vertical_left", "horizontal_plus"): "central_plus",
     },
     "border_top": {
         ("horizontal", ""): "horizontal",
@@ -497,6 +507,11 @@ border_translate_cache = LRUCache(maxsize=100)
 
 @cached(border_translate_cache)
 def translate_theme_border(side: str, theme: Theme, border_from: str, border_to: str) -> str:
+    border_from_name = theme.border.get_border_name(border_from)
+    border_to_name = theme.border.get_border_name(border_to)
+
+    if border_result := translate_border_dict[side].get((border_from_name, border_to_name)):
+        return getattr(theme.border, border_result)
     return border_from
 
 
@@ -750,7 +765,7 @@ def fill_line(
                         if ci == 0:
                             template_list.append(translate_theme_border("border_left", theme, vertical, metadata["border_left"][0]))
                         elif ci == row_length - 1:
-                            template_list[-1] = translate_theme_border("border_right", theme, vertical, metadata["border_right"][-1])
+                            template_list[-1] = translate_theme_border("border_right", theme, template_list[-1] or vertical, metadata["border_right"][-1])
 
                     if template_list:
                         template_list[-1] = translate_theme_border("border_left", theme, template_list[-1] or vertical, metadata["border_left"][ri]) or template_list[-1]
@@ -844,5 +859,4 @@ def apply_metadata(string: str, style: str, theme: Theme, metadata_list: list) -
                     string[index] = translate_theme_border(style, theme, border_l, border_r) or border_l
                 index += 1
         index += 3
-
     return str(string)
