@@ -88,13 +88,13 @@ class Theme:
         self.custom_sub_table_theme = custom_sub_table_theme or self
 
     def __repr__(self):
-        return f"<table2string.utils.Theme<Border({self.border.name!r})> at 0x{id(self):#x}>"
+        return f"Themes.{self.border.name}"
 
 
 class Themes:
     ascii_thin: Theme = Theme()
     ascii_thin_double: Theme = Theme(
-        Border(
+        border=Border(
             name="ascii_thin_double",
             horizontal="-",
             vertical="|",
@@ -116,7 +116,7 @@ class Themes:
         ),
     )
     ascii_double: Theme = Theme(
-        Border(
+        border=Border(
             name="ascii_double",
             horizontal="=",
             vertical="‖",
@@ -138,7 +138,7 @@ class Themes:
         ),
     )
     ascii_double_thin: Theme = Theme(
-        Border(
+        border=Border(
             name="ascii_double_thin",
             horizontal="=",
             vertical="‖",
@@ -160,7 +160,7 @@ class Themes:
         ),
     )
     ascii_booktabs: Theme = Theme(
-        Border(
+        border=Border(
             name="ascii_booktabs",
             horizontal="-",
             vertical=" ",
@@ -182,7 +182,7 @@ class Themes:
         ),
     )
     thin: Theme = Theme(
-        Border(
+        border=Border(
             name="thin",
             horizontal="─",
             vertical="│",
@@ -204,7 +204,7 @@ class Themes:
         ),
     )
     thin_thick: Theme = Theme(
-        Border(
+        border=Border(
             name="thin_thick",
             horizontal="─",
             vertical="│",
@@ -224,9 +224,10 @@ class Themes:
             top_horizontal_plus="┯",
             bottom_horizontal_plus="┷",
         ),
+        custom_sub_table_theme=thin,
     )
     thin_double: Theme = Theme(
-        Border(
+        border=Border(
             name="thin_double",
             horizontal="─",
             vertical="│",
@@ -246,10 +247,10 @@ class Themes:
             top_horizontal_plus="╤",
             bottom_horizontal_plus="╧",
         ),
-        thin,
+        custom_sub_table_theme=thin,
     )
     rounded: Theme = Theme(
-        Border(
+        border=Border(
             name="rounded",
             horizontal="─",
             vertical="│",
@@ -271,7 +272,7 @@ class Themes:
         ),
     )
     rounded_thick: Theme = Theme(
-        Border(
+        border=Border(
             name="rounded_thick",
             horizontal="─",
             vertical="│",
@@ -291,9 +292,10 @@ class Themes:
             top_horizontal_plus="┯",
             bottom_horizontal_plus="┷",
         ),
+        custom_sub_table_theme=thin,
     )
     rounded_double: Theme = Theme(
-        Border(
+        border=Border(
             name="rounded_double",
             horizontal="─",
             vertical="│",
@@ -313,9 +315,10 @@ class Themes:
             top_horizontal_plus="╤",
             bottom_horizontal_plus="╧",
         ),
+        custom_sub_table_theme=thin,
     )
     thick: Theme = Theme(
-        Border(
+        border=Border(
             name="thick",
             horizontal="━",
             vertical="┃",
@@ -337,7 +340,7 @@ class Themes:
         ),
     )
     thick_thin: Theme = Theme(
-        Border(
+        border=Border(
             name="thick_thin",
             horizontal="─",
             vertical="│",
@@ -357,9 +360,10 @@ class Themes:
             top_horizontal_plus="┳",
             bottom_horizontal_plus="┻",
         ),
+        custom_sub_table_theme=thick,
     )
     double: Theme = Theme(
-        Border(
+        border=Border(
             name="double",
             horizontal="═",
             vertical="║",
@@ -381,7 +385,7 @@ class Themes:
         ),
     )
     double_thin: Theme = Theme(
-        Border(
+        border=Border(
             name="double_thin",
             horizontal="═",
             vertical="║",
@@ -403,7 +407,7 @@ class Themes:
         ),
     )
     booktabs: Theme = Theme(
-        Border(
+        border=Border(
             name="booktabs",
             horizontal="─",
             vertical=" ",
@@ -423,9 +427,10 @@ class Themes:
             top_horizontal_plus=" ",
             bottom_horizontal_plus=" ",
         ),
+        custom_sub_table_theme=thin,
     )
     markdown: Theme = Theme(
-        Border(
+        border=Border(
             name="markdown",
             horizontal=" ",
             vertical="|",
@@ -493,13 +498,10 @@ translate_border_dict = {
         ("horizontal_plus", "top_horizontal"): "top_horizontal_plus",
     },
     "border_bottom": {
-        ("", "horizontal"): "horizontal",
-        ("vertical", "horizontal"): "bottom_horizontal",
-        ("vertical", "bottom_horizontal"): "bottom_horizontal",
-        ("", "bottom_horizontal"): "bottom_horizontal",
-        ("", "top_horizontal"): "top_horizontal",
-        ("vertical", "top_horizontal"): "central",
-        ("bottom_horizontal", "horizontal"): "bottom_horizontal",
+        ("horizontal", "vertical"): "bottom_horizontal",
+        ("top_horizontal", "vertical"): "central",
+        ("bottom_horizontal", "vertical"): "bottom_horizontal",
+        ("horizontal", "bottom_horizontal"): "bottom_horizontal",
     },
 }
 border_translate_cache = LRUCache(maxsize=100)
@@ -767,12 +769,19 @@ def fill_line(
                         elif ci == row_length - 1:
                             template_list[-1] = translate_theme_border("border_right", theme, template_list[-1] or vertical, metadata["border_right"][-1])
 
+                    try:
+                        metadata_border_left_ri = metadata["border_left"][ri]
+                        metadata_border_right_ri = metadata["border_right"][ri]
+                    except IndexError:
+                        metadata_border_left_ri = " "
+                        metadata_border_right_ri = " "
                     if template_list:
-                        template_list[-1] = translate_theme_border("border_left", theme, template_list[-1] or vertical, metadata["border_left"][ri]) or template_list[-1]
+                        template_list[-1] = translate_theme_border("border_left", theme, template_list[-1] or vertical, metadata_border_left_ri) or template_list[-1]
 
-                    template_list.append(f"{metadata['border_left'][ri]}{{}}{metadata['border_right'][ri]}")
+                    # print(f"{widths[ci]=} {metadata_border_left_ri=} {metadata_border_right_ri=}")
+                    template_list.append(f"{metadata_border_left_ri}{{:<{widths[ci]}}}{metadata_border_right_ri}")
 
-                    border_right = translate_theme_border("border_right", theme, vertical, metadata["border_right"][ri])
+                    border_right = translate_theme_border("border_right", theme, vertical, metadata_border_right_ri)
                     template_list.append(border_right)
                     if without_border and ci == row_length - 1:
                         del template_list[-1]
@@ -801,7 +810,16 @@ def check_cell(cell) -> bool:
     if not callable(cell.stringify):
         return False
 
-    if not {"max_width", "max_height", "without_border"}.issubset(
+    if not {
+        "align",
+        "max_width",
+        "max_height",
+        "line_break_symbol",
+        "cell_break_symbol",
+        "theme",
+        "without_border",
+        "ignore_width_errors",
+    }.issubset(
         {param.name for param in inspect.signature(cell.stringify).parameters.values()}
     ):
         return False
@@ -809,26 +827,10 @@ def check_cell(cell) -> bool:
     return True
 
 
-def get_row_lengths(
-    table: Sequence[Sequence],
-    max_width: tuple[int, ...] | None = None,
-    max_height: int | None = None,
-) -> List[int]:
-    def get_sub_table_max_width(ci: int):
-        if not max_width or isinstance(ci, int):
-            return max_width
-
-        return max_width[ci]
-
+def get_row_lengths(table: Sequence[Sequence]) -> List[int]:
     return [
         max(
-            len(
-                cell.stringify(
-                    max_width=get_sub_table_max_width(ci),
-                    max_height=max_height,
-                    without_border=True,
-                ).split("\n", maxsplit=1)[0]
-            ) - 2
+            (lambda row_lengths: sum(row_lengths) + 3 * len(row_lengths))(get_row_lengths(cell.table))
             if check_cell(cell)
             else (
                 max(
@@ -844,19 +846,24 @@ def get_row_lengths(
     ]
 
 
-def apply_metadata(string: str, style: str, theme: Theme, metadata_list: list) -> str:
-    return string
+def apply_metadata(string: str, style: str, theme: Theme, metadata_list: tuple[dict | None, ...], max_widths: list[int], without_border: bool) -> str:
     string = MutableString(string)
     index = 2
-    for current_metadata in metadata_list:
+    if without_border:
+        index -= 1
+
+    for current_metadata, width in zip(metadata_list, max_widths):
         if current_metadata:
-            metadata = current_metadata[style]
-            for border_r in metadata:
+            for border_r in current_metadata[style]:
                 border_l = string[index]
+                if border_l == " ":
+                    border_l = theme.border.horizontal
                 if style == "border_top":
                     string[index] = translate_theme_border(style, theme, border_l, border_r) or border_l
                 elif style == "border_bottom":
                     string[index] = translate_theme_border(style, theme, border_l, border_r) or border_l
                 index += 1
+        else:
+            index += width
         index += 3
     return str(string)

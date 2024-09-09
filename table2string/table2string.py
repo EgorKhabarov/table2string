@@ -78,7 +78,7 @@ def print_table(
     ), f"not allowed alignments: {tuple(not_allowed_aligns)}"
 
     column_count = max(map(len, table))
-    if without_border and max_width:
+    if without_border and max_width and isinstance(max_width, int):
         max_width += 4
 
     if column_names:
@@ -109,7 +109,7 @@ def print_table(
             assert sum(max_width) >= min_width, f"{sum(max_width)} >= {min_width}"
 
     border = theme.border
-    row_lengths = get_row_lengths(table, max_width, max_height)
+    row_lengths = get_row_lengths(table)
     max_widths = transform_width(max_width, column_count, row_lengths)
     align_t = transform_align(column_count, align)
     column_names_align_t = transform_align(column_count, column_names_align)
@@ -208,8 +208,8 @@ down_separator       = "└───┴───┴───┘"
 
     # Trimming long lines
     # TODO переделать в table[i] = ...
-    def line_spliter_for_sub_table(sub_table: Table, ci: int) -> list[list[str]]:
-        sub_table_lines = sub_table.stringify(
+    def line_spliter_for_sub_table(sub_table: Table, ci: int) -> list[list[str] | bool | dict[str, tuple[str, ...]]]:
+        string_sub_table = sub_table.stringify(
             align="^",
             max_width=max_widths[ci],
             max_height=max_height,
@@ -219,17 +219,18 @@ down_separator       = "└───┴───┴───┘"
             without_border=True,
             ignore_width_errors=True,
         )
-        sub_table_lines = sub_table_lines.splitlines()
-        sub_table_symbols = list(("",) * len(sub_table_lines))
-        return [
-            list(line[1:-1] for line in sub_table_lines[1:-1]),
+        sub_table_lines = string_sub_table.splitlines()
+        blank_line = ""
+        sub_table_symbols = [blank_line for _ in range(len(sub_table_lines))]
+        result = [
+            [line[1:-1] for line in sub_table_lines[1:-1]],
             sub_table_symbols,
             True,
             {
-                "border_top": tuple(sub_table_lines[0])[1:-1],
-                "border_bottom": tuple(sub_table_lines[-1])[1:-1],
-                "border_left": tuple(line[0] for line in sub_table_lines)[1:-1],
-                "border_right": tuple(line[-1] for line in sub_table_lines)[1:-1],
+                "border_top": tuple(sub_table_lines[0][1:-1]),
+                "border_bottom": tuple(sub_table_lines[-1][1:-1]),
+                "border_left": tuple(line[0] for line in sub_table_lines[1:-1]),
+                "border_right": tuple(line[-1] for line in sub_table_lines[1:-1]),
             },
         ]
 
@@ -536,3 +537,10 @@ class Table:
 
     def __str__(self):
         return self.stringify()
+
+    def __repr__(self):
+        return "Table({table}{name}{column_names})".format(
+            table=f"{self.table!r}",
+            name=f", name={self.name}" if self.name else "",
+            column_names=f", column_names={self.column_names!r}" if self.column_names else "",
+        )
