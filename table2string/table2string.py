@@ -162,12 +162,12 @@ def print_table(
     )
 
     if without_border:
-        up_separator = up_separator[1:-1].replace(border.horizontal, " ")
+        up_separator = up_separator[1:-1]
         under_name_separator = under_name_separator[1:-1]
-        up_noname_separator = up_noname_separator[1:-1].replace(border.horizontal, " ")
+        up_noname_separator = up_noname_separator[1:-1]
         line_separator = line_separator[1:-1]
         line_separator_plus = line_separator_plus[1:-1]
-        down_separator = down_separator[1:-1].replace(border.horizontal, " ")
+        down_separator = down_separator[1:-1]
 
     """
 # EXAMPLE
@@ -233,6 +233,7 @@ down_separator       = "└───┴───┴───┘"
                 "border_right": tuple(line[-1] for line in sub_table_lines[1:-1]),
             },
         ]
+        return result
 
     table_g = (
         [
@@ -251,22 +252,34 @@ down_separator       = "└───┴───┴───┘"
     )
     table_g = list(table_g)
     metadata_list = None  # TODO убрать
+    prev_metadata = None
+    result_table = []
 
-    for n, row in enumerate(table_g):
+    for n, row in enumerate(table_g):  # TODO rename n to ri (row index)
         if n != 0:
-            print(file=file)
+            result_table.append(("", "\n"))
 
         if maximize_height and max_height:
             max_row_height = max_height
         else:
             max_row_height = max(map(len, tuple(zip(*row))[0]))
 
-        for column in row:
-            extend_data = (" ",) * (max_row_height - len(column[0]))
+        for ci, column in enumerate(row):
+            if column[2]:  # without_border
+                metadata: dict = column[3]
+                string = "".join(
+                    theme.border.vertical if symbol == theme.border.bottom_horizontal else " "
+                    for symbol in metadata["border_bottom"]
+                )
+                extend_data = (string,) * (max_row_height - len(column[0]))
+            else:
+                extend_data = (" ",) * (max_row_height - len(column[0]))
             column[0].extend(extend_data)
             column[1].extend(extend_data)
 
         rows, symbols, lines_without_border, metadata_list = zip(*row)
+        if n == 0:
+            prev_metadata = metadata_list
 
         def n_in_sep():
             if column_names:
@@ -296,21 +309,39 @@ down_separator       = "└───┴───┴───┘"
                 a = align_t
 
             if s.strip() or tag:
-                if s in (under_name_separator, up_noname_separator, line_separator_plus, line_separator):
-                    s = apply_metadata(s, "border_top", theme, metadata_list)
+                if s in (under_name_separator, up_noname_separator):
+                    if n == 1:
+                        s = apply_metadata(s, "border_bottom", theme, prev_metadata, max_widths, without_border)
+                    else:
+                        s = apply_metadata(s, "border_top", theme, metadata_list, max_widths, without_border)
+                elif s in (line_separator_plus, line_separator) or s[1:-1] in (line_separator_plus, line_separator):
+                    if n > 1:
+                        result_table[-3] = (
+                            apply_metadata(result_table[-3][0], "border_bottom", theme, metadata_list, max_widths, without_border),
+                            result_table[-3][1],
+                        )
+                    s = apply_metadata(s, "border_top", theme, metadata_list, max_widths, without_border)
                 elif s == down_separator:
-                    s = apply_metadata(s, "border_bottom", theme, metadata_list)
-                print(s, file=file)
+                    result_table[-3] = (
+                        apply_metadata(result_table[-3][0], "border_top", theme, metadata_list, max_widths, without_border),
+                        result_table[-3][1],
+                    )
+                    s = apply_metadata(s, "border_bottom", theme, metadata_list, max_widths, without_border)
+                result_table.append((s, "\n"))
         else:
             a = align_t
 
-        print(fill_line(rows, symbols, lines_without_border, metadata_list, max_widths, a, theme, without_border), file=file, end="")
+        result_table.append((fill_line(rows, symbols, lines_without_border, metadata_list, max_widths, a, theme, without_border), ""))
+        prev_metadata = metadata_list
 
     if down_separator.strip() or without_border:
-        s = apply_metadata(down_separator.rstrip("\n"), "border_bottom", theme, metadata_list)
-        print("\n" + s, file=file, end=end)
+        s = apply_metadata(down_separator.rstrip("\n"), "border_bottom", theme, metadata_list, max_widths, without_border)
+        result_table.append(("\n" + s, end))
     elif end:
-        print(file=file, end=end)
+        result_table.append(("", end))
+
+    for content, end in result_table:
+        print(content, file=file, end=end)
 
 
 def stringify_table(
