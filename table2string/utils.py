@@ -476,16 +476,16 @@ class MutableString:
 
 translate_border_dict = {
     "border_left": {
-        ("vertical", "horizontal"): "vertical_left",
-        ("vertical", "horizontal_plus"): "vertical_left_plus",
-        ("vertical_right", "horizontal"): "central",
-        ("vertical_right", "horizontal_plus"): "central_plus",
+        ("vertical", "vertical_left"): "vertical_left",
+        ("vertical", "vertical_left_plus"): "vertical_left_plus",
+        ("vertical_right", "vertical_left"): "central",
+        ("vertical_right", "vertical_left_plus"): "central_plus",
     },
     "border_right": {
-        ("vertical", "horizontal"): "vertical_right",
-        ("vertical", "horizontal_plus"): "vertical_right_plus",
-        ("vertical_left", "horizontal"): "central",
-        ("vertical_left", "horizontal_plus"): "central_plus",
+        ("vertical", "vertical_right"): "vertical_right",
+        ("vertical", "vertical_right_plus"): "vertical_right_plus",
+        ("vertical_left", "vertical_right"): "central",
+        ("vertical_left", "vertical_right_plus"): "central_plus",
     },
     "border_top": {
         ("horizontal", ""): "horizontal",
@@ -697,7 +697,7 @@ def line_spliter(
 def fill_line(
     rows: List[List[str]],
     symbols: List[List[str]],
-    lines_without_border: list[bool],
+    subtable_columns: list[bool],
     metadata_list: tuple[dict[str, str] | None, ...],
     widths: List[int],
     align: Tuple[str, ...],
@@ -707,7 +707,7 @@ def fill_line(
 
     :param rows:
     :param symbols:
-    :param lines_without_border:
+    :param subtable_columns:
     :param metadata_list:
     :param widths:
     :param align:
@@ -759,7 +759,7 @@ def fill_line(
             template_list = []
             row_length = len(row)
             for ci in range(row_length):  # ci - column index
-                if lines_without_border[ci]:
+                if subtable_columns[ci]:
                     metadata = metadata_list[ci]
                     if ci == 0:
                         template_list.append(translate_theme_border("border_left", theme, vertical, metadata["border_left"][0]))
@@ -775,7 +775,7 @@ def fill_line(
                     if template_list:
                         template_list[-1] = translate_theme_border("border_left", theme, template_list[-1] or vertical, metadata_border_left_ri) or template_list[-1]
 
-                    template_list.append(f"{metadata_border_left_ri}{{:<{widths[ci]}}}{metadata_border_right_ri}")
+                    template_list.append(f"{{:<{widths[ci]+2}}}")
 
                     border_right = translate_theme_border("border_right", theme, vertical, metadata_border_right_ri)
                     template_list.append(border_right)

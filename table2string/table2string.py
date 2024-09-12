@@ -180,7 +180,7 @@ down_separator       = "└───┴───┴───┘"
         else:
             max_name_width = sum(max_widths) + (3 * column_count) + 1 - 4
 
-        rows, symbols, lines_without_border, metadata_list = zip(
+        rows, symbols, subtable_columns, metadata_list = zip(
             line_spliter(
                 name,
                 max_name_width,
@@ -190,7 +190,7 @@ down_separator       = "└───┴───┴───┘"
             )
         )
         print(
-            fill_line(rows, symbols, lines_without_border, metadata_list, [max_name_width], name_align_t, theme),
+            fill_line(rows, symbols, subtable_columns, metadata_list, [max_name_width], name_align_t, theme),
             file=file,
         )
 
@@ -198,7 +198,7 @@ down_separator       = "└───┴───┴───┘"
     # TODO переделать в table[i] = ...
     def line_spliter_for_sub_table(sub_table: Table, ci: int) -> list[list[str] | bool | dict[str, tuple[str, ...]]]:
         string_sub_table = sub_table.stringify(
-            align="^",
+            align=align,
             max_width=max_widths[ci] + 4,
             max_height=max_height,
             line_break_symbol=line_break_symbol,
@@ -214,8 +214,8 @@ down_separator       = "└───┴───┴───┘"
             sub_table_symbols,
             True,
             {
-                "border_top": tuple(sub_table_lines[0][1:-1]),
-                "border_bottom": tuple(sub_table_lines[-1][1:-1]),
+                "border_top": tuple(sub_table_lines[0][2:-2]),
+                "border_bottom": tuple(sub_table_lines[-1][2:-2]),
                 "border_left": tuple(line[0] for line in sub_table_lines[1:-1]),
                 "border_right": tuple(line[-1] for line in sub_table_lines[1:-1]),
             },
@@ -254,17 +254,17 @@ down_separator       = "└───┴───┴───┘"
         for ci, column in enumerate(row):
             if column[2]:  # subtable
                 metadata: dict = column[3]
-                string = "".join(
+                string = " "+"".join(
                     theme.border.vertical if symbol == theme.border.bottom_horizontal else " "
                     for symbol in metadata["border_bottom"]
-                )
+                )+" "
                 extend_data = (string,) * (max_row_height - len(column[0]))
             else:
                 extend_data = (" ",) * (max_row_height - len(column[0]))
             column[0].extend(extend_data)
             column[1].extend(extend_data)
 
-        rows, symbols, lines_without_border, metadata_list = zip(*row)
+        rows, symbols, subtable_columns, metadata_list = zip(*row)
         if n == 0:
             prev_metadata = metadata_list
 
@@ -315,7 +315,7 @@ down_separator       = "└───┴───┴───┘"
         else:
             a = align_t
 
-        result_table.append((fill_line(rows, symbols, lines_without_border, metadata_list, max_widths, a, theme), ""))
+        result_table.append((fill_line(rows, symbols, subtable_columns, metadata_list, max_widths, a, theme), ""))
         prev_metadata = metadata_list
 
     if down_separator.strip():
@@ -560,9 +560,11 @@ def get_row_lengths(table: Sequence[Sequence]) -> List[int]:
     Не в utils.py из-за рекурсивного импорта
     :param table: Two-dimensional matrix
     """
-    return [
+    row_lengths = [
         max(
-            (lambda row_lengths: (sum(row_lengths) + 3 * len(row_lengths) + 1))(get_row_lengths(cell.table))
+            (
+                lambda subtable_row_lengths: (sum(subtable_row_lengths) + 3 * len(subtable_row_lengths) + 1)-4
+            )(get_row_lengths(cell.table))
             if check_cell(cell)
             else (
                 max(
@@ -576,3 +578,4 @@ def get_row_lengths(table: Sequence[Sequence]) -> List[int]:
         )
         for ci, column in enumerate(zip(*table))
     ]
+    return row_lengths
