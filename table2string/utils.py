@@ -3,7 +3,8 @@ import inspect
 import unicodedata
 from dataclasses import dataclass
 from cachetools import cached, LRUCache
-from typing import Union, List, Tuple, Sequence, Optional
+from typing import Union, List, Tuple, Optional
+
 
 ALLOWED_ALIGNS = [
     "<",
@@ -701,7 +702,6 @@ def fill_line(
     widths: List[int],
     align: Tuple[str, ...],
     theme: Theme = Themes.ascii_thin,
-    without_border: bool = False,
 ) -> str:
     """
 
@@ -712,7 +712,6 @@ def fill_line(
     :param widths:
     :param align:
     :param theme:
-    :param without_border:
     :return:
     """
     border = theme.border
@@ -742,7 +741,6 @@ def fill_line(
     lines = []
     symbol = list(zip(*symbols))
     vertical = border.vertical
-    vertical_without_border = "" if without_border else border.vertical
 
     for ri, row in enumerate(zip(*rows)):  # ri - row index
         row = list(row)
@@ -763,11 +761,10 @@ def fill_line(
             for ci in range(row_length):  # ci - column index
                 if lines_without_border[ci]:
                     metadata = metadata_list[ci]
-                    if not without_border:
-                        if ci == 0:
-                            template_list.append(translate_theme_border("border_left", theme, vertical, metadata["border_left"][0]))
-                        elif ci == row_length - 1:
-                            template_list[-1] = translate_theme_border("border_right", theme, template_list[-1] or vertical, metadata["border_right"][-1])
+                    if ci == 0:
+                        template_list.append(translate_theme_border("border_left", theme, vertical, metadata["border_left"][0]))
+                    elif ci == row_length - 1:
+                        template_list[-1] = translate_theme_border("border_right", theme, template_list[-1] or vertical, metadata["border_right"][-1])
 
                     try:
                         metadata_border_left_ri = metadata["border_left"][ri]
@@ -778,22 +775,16 @@ def fill_line(
                     if template_list:
                         template_list[-1] = translate_theme_border("border_left", theme, template_list[-1] or vertical, metadata_border_left_ri) or template_list[-1]
 
-                    # print(f"{widths[ci]=} {metadata_border_left_ri=} {metadata_border_right_ri=}")
                     template_list.append(f"{metadata_border_left_ri}{{:<{widths[ci]}}}{metadata_border_right_ri}")
 
                     border_right = translate_theme_border("border_right", theme, vertical, metadata_border_right_ri)
                     template_list.append(border_right)
-                    if without_border and ci == row_length - 1:
-                        del template_list[-1]
                 else:
-                    if not without_border:
-                        if ci == 0:
-                            template_list.append(vertical_without_border)
+                    if ci == 0:
+                        template_list.append(vertical)
                     template_list.append(f" {{:{current_align[ci]}{get_width(ci)}}}{symbol[ri][ci]}")
 
                     template_list.append(vertical)
-                    if without_border and ci == row_length - 1:
-                        del template_list[-1]
 
             return "".join(template_list)
 
@@ -817,7 +808,6 @@ def check_cell(cell) -> bool:
         "line_break_symbol",
         "cell_break_symbol",
         "theme",
-        "without_border",
         "ignore_width_errors",
     }.issubset(
         {param.name for param in inspect.signature(cell.stringify).parameters.values()}
@@ -827,30 +817,15 @@ def check_cell(cell) -> bool:
     return True
 
 
-def get_row_lengths(table: Sequence[Sequence]) -> List[int]:
-    return [
-        max(
-            (lambda row_lengths: sum(row_lengths) + 3 * len(row_lengths))(get_row_lengths(cell.table))
-            if check_cell(cell)
-            else (
-                max(
-                    get_text_width_in_console(line)
-                    for line in str_cell.splitlines() or [""]
-                )
-                if (str_cell := str(cell))
-                else 1
-            )
-            for cell in column
-        )
-        for ci, column in enumerate(zip(*table))
-    ]
-
-
-def apply_metadata(string: str, style: str, theme: Theme, metadata_list: tuple[dict | None, ...], max_widths: list[int], without_border: bool) -> str:
+def apply_metadata(
+    string: str,
+    style: str,
+    theme: Theme,
+    metadata_list: tuple[dict | None, ...],
+    max_widths: list[int],
+) -> str:
     string = MutableString(string)
     index = 2
-    if without_border:
-        index -= 1
 
     for current_metadata, width in zip(metadata_list, max_widths):
         if current_metadata:
