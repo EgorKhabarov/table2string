@@ -488,21 +488,16 @@ translate_border_dict = {
         ("vertical_left", "vertical_right_plus"): "central_plus",
     },
     "border_top": {
-        ("horizontal", ""): "horizontal",
-        ("horizontal", "vertical"): "top_horizontal",
-        ("top_horizontal", ""): "",
-        ("top_horizontal", "vertical"): "top_horizontal",
-        ("bottom_horizontal", ""): "bottom_horizontal",
-        ("bottom_horizontal", "vertical"): "central",
         ("horizontal", "top_horizontal"): "top_horizontal",
-        ("horizontal_plus", ""): "horizontal_plus",
+        ("top_horizontal", "bottom_horizontal"): "central",
+        ("bottom_horizontal", "top_horizontal"): "central",
         ("horizontal_plus", "top_horizontal"): "top_horizontal_plus",
     },
     "border_bottom": {
-        ("horizontal", "vertical"): "bottom_horizontal",
-        ("top_horizontal", "vertical"): "central",
-        ("bottom_horizontal", "vertical"): "bottom_horizontal",
         ("horizontal", "bottom_horizontal"): "bottom_horizontal",
+        ("top_horizontal", "bottom_horizontal"): "central",
+        ("bottom_horizontal", "top_horizontal"): "central",
+        ("horizontal_plus", "bottom_horizontal"): "bottom_horizontal_plus",
     },
 }
 border_translate_cache = LRUCache(maxsize=100)
@@ -534,8 +529,8 @@ def get_text_width_in_console(text: str) -> int:
 def decrease_numbers(
     row_lengths: List[int],
     max_width: int = 120,
-    min_width: int = 1,
 ) -> List[int]:
+    min_width = 1
     current_sum = sum(row_lengths)
     difference = max_width - current_sum
 
@@ -792,29 +787,6 @@ def fill_line(
         lines.append(template.format(*row))
 
     return "\n".join(lines)
-
-
-def check_cell(cell) -> bool:
-    if not hasattr(cell, "stringify"):
-        return False
-
-    if not callable(cell.stringify):
-        return False
-
-    if not {
-        "align",
-        "max_width",
-        "max_height",
-        "line_break_symbol",
-        "cell_break_symbol",
-        "theme",
-        "ignore_width_errors",
-    }.issubset(
-        {param.name for param in inspect.signature(cell.stringify).parameters.values()}
-    ):
-        return False
-
-    return True
 
 
 def apply_metadata(

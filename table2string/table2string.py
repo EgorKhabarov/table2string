@@ -9,7 +9,6 @@ from table2string.utils import (
     ALLOWED_ALIGNS,
     apply_metadata,
     line_spliter,
-    check_cell,
     fill_line,
     Themes,
     Theme,
@@ -76,6 +75,24 @@ def print_table(
     ), f"not allowed alignments: {tuple(not_allowed_aligns)}"
 
     column_count = max(map(len, table))
+    row_lengths = get_row_lengths(table)
+    min_row_lengths = get_row_lengths(table, minimum=True)
+
+    if max_width is not None and not ignore_width_errors:  # TODO ignore_width_errors
+        min_width = sum(min_row_lengths) + 3 * len(min_row_lengths) + 1
+        if isinstance(max_width, int):
+            assert max_width >= min_width, f"{max_width} >= {min_width}"
+        else:
+            assert not [mw for mw in max_width if mw < 1], [
+                mw for mw in max_width if mw < 1
+            ]
+            max_width = max_width[:column_count]
+            max_width = (
+                *max_width,
+                *(max_width[-1],) * (column_count - len(max_width)),
+            )
+            sum_max_width = sum(max_width)
+            assert sum_max_width >= min_width, f"{sum_max_width} >= {min_width}"
 
     if column_names:
         column_names = list(column_names)
@@ -88,24 +105,7 @@ def print_table(
 
         table.insert(0, column_names)
 
-    if max_width is not None and not ignore_width_errors:
-        if isinstance(max_width, int):
-            min_width = column_count * 4 + 1
-            assert max_width >= min_width, f"{max_width} >= {min_width}"
-        else:
-            assert not [mw for mw in max_width if mw < 1], [
-                mw for mw in max_width if mw < 1
-            ]
-            max_width = max_width[:column_count]
-            max_width = (
-                *max_width,
-                *(max_width[-1],) * (column_count - len(max_width)),
-            )
-            min_width = column_count
-            assert sum(max_width) >= min_width, f"{sum(max_width)} >= {min_width}"
-
     border = theme.border
-    row_lengths = get_row_lengths(table)
     max_widths = transform_width(max_width, column_count, row_lengths)
     align_t = transform_align(column_count, align)
     column_names_align_t = transform_align(column_count, column_names_align)
@@ -207,6 +207,8 @@ down_separator       = "└───┴───┴───┘"
             ignore_width_errors=True,
         )
         sub_table_lines = string_sub_table.splitlines()
+        if max_height:
+            sub_table_lines = sub_table_lines[:max_height+2]
         blank_line = ""
         sub_table_symbols = [blank_line for _ in range(len(sub_table_lines))]
         result = [
@@ -225,7 +227,7 @@ down_separator       = "└───┴───┴───┘"
     table_g = (
         [
             line_spliter_for_sub_table(cell, ci)
-            if check_cell(cell)
+            if isinstance(cell, Table)
             else line_spliter(
                 str(cell),
                 max_widths[ci],
@@ -293,24 +295,9 @@ down_separator       = "└───┴───┴───┘"
                 a = align_t
 
             if s.strip():
-                if s in (under_name_separator, up_noname_separator):
-                    if n == 1:
-                        s = apply_metadata(s, "border_bottom", theme, prev_metadata, max_widths)
-                    else:
-                        s = apply_metadata(s, "border_top", theme, metadata_list, max_widths)
-                elif s in (line_separator_plus, line_separator) or s[1:-1] in (line_separator_plus, line_separator):
-                    if n > 1:
-                        result_table[-3] = (
-                            apply_metadata(result_table[-3][0], "border_bottom", theme, metadata_list, max_widths),
-                            result_table[-3][1],
-                        )
-                    s = apply_metadata(s, "border_top", theme, metadata_list, max_widths)
-                elif s == down_separator:
-                    result_table[-3] = (
-                        apply_metadata(result_table[-3][0], "border_top", theme, metadata_list, max_widths),
-                        result_table[-3][1],
-                    )
-                    s = apply_metadata(s, "border_bottom", theme, metadata_list, max_widths)
+                s = apply_metadata(s, "border_top", theme, metadata_list, max_widths)
+                if n > 0:
+                    s = apply_metadata(s, "border_bottom", theme, prev_metadata, max_widths)
                 result_table.append((s, "\n"))
         else:
             a = align_t
@@ -552,21 +539,22 @@ class Table:
         )
 
 
-def get_row_lengths(table: Sequence[Sequence]) -> List[int]:
+def get_row_lengths(table: Sequence[Sequence], minimum: bool = False) -> List[int]:
     """
     Вычисляет и возвращает список ширин колонок
     Если ячейка матрицы это экземпляр table2string.Table используется рекурсия
 
     Не в utils.py из-за рекурсивного импорта
     :param table: Two-dimensional matrix
+    :param minimum: 1
     """
     row_lengths = [
         max(
             (
                 lambda subtable_row_lengths: (sum(subtable_row_lengths) + 3 * len(subtable_row_lengths) + 1)-4
-            )(get_row_lengths(cell.table))
-            if check_cell(cell)
-            else (
+            )(get_row_lengths(cell.table, minimum=minimum))
+            if isinstance(cell, Table)
+            else 1 if minimum else (
                 max(
                     get_text_width_in_console(line)
                     for line in str_cell.splitlines() or [""]
