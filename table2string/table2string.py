@@ -191,13 +191,23 @@ down_separator       = "└───┴───┴───┘"
             )
         )
         print(
-            fill_line(rows, symbols, subtable_columns, metadata_list, [max_name_width], name_align_t, theme),
+            fill_line(
+                rows,
+                symbols,
+                subtable_columns,
+                metadata_list,
+                [max_name_width],
+                name_align_t,
+                theme,
+            ),
             file=file,
         )
 
     # Trimming long lines
     # TODO переделать в table[i] = ...
-    def line_spliter_for_sub_table(sub_table: Table, ci: int) -> list[list[str] | bool | dict[str, tuple[str, ...]]]:
+    def line_spliter_for_sub_table(
+        sub_table: Table, ci: int
+    ) -> list[list[str] | bool | dict[str, tuple[str, ...]]]:
         string_sub_table = sub_table.stringify(
             align=align,
             max_width=max_widths[ci] + 4,
@@ -209,7 +219,7 @@ down_separator       = "└───┴───┴───┘"
         )
         sub_table_lines = string_sub_table.splitlines()
         if max_height:
-            sub_table_lines = sub_table_lines[:max_height+2]
+            sub_table_lines = sub_table_lines[: max_height + 2]
         blank_line = ""
         sub_table_symbols = [blank_line for _ in range(len(sub_table_lines))]
         result = [
@@ -219,22 +229,26 @@ down_separator       = "└───┴───┴───┘"
             {
                 "border_top": tuple(sub_table_lines[0][2:-2]),
                 "border_bottom": tuple(sub_table_lines[-1][2:-2]),
-                "border_left": tuple(line[0] for line in sub_table_lines[1:-1]) or (" ",),
-                "border_right": tuple(line[-1] for line in sub_table_lines[1:-1]) or (" ",),
+                "border_left": tuple(line[0] for line in sub_table_lines[1:-1])
+                or (" ",),
+                "border_right": tuple(line[-1] for line in sub_table_lines[1:-1])
+                or (" ",),
             },
         ]
         return result
 
     table_g = (
         [
-            line_spliter_for_sub_table(cell, ci)
-            if isinstance(cell, Table)
-            else line_spliter(
-                str(cell),
-                max_widths[ci],
-                max_height,
-                line_break_symbol,
-                cell_break_symbol,
+            (
+                line_spliter_for_sub_table(cell, ci)
+                if isinstance(cell, Table)
+                else line_spliter(
+                    str(cell),
+                    max_widths[ci],
+                    max_height,
+                    line_break_symbol,
+                    cell_break_symbol,
+                )
             )
             for ci, cell in enumerate(row)
         ]
@@ -256,10 +270,18 @@ down_separator       = "└───┴───┴───┘"
         for ci, column in enumerate(row):
             if column[2]:  # subtable
                 metadata: dict = column[3]
-                string = " "+"".join(
-                    theme.border.vertical if symbol == theme.border.bottom_horizontal else " "
-                    for symbol in metadata["border_bottom"]
-                )+" "
+                string = (
+                    " "
+                    + "".join(
+                        (
+                            theme.border.vertical
+                            if symbol == theme.border.bottom_horizontal
+                            else " "
+                        )
+                        for symbol in metadata["border_bottom"]
+                    )
+                    + " "
+                )
                 extend_data = (string,) * (max_row_height - len(column[0]))
             else:
                 extend_data = (" ",) * (max_row_height - len(column[0]))
@@ -297,16 +319,31 @@ down_separator       = "└───┴───┴───┘"
             if s.strip():
                 s = apply_metadata(s, "border_top", theme, metadata_list, max_widths)
                 if n > 0:
-                    s = apply_metadata(s, "border_bottom", theme, prev_metadata, max_widths)
+                    s = apply_metadata(
+                        s, "border_bottom", theme, prev_metadata, max_widths
+                    )
                 result_table.append((s, "\n"))
         else:
             a = align_t
 
-        result_table.append((fill_line(rows, symbols, subtable_columns, metadata_list, max_widths, a, theme), ""))
+        result_table.append(
+            (
+                fill_line(
+                    rows, symbols, subtable_columns, metadata_list, max_widths, a, theme
+                ),
+                "",
+            )
+        )
         prev_metadata = metadata_list
 
     if down_separator.strip():
-        s = apply_metadata(down_separator.rstrip("\n"), "border_bottom", theme, prev_metadata, max_widths)
+        s = apply_metadata(
+            down_separator.rstrip("\n"),
+            "border_bottom",
+            theme,
+            prev_metadata,
+            max_widths,
+        )
         result_table.append(("\n" + s, end))
     elif end:
         result_table.append(("", end))
@@ -535,7 +572,9 @@ class Table:
         return "Table({table}{name}{column_names})".format(
             table=f"{self.table!r}",
             name=f", name={self.name!r}" if self.name else "",
-            column_names=f", column_names={self.column_names!r}" if self.column_names else "",
+            column_names=(
+                f", column_names={self.column_names!r}" if self.column_names else ""
+            ),
         )
 
 
@@ -551,16 +590,25 @@ def get_row_lengths(table: Sequence[Sequence], minimum: bool = False) -> List[in
     row_lengths = [
         max(
             (
-                lambda subtable_row_lengths: (sum(subtable_row_lengths) + 3 * len(subtable_row_lengths) + 1)-4
-            )(get_row_lengths(cell.table, minimum=minimum))
-            if isinstance(cell, Table)
-            else 1 if minimum else (
-                max(
-                    get_text_width_in_console(line)
-                    for line in str_cell.splitlines() or [""]
+                (
+                    lambda subtable_row_lengths: (
+                        sum(subtable_row_lengths) + 3 * len(subtable_row_lengths) + 1
+                    )
+                    - 4
+                )(get_row_lengths(cell.table, minimum=minimum))
+                if isinstance(cell, Table)
+                else (
+                    1
+                    if minimum
+                    else (
+                        max(
+                            get_text_width_in_console(line)
+                            for line in str_cell.splitlines() or [""]
+                        )
+                        if (str_cell := str(cell))
+                        else 1
+                    )
                 )
-                if (str_cell := str(cell))
-                else 1
             )
             for cell in column
         )

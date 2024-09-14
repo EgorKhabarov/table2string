@@ -84,7 +84,11 @@ class Border:
 
 
 class Theme:
-    def __init__(self, border: Border = Border(), custom_sub_table_theme: Optional["Theme"] = None):
+    def __init__(
+        self,
+        border: Border = Border(),
+        custom_sub_table_theme: Optional["Theme"] = None,
+    ):
         self.border = border
         self.custom_sub_table_theme = custom_sub_table_theme or self
 
@@ -408,7 +412,7 @@ class Themes:
             top_horizontal_plus="╥",
             bottom_horizontal_plus="╨",
         ),
-        custom_sub_table_theme=double
+        custom_sub_table_theme=double,
     )
     booktabs: Theme = Theme(
         border=Border(
@@ -513,11 +517,15 @@ border_translate_cache = LRUCache(maxsize=100)
 
 
 @cached(border_translate_cache)
-def translate_theme_border(side: str, theme: Theme, border_from: str, border_to: str) -> str:
+def translate_theme_border(
+    side: str, theme: Theme, border_from: str, border_to: str
+) -> str:
     border_from_name = theme.border.get_border_name(border_from)
     border_to_name = theme.border.get_border_name(border_to)
 
-    if border_result := translate_border_dict[side].get((border_from_name, border_to_name)):
+    if border_result := translate_border_dict[side].get(
+        (border_from_name, border_to_name)
+    ):
         return getattr(theme.border, border_result)
     return border_from
 
@@ -755,9 +763,7 @@ def fill_line(
             current_align = align_right
 
         def get_width(ci: int):
-            return widths[ci] - (
-                get_text_width_in_console(row[ci]) - len(row[ci])
-            )
+            return widths[ci] - (get_text_width_in_console(row[ci]) - len(row[ci]))
 
         def get_template() -> str:
             template_list = []
@@ -766,9 +772,21 @@ def fill_line(
                 if subtable_columns[ci]:
                     metadata = metadata_list[ci]
                     if ci == 0:
-                        template_list.append(translate_theme_border("border_left", theme, vertical, metadata["border_left"][0]))
+                        template_list.append(
+                            translate_theme_border(
+                                "border_left",
+                                theme,
+                                vertical,
+                                metadata["border_left"][0],
+                            )
+                        )
                     elif ci == row_length - 1:
-                        template_list[-1] = translate_theme_border("border_right", theme, template_list[-1] or vertical, metadata["border_right"][-1])
+                        template_list[-1] = translate_theme_border(
+                            "border_right",
+                            theme,
+                            template_list[-1] or vertical,
+                            metadata["border_right"][-1],
+                        )
 
                     try:
                         metadata_border_left_ri = metadata["border_left"][ri]
@@ -777,16 +795,28 @@ def fill_line(
                         metadata_border_left_ri = " "
                         metadata_border_right_ri = " "
                     if template_list:
-                        template_list[-1] = translate_theme_border("border_left", theme, template_list[-1] or vertical, metadata_border_left_ri) or template_list[-1]
+                        template_list[-1] = (
+                            translate_theme_border(
+                                "border_left",
+                                theme,
+                                template_list[-1] or vertical,
+                                metadata_border_left_ri,
+                            )
+                            or template_list[-1]
+                        )
 
                     template_list.append(f"{{:<{widths[ci]+2}}}")
 
-                    border_right = translate_theme_border("border_right", theme, vertical, metadata_border_right_ri)
+                    border_right = translate_theme_border(
+                        "border_right", theme, vertical, metadata_border_right_ri
+                    )
                     template_list.append(border_right)
                 else:
                     if ci == 0:
                         template_list.append(vertical)
-                    template_list.append(f" {{:{current_align[ci]}{get_width(ci)}}}{symbol[ri][ci]}")
+                    template_list.append(
+                        f" {{:{current_align[ci]}{get_width(ci)}}}{symbol[ri][ci]}"
+                    )
 
                     template_list.append(vertical)
 
@@ -815,9 +845,15 @@ def apply_metadata(
                 if border_l == " ":
                     border_l = theme.border.horizontal
                 if style == "border_top":
-                    string[index] = translate_theme_border(style, theme, border_l, border_r) or border_l
+                    string[index] = (
+                        translate_theme_border(style, theme, border_l, border_r)
+                        or border_l
+                    )
                 elif style == "border_bottom":
-                    string[index] = translate_theme_border(style, theme, border_l, border_r) or border_l
+                    string[index] = (
+                        translate_theme_border(style, theme, border_l, border_r)
+                        or border_l
+                    )
                 index += 1
         else:
             index += width

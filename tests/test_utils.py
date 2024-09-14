@@ -168,14 +168,23 @@ def test_fill_line():
 """.strip()
     )
     assert (
-        fill_line([["123", "456"]], [[" ", " "]], [False, False], (None, None), [3], ("<",))
+        fill_line(
+            [["123", "456"]], [[" ", " "]], [False, False], (None, None), [3], ("<",)
+        )
         == """
 | 123 |
 | 456 |
 """.strip()
     )
     assert (
-        fill_line([["123"], ["456"]], [[" "], [" "]], [False, False], (None, None), [3, 3], ("<", "<"))
+        fill_line(
+            [["123"], ["456"]],
+            [[" "], [" "]],
+            [False, False],
+            (None, None),
+            [3, 3],
+            ("<", "<"),
+        )
         == "| 123 | 456 |"
     )
     assert (
