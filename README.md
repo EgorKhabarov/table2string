@@ -12,8 +12,9 @@
 
 While there are several libraries available for converting tables to strings in Python, none seemed to meet my specific requirements. 
 
-- **Line Break Support:** Easily include line breaks within cells for enhanced readability.
-- **Emoji Integration:** Effortlessly incorporate emoji characters into your tables to add visual appeal and context.
+- **Line Break Support**: Easily include line breaks within cells for enhanced readability.
+- **Subtable Support**: Easily include a table within a table for a more flexible presentation.
+- **Emoji Integration**: Effortlessly incorporate emoji characters into your tables to add visual appeal and context.
 
 ---
 
@@ -119,6 +120,14 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 | qwe | rty |   |
 |     | uio |   |
 +-----+-----+---+
+>>> Table([("\nf1", Table([("1", "2"), ("3", "4")]),)], name="Table Name").print()
++------------+
+| Table Name |
++----+---+---+
+|    | 1 | 2 |
+| f1 +---+---+
+|    | 3 | 4 |
++----+---+---+
 
 ```
 
@@ -1097,41 +1106,41 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 
 ```pycon
 >>> t.print(theme=Themes.thick_thin)
-┌─────┬─────┬───┐
-│   1 │   2 │ 3 │
-┠━━━━━╂━━━━━╂━━━┨
-│ qwe │ rty │   │
-│     │ uio │   │
-└─────┴─────┴───┘
+┏━━━━━┳━━━━━┳━━━┓
+┃   1 ┃   2 ┃ 3 ┃
+┠─────╂─────╂───┨
+┃ qwe ┃ rty ┃   ┃
+┃     ┃ uio ┃   ┃
+┗━━━━━┻━━━━━┻━━━┛
 >>> t_column_names.print(theme=Themes.thick_thin)
-┌─────┬─────┬───┐
-│ c1  │ c2  │ 3 │
-┠━━━━━╂━━━━━╂━━━┨
-│   1 │   2 │ 3 │
-├─────┼─────┼───┤
-│ qwe │ rty │   │
-│     │ uio │   │
-└─────┴─────┴───┘
+┏━━━━━┳━━━━━┳━━━┓
+┃ c1  ┃ c2  ┃ 3 ┃
+┠─────╂─────╂───┨
+┃   1 ┃   2 ┃ 3 ┃
+┣━━━━━╋━━━━━╋━━━┫
+┃ qwe ┃ rty ┃   ┃
+┃     ┃ uio ┃   ┃
+┗━━━━━┻━━━━━┻━━━┛
 >>> t_name.print(theme=Themes.thick_thin)
-┌───────────────┐
-│  Table Name   │
-├─────┬─────┬───┤
-│   1 │   2 │ 3 │
-┠━━━━━╂━━━━━╂━━━┨
-│ qwe │ rty │   │
-│     │ uio │   │
-└─────┴─────┴───┘
+┏━━━━━━━━━━━━━━━┓
+┃  Table Name   ┃
+┣━━━━━┳━━━━━┳━━━┫
+┃   1 ┃   2 ┃ 3 ┃
+┠─────╂─────╂───┨
+┃ qwe ┃ rty ┃   ┃
+┃     ┃ uio ┃   ┃
+┗━━━━━┻━━━━━┻━━━┛
 >>> t_name_column_names.print(theme=Themes.thick_thin)
-┌───────────────┐
-│  Table Name   │
-├─────┬─────┬───┤
-│ c1  │ c2  │ 3 │
-┠━━━━━╂━━━━━╂━━━┨
-│   1 │   2 │ 3 │
-├─────┼─────┼───┤
-│ qwe │ rty │   │
-│     │ uio │   │
-└─────┴─────┴───┘
+┏━━━━━━━━━━━━━━━┓
+┃  Table Name   ┃
+┣━━━━━┳━━━━━┳━━━┫
+┃ c1  ┃ c2  ┃ 3 ┃
+┠─────╂─────╂───┨
+┃   1 ┃   2 ┃ 3 ┃
+┣━━━━━╋━━━━━╋━━━┫
+┃ qwe ┃ rty ┃   ┃
+┃     ┃ uio ┃   ┃
+┗━━━━━┻━━━━━┻━━━┛
 
 ```
 </details>

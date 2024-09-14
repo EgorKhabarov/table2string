@@ -1,5 +1,3 @@
-import inspect
-
 import unicodedata
 from dataclasses import dataclass
 from cachetools import cached, LRUCache
