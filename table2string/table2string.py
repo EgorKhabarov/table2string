@@ -90,7 +90,7 @@ def print_table(
     row_lengths = get_row_lengths(table)
     min_row_lengths = get_row_lengths(table, minimum=True)
 
-    if max_width is not None and not ignore_width_errors:  # TODO ignore_width_errors
+    if max_width is not None and not ignore_width_errors:
         min_width = sum(min_row_lengths) + 3 * len(min_row_lengths) + 1
         if isinstance(max_width, int):
             assert max_width >= min_width, f"{max_width} >= {min_width}"
@@ -204,7 +204,6 @@ down_separator       = "└───┴───┴───┘"
         )
 
     # Trimming long lines
-    # TODO переделать в table[i] = ...
     def line_spliter_for_sub_table(
         sub_table: Table, ci: int
     ) -> list[list[str] | bool | dict[str, tuple[str, ...]]]:
@@ -237,30 +236,25 @@ down_separator       = "└───┴───┴───┘"
         ]
         return result
 
-    table_g = (
-        [
-            (
-                line_spliter_for_sub_table(cell, ci)
-                if isinstance(cell, Table)
-                else line_spliter(
-                    str(cell),
+    prev_metadata = None
+    result_table = []
+
+    for ri, row in enumerate(table):
+        if ri != 0:
+            result_table.append(("", "\n"))
+
+        for ci, column in enumerate(row):
+            if isinstance(column, Table):
+                column_lines = line_spliter_for_sub_table(column, ci)
+            else:
+                column_lines = line_spliter(
+                    str(column),
                     max_widths[ci],
                     max_height,
                     line_break_symbol,
                     cell_break_symbol,
                 )
-            )
-            for ci, cell in enumerate(row)
-        ]
-        for row in table
-    )
-    table_g = list(table_g)
-    prev_metadata = None
-    result_table = []
-
-    for n, row in enumerate(table_g):  # TODO rename n to ri (row index)
-        if n != 0:
-            result_table.append(("", "\n"))
+            row[ci] = column_lines
 
         if maximize_height and max_height:
             max_row_height = max_height
@@ -289,27 +283,27 @@ down_separator       = "└───┴───┴───┘"
             column[1].extend(extend_data)
 
         rows, symbols, subtable_columns, metadata_list = zip(*row)
-        if n == 0:
+        if ri == 0:
             prev_metadata = metadata_list
 
         def n_in_sep():
             if column_names:
-                return n - 1 in sep
+                return ri - 1 in sep
             else:
-                return n in sep
+                return ri in sep
 
         if (
-            (sep is True or n == 0)
+            (sep is True or ri == 0)
             or (isinstance(sep, (range, tuple)) and n_in_sep())
-            or (n == 1 and column_names)
+            or (ri == 1 and column_names)
         ):
-            if (name and n == 1) or ((not name) and n == 1):
+            if (name and ri == 1) or ((not name) and ri == 1):
                 s = line_separator_plus
                 a = align_t
-            elif name and n == 0:
+            elif name and ri == 0:
                 s = under_name_separator
                 a = column_names_align_t if column_names else align_t
-            elif (not name) and n == 0:
+            elif (not name) and ri == 0:
                 s = up_noname_separator
                 a = column_names_align_t if column_names else align_t
             else:
@@ -318,7 +312,7 @@ down_separator       = "└───┴───┴───┘"
 
             if s.strip():
                 s = apply_metadata(s, "border_top", theme, metadata_list, max_widths)
-                if n > 0:
+                if ri > 0:
                     s = apply_metadata(
                         s, "border_bottom", theme, prev_metadata, max_widths
                     )
