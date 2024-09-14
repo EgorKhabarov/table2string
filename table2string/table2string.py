@@ -75,6 +75,18 @@ def print_table(
     ), f"not allowed alignments: {tuple(not_allowed_aligns)}"
 
     column_count = max(map(len, table))
+
+    if column_names:
+        column_names = list(column_names)
+        column_names_len = len(column_names)
+
+        if column_names_len > column_count:
+            column_names = column_names[: column_names_len - 1]
+        else:
+            column_names.extend((" ",) * (column_count - column_names_len))
+
+        table.insert(0, column_names)
+
     row_lengths = get_row_lengths(table)
     min_row_lengths = get_row_lengths(table, minimum=True)
 
@@ -91,19 +103,8 @@ def print_table(
                 *max_width,
                 *(max_width[-1],) * (column_count - len(max_width)),
             )
-            sum_max_width = sum(max_width)
+            sum_max_width = sum(max_width) + 3 * len(max_width) + 1
             assert sum_max_width >= min_width, f"{sum_max_width} >= {min_width}"
-
-    if column_names:
-        column_names = list(column_names)
-        column_names_len = len(column_names)
-
-        if column_names_len > column_count:
-            column_names = column_names[: column_names_len - 1]
-        else:
-            column_names.extend((" ",) * (column_count - column_names_len))
-
-        table.insert(0, column_names)
 
     border = theme.border
     max_widths = transform_width(max_width, column_count, row_lengths)
@@ -218,8 +219,8 @@ down_separator       = "└───┴───┴───┘"
             {
                 "border_top": tuple(sub_table_lines[0][2:-2]),
                 "border_bottom": tuple(sub_table_lines[-1][2:-2]),
-                "border_left": tuple(line[0] for line in sub_table_lines[1:-1]),
-                "border_right": tuple(line[-1] for line in sub_table_lines[1:-1]),
+                "border_left": tuple(line[0] for line in sub_table_lines[1:-1]) or (" ",),
+                "border_right": tuple(line[-1] for line in sub_table_lines[1:-1]) or (" ",),
             },
         ]
         return result
@@ -240,7 +241,6 @@ down_separator       = "└───┴───┴───┘"
         for row in table
     )
     table_g = list(table_g)
-    metadata_list = None  # TODO убрать
     prev_metadata = None
     result_table = []
 
@@ -306,7 +306,7 @@ down_separator       = "└───┴───┴───┘"
         prev_metadata = metadata_list
 
     if down_separator.strip():
-        s = apply_metadata(down_separator.rstrip("\n"), "border_bottom", theme, metadata_list, max_widths)
+        s = apply_metadata(down_separator.rstrip("\n"), "border_bottom", theme, prev_metadata, max_widths)
         result_table.append(("\n" + s, end))
     elif end:
         result_table.append(("", end))
@@ -534,7 +534,7 @@ class Table:
     def __repr__(self):
         return "Table({table}{name}{column_names})".format(
             table=f"{self.table!r}",
-            name=f", name={self.name}" if self.name else "",
+            name=f", name={self.name!r}" if self.name else "",
             column_names=f", column_names={self.column_names!r}" if self.column_names else "",
         )
 

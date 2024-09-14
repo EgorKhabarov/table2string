@@ -115,6 +115,7 @@ class Themes:
             top_horizontal_plus="+",
             bottom_horizontal_plus="+",
         ),
+        custom_sub_table_theme=ascii_thin,
     )
     ascii_double: Theme = Theme(
         border=Border(
@@ -159,6 +160,7 @@ class Themes:
             top_horizontal_plus="-",
             bottom_horizontal_plus="-",
         ),
+        custom_sub_table_theme=ascii_double,
     )
     ascii_booktabs: Theme = Theme(
         border=Border(
@@ -343,23 +345,23 @@ class Themes:
     thick_thin: Theme = Theme(
         border=Border(
             name="thick_thin",
-            horizontal="─",
-            vertical="│",
-            top_left="┌",
-            top_right="┐",
-            bottom_left="└",
-            bottom_right="┘",
-            vertical_left="├",
-            vertical_right="┤",
-            top_horizontal="┬",
-            bottom_horizontal="┴",
-            central="┼",
+            horizontal="━",
+            vertical="┃",
+            top_left="┏",
+            top_right="┓",
+            bottom_left="┗",
+            bottom_right="┛",
+            vertical_left="┣",
+            vertical_right="┫",
+            top_horizontal="┳",
+            bottom_horizontal="┻",
+            central="╋",
             vertical_left_plus="┠",
-            horizontal_plus="━",
+            horizontal_plus="─",
             central_plus="╂",
             vertical_right_plus="┨",
-            top_horizontal_plus="┳",
-            bottom_horizontal_plus="┻",
+            top_horizontal_plus="┰",
+            bottom_horizontal_plus="┸",
         ),
         custom_sub_table_theme=thick,
     )
@@ -403,9 +405,10 @@ class Themes:
             horizontal_plus="─",
             central_plus="╫",
             vertical_right_plus="╢",
-            top_horizontal_plus="╦",
-            bottom_horizontal_plus="╩",
+            top_horizontal_plus="╥",
+            bottom_horizontal_plus="╨",
         ),
+        custom_sub_table_theme=double
     )
     booktabs: Theme = Theme(
         border=Border(
@@ -428,7 +431,6 @@ class Themes:
             top_horizontal_plus=" ",
             bottom_horizontal_plus=" ",
         ),
-        custom_sub_table_theme=thin,
     )
     markdown: Theme = Theme(
         border=Border(
@@ -451,6 +453,7 @@ class Themes:
             top_horizontal_plus=" ",
             bottom_horizontal_plus=" ",
         ),
+        custom_sub_table_theme=ascii_thin,
     )
 
 
@@ -480,24 +483,30 @@ translate_border_dict = {
         ("vertical", "vertical_left_plus"): "vertical_left_plus",
         ("vertical_right", "vertical_left"): "central",
         ("vertical_right", "vertical_left_plus"): "central_plus",
+        ("vertical", "central"): "vertical_left",
     },
     "border_right": {
         ("vertical", "vertical_right"): "vertical_right",
         ("vertical", "vertical_right_plus"): "vertical_right_plus",
         ("vertical_left", "vertical_right"): "central",
         ("vertical_left", "vertical_right_plus"): "central_plus",
+        ("vertical", "central"): "vertical_right",
     },
     "border_top": {
         ("horizontal", "top_horizontal"): "top_horizontal",
         ("top_horizontal", "bottom_horizontal"): "central",
         ("bottom_horizontal", "top_horizontal"): "central",
         ("horizontal_plus", "top_horizontal"): "top_horizontal_plus",
+        ("horizontal", "central"): "central",
+        ("horizontal_plus", "central"): "central",
     },
     "border_bottom": {
         ("horizontal", "bottom_horizontal"): "bottom_horizontal",
         ("top_horizontal", "bottom_horizontal"): "central",
         ("bottom_horizontal", "top_horizontal"): "central",
         ("horizontal_plus", "bottom_horizontal"): "bottom_horizontal_plus",
+        ("horizontal", "central"): "central",
+        ("horizontal_plus", "central"): "central",
     },
 }
 border_translate_cache = LRUCache(maxsize=100)

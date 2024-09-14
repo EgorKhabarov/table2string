@@ -1028,25 +1028,25 @@ Never gonna tell a lie and hurt you
     assert (
         stringify_table(table_19, theme=Themes.thick_thin)
         == """
-┌─────┬─────┬───┐
-│   1 │   2 │ 3 │
-┠━━━━━╂━━━━━╂━━━┨
-│ qwe │ rty │   │
-│     │ uio │   │
-└─────┴─────┴───┘
+┏━━━━━┳━━━━━┳━━━┓
+┃   1 ┃   2 ┃ 3 ┃
+┠─────╂─────╂───┨
+┃ qwe ┃ rty ┃   ┃
+┃     ┃ uio ┃   ┃
+┗━━━━━┻━━━━━┻━━━┛
 """.strip()
     )
     assert (
         stringify_table(table_19, theme=Themes.thick_thin, name=name_1)
         == """
-┌───────────────┐
-│  Table Name   │
-├─────┬─────┬───┤
-│   1 │   2 │ 3 │
-┠━━━━━╂━━━━━╂━━━┨
-│ qwe │ rty │   │
-│     │ uio │   │
-└─────┴─────┴───┘
+┏━━━━━━━━━━━━━━━┓
+┃  Table Name   ┃
+┣━━━━━┳━━━━━┳━━━┫
+┃   1 ┃   2 ┃ 3 ┃
+┠─────╂─────╂───┨
+┃ qwe ┃ rty ┃   ┃
+┃     ┃ uio ┃   ┃
+┗━━━━━┻━━━━━┻━━━┛
 """.strip()
     )
     assert (

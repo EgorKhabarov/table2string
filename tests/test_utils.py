@@ -1,9 +1,9 @@
+from table2string.table2string import get_row_lengths
 from table2string.utils import (
     get_text_width_in_console,
     decrease_numbers,
     transform_align,
     transform_width,
-    get_row_lengths,
     line_spliter,
     fill_line,
 )
