@@ -1,7 +1,7 @@
 from table2string.table2string import get_row_lengths
 from table2string.utils import (
     get_text_width_in_console,
-    decrease_numbers,
+    proportional_change,
     transform_align,
     transform_width,
     line_spliter,
@@ -15,14 +15,36 @@ def test_get_text_width_in_console():
 
 
 def test_decrease_numbers():
-    assert decrease_numbers([2, 2, 3], 10) == [3, 3, 4]
-    assert decrease_numbers([2, 2, 3], 11) == [3, 3, 5]
-    assert decrease_numbers([20, 2, 3], 10) == [8, 1, 1]
-    assert decrease_numbers([20, 2, 3], 100) == [80, 8, 12]
-    assert decrease_numbers(
+    assert proportional_change([2, 2, 3], 10) == [3, 3, 4]
+    assert proportional_change([2, 2, 3], 11) == [3, 3, 5]
+    assert proportional_change([20, 2, 3], 10) == [5, 2, 3]
+    assert proportional_change([20, 2, 3], 100) == [59, 19, 22]
+    assert proportional_change(
         [19, 10, 7, 4, 12, 4, 4, 4, 1, 1168],
         185,
-    ) == [1, 1, 1, 1, 2, 1, 1, 1, 1, 175]
+    ) == [7, 8, 8, 9, 9, 10, 10, 12, 13, 99]
+
+    assert proportional_change([9, 6], 6, [5, 1]) == [5, 1]
+    assert proportional_change([2, 2, 3], 10, [1, 1, 1]) == [3, 3, 4]
+    assert proportional_change([2, 2, 3], 10, [1, 4, 1]) == [2, 4, 4]
+    assert proportional_change(
+        [19, 10, 7, 4, 12, 4, 4, 4, 1, 1168],
+        185,
+    ) == [7, 8, 8, 9, 9, 10, 10, 12, 13, 99]
+    assert proportional_change(
+        [19, 10, 7, 4, 12, 4, 4, 4, 1, 1168],
+        185,
+        [1, 1, 1, 1, 1, 1, 1, 1, 20, 1],
+    ) == [6, 7, 7, 8, 8, 9, 10, 11, 21, 98]
+    assert proportional_change([1, 1, 1], 10, [1, 1, 1]) == [4, 3, 3]
+    assert proportional_change([1, 1, 1], 11, [1, 1, 1]) == [3, 4, 4]
+    assert proportional_change([1, 1, 1], 12, [1, 1, 1]) == [4, 4, 4]
+    assert proportional_change([1, 1, 1], 13, [1, 1, 1]) == [5, 4, 4]
+    assert proportional_change([1, 1, 1], 14, [1, 1, 1]) == [4, 5, 5]
+    assert proportional_change([1, 1, 1], 15, [1, 1, 1]) == [5, 5, 5]
+    assert proportional_change([1, 1, 1], 16, [1, 1, 1]) == [5, 5, 6]
+    assert proportional_change([1, 1, 1], 16, [1, 9, 6]) == [1, 9, 6]
+    assert proportional_change([987654, 10000, 999999], 16, [1, 9, 1]) == [3, 9, 4]
 
 
 def test_transform_align():

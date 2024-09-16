@@ -107,7 +107,7 @@ def print_table(
             assert sum_max_width >= min_width, f"{sum_max_width} >= {min_width}"
 
     border = theme.border
-    max_widths = transform_width(max_width, column_count, row_lengths)
+    max_widths = transform_width(max_width, column_count, row_lengths, min_row_lengths)
     align_t = transform_align(column_count, align)
     column_names_align_t = transform_align(column_count, column_names_align)
 

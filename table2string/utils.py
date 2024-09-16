@@ -1,3 +1,4 @@
+import re
 import unicodedata
 from dataclasses import dataclass
 from cachetools import cached, LRUCache
@@ -532,6 +533,7 @@ def get_text_width_in_console(text: str) -> int:
     """
     Calculates the number of positions that a line will occupy in the console.
     """
+    text = re.sub(r"\x1b\[[0-9;]*[a-zA-Z]", "", text)
     width = 0
     for char in text:
         if unicodedata.east_asian_width(char) in ("W", "F"):
@@ -541,47 +543,73 @@ def get_text_width_in_console(text: str) -> int:
     return width
 
 
-def decrease_numbers(
+def proportional_change(
     row_lengths: List[int],
     max_width: int = 120,
+    min_row_lengths: Optional[List[int]] = None,
+    k: float = 0.5,  # коэффициент уменьшения слишком больших чисел
 ) -> List[int]:
-    min_width = 1
+    if min_row_lengths:
+        assert (
+            sum(min_row_lengths) <= max_width
+        ), f"{sum(min_row_lengths)} <= {max_width}"
+    if min_row_lengths is None:
+        min_row_lengths = [1] * len(row_lengths)
+
     current_sum = sum(row_lengths)
     difference = max_width - current_sum
 
-    if difference == 0 and all(n >= min_width for n in row_lengths):
+    if difference == 0 and all(n >= m for n, m in zip(row_lengths, min_row_lengths)):
         return row_lengths
 
     proportions = [n / current_sum for n in row_lengths]
-    distributed = [n + round(difference * p) for n, p in zip(row_lengths, proportions)]
+    distributed = [
+        max(m, n + round(difference * p))
+        for n, p, m in zip(row_lengths, proportions, min_row_lengths)
+    ]
 
     total = sum(distributed)
     final_difference = max_width - total
 
+    # Корректируем, если итоговая сумма больше или меньше целевой
     if final_difference > 0:
         for i in range(final_difference):
-            distributed[i % len(distributed)] += 1
+            idx = i % len(distributed)
+            distributed[idx] += 1
     elif final_difference < 0:
         for i in range(-final_difference):
-            if distributed[i % len(distributed)] > min_width:
-                distributed[i % len(distributed)] -= 1
+            idx = i % len(distributed)
+            if distributed[idx] > min_row_lengths[idx]:
+                distributed[idx] -= 1
 
-    # Ensure all values are at least min_value
+    # Этап уменьшения больших значений с коэффициентом
     for i in range(len(distributed)):
-        if distributed[i] < min_width:
-            distributed[i] = min_width
+        distributed[i] = max(
+            min_row_lengths[i],
+            distributed[i]
+            - round(distributed[i] * k)
+            + round(sum(distributed) * k / len(distributed)),
+        )
 
-    # Adjust again if min_value correction breaks the total sum
+    # Проверка и финальная корректировка суммы
     total = sum(distributed)
     final_difference = max_width - total
 
-    if final_difference > 0:
-        for i in range(final_difference):
-            distributed[i % len(distributed)] += 1
-    elif final_difference < 0:
-        for i in range(-final_difference):
-            if distributed[i % len(distributed)] > min_width:
-                distributed[i % len(distributed)] -= 1
+    while final_difference != 0:
+        if final_difference > 0:
+            for i in range(len(distributed)):
+                if distributed[i] < max_width - (len(distributed) - 1):
+                    distributed[i] += 1
+                    final_difference -= 1
+                    if final_difference == 0:
+                        break
+        elif final_difference < 0:
+            for i in range(len(distributed)):
+                if distributed[i] > min_row_lengths[i]:
+                    distributed[i] -= 1
+                    final_difference += 1
+                    if final_difference == 0:
+                        break
 
     return distributed
 
@@ -616,12 +644,14 @@ def transform_width(
     width: Union[int, Tuple[int, ...], None],
     column_count: int,
     row_lengths: List[int],
+    min_row_lengths: Optional[List[int]] = None,
 ) -> Union[List[int]]:
     """
 
     :param width:
     :param column_count:
     :param row_lengths:
+    :param min_row_lengths:
     :return:
     """
     if width is None:
@@ -647,7 +677,7 @@ def transform_width(
 
     # Calculate the width of each column
     sum_column_width = (width_i - column_count * 3 - 1) or 1
-    max_widths = decrease_numbers(row_lengths, sum_column_width)
+    max_widths = proportional_change(row_lengths, sum_column_width, min_row_lengths)
     return max_widths
 
 
