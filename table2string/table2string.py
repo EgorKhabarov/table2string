@@ -1,6 +1,6 @@
 import csv
 from io import TextIOWrapper, StringIO
-from typing import Union, Tuple, Any, Sequence, List
+from typing import Union, Tuple, Any, Sequence, List, Dict
 
 from table2string.utils import (
     get_text_width_in_console,
@@ -55,7 +55,7 @@ def print_table(
     :param ignore_width_errors:
     :return: None
     """
-    table: list[list[Any]] = list(list(row) for row in table)
+    table: List[List[Any]] = list(list(row) for row in table)
     assert any(table), table
     assert sum(hasattr(row, "__getitem__") for row in table)
     if column_names is not None:
@@ -87,11 +87,11 @@ def print_table(
 
         table.insert(0, column_names)
 
-    row_lengths = get_row_lengths(table)
-    min_row_lengths = get_row_lengths(table, minimum=True)
+    row_widths = get_row_widths(table)
+    min_row_widths = get_row_widths(table, minimum=True)
 
     if max_width is not None and not ignore_width_errors:
-        min_width = sum(min_row_lengths) + 3 * len(min_row_lengths) + 1
+        min_width = sum(min_row_widths) + 3 * len(min_row_widths) + 1
         if isinstance(max_width, int):
             assert max_width >= min_width, f"{max_width} >= {min_width}"
         else:
@@ -107,7 +107,7 @@ def print_table(
             assert sum_max_width >= min_width, f"{sum_max_width} >= {min_width}"
 
     border = theme.border
-    max_widths = transform_width(max_width, column_count, row_lengths, min_row_lengths)
+    max_widths = transform_width(max_width, column_count, row_widths, min_row_widths)
     align_t = transform_align(column_count, align)
     column_names_align_t = transform_align(column_count, column_names_align)
 
@@ -177,7 +177,7 @@ down_separator       = "└───┴───┴───┘"
             print(up_separator, file=file)
 
         if not max_widths:
-            max_name_width = sum(row_lengths) + (3 * column_count) + 1 - 4
+            max_name_width = sum(row_widths) + (3 * column_count) + 1 - 4
         else:
             max_name_width = sum(max_widths) + (3 * column_count) + 1 - 4
 
@@ -205,11 +205,11 @@ down_separator       = "└───┴───┴───┘"
 
     # Trimming long lines
     def line_spliter_for_sub_table(
-        sub_table: Table, ci: int
-    ) -> list[list[str] | bool | dict[str, tuple[str, ...]]]:
+        sub_table: Table, column_index: int
+    ) -> List[List[str] | bool | Dict[str, Tuple[str, ...]]]:
         string_sub_table = sub_table.stringify(
             align=align,
-            max_width=max_widths[ci] + 4,
+            max_width=max_widths[column_index] + 4,
             max_height=max_height,
             line_break_symbol=line_break_symbol,
             cell_break_symbol=cell_break_symbol,
@@ -262,7 +262,7 @@ down_separator       = "└───┴───┴───┘"
             max_row_height = max(map(len, tuple(zip(*row))[0]))
 
         for ci, column in enumerate(row):
-            if column[2]:  # subtable
+            if column[2]:  # is subtable
                 metadata: dict = column[3]
                 string = (
                     " "
@@ -572,24 +572,24 @@ class Table:
         )
 
 
-def get_row_lengths(table: Sequence[Sequence], minimum: bool = False) -> List[int]:
+def get_row_widths(table: Sequence[Sequence], minimum: bool = False) -> List[int]:
     """
-    Вычисляет и возвращает список ширин колонок
-    Если ячейка матрицы это экземпляр table2string.Table используется рекурсия
+    Calculates and returns a list of column widths.
+    If the matrix cell is an instance of Table recursion is used
 
-    Не в utils.py из-за рекурсивного импорта
+    Not in utils.py due to recursive import
     :param table: Two-dimensional matrix
-    :param minimum: 1
+    :param minimum: Forces the function to return the minimum width for each column, which is 1
     """
-    row_lengths = [
+    row_widths = [
         max(
             (
                 (
-                    lambda subtable_row_lengths: (
-                        sum(subtable_row_lengths) + 3 * len(subtable_row_lengths) + 1
+                    lambda subtable_row_widths: (
+                        sum(subtable_row_widths) + 3 * len(subtable_row_widths) + 1
                     )
                     - 4
-                )(get_row_lengths(cell.table, minimum=minimum))
+                )(get_row_widths(cell.table, minimum=minimum))
                 if isinstance(cell, Table)
                 else (
                     1
@@ -608,4 +608,4 @@ def get_row_lengths(table: Sequence[Sequence], minimum: bool = False) -> List[in
         )
         for ci, column in enumerate(zip(*table))
     ]
-    return row_lengths
+    return row_widths

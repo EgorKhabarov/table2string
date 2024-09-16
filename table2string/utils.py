@@ -2,7 +2,7 @@ import re
 import unicodedata
 from dataclasses import dataclass
 from cachetools import cached, LRUCache
-from typing import Union, List, Tuple, Optional
+from typing import Union, List, Tuple, Optional, Dict
 
 
 ALLOWED_ALIGNS = [
@@ -460,26 +460,6 @@ class Themes:
     )
 
 
-class MutableString:
-    def __init__(self, seq=""):
-        self.data = list(seq)
-
-    def __getitem__(self, index):
-        return self.data[index]
-
-    def __setitem__(self, index, value):
-        if isinstance(index, slice):
-            self.data[index] = list(value)
-        else:
-            self.data[index] = value
-
-    def __str__(self):
-        return "".join(self.data)
-
-    def __repr__(self):
-        return f"MutableString({str(self)!r})"
-
-
 translate_border_dict = {
     "border_left": {
         ("vertical", "vertical_left"): "vertical_left",
@@ -519,6 +499,14 @@ border_translate_cache = LRUCache(maxsize=100)
 def translate_theme_border(
     side: str, theme: Theme, border_from: str, border_to: str
 ) -> str:
+    """
+    Used to connect table boundaries to a subtable
+    :param side: "border_left" or "border_right" or "border_top" or "border_bottom"
+    :param theme: Theme
+    :param border_from: The border to be connected to border_to
+    :param border_to: The border to be attached
+    :return: Connected borders (if possible)
+    """
     border_from_name = theme.border.get_border_name(border_from)
     border_to_name = theme.border.get_border_name(border_to)
 
@@ -544,34 +532,54 @@ def get_text_width_in_console(text: str) -> int:
 
 
 def proportional_change(
-    row_lengths: List[int],
+    row_widths: List[int],
     max_width: int = 120,
-    min_row_lengths: Optional[List[int]] = None,
-    k: float = 0.5,  # коэффициент уменьшения слишком больших чисел
+    min_row_widths: Optional[List[int]] = None,
+    k: float = 0.5,
 ) -> List[int]:
-    if min_row_lengths:
-        assert (
-            sum(min_row_lengths) <= max_width
-        ), f"{sum(min_row_lengths)} <= {max_width}"
-    if min_row_lengths is None:
-        min_row_lengths = [1] * len(row_lengths)
+    """
+    The function changes the values in `row_widths` proportionally,
+    so that the sum of the numbers remains equal to `max_width`
+    and each value in must be greater than or equal to the corresponding number in `min_row_widths`.
+    The proportionality condition can be violated only to meet the conditions in `min_row_widths`
+    or to avoid the appearance of fractional numbers.
+    When passing arguments to the function, it is guaranteed that `max_width`
+    will be large enough to change the values in `row_widths`
+    without violating the conditions of the sum and minimum values.
+    It is also guaranteed that all values in the list of `row_widths`
+    and `min_row_widths` will be greater than 0.
+    The length of `row_widths` and `min_row_widths` are the same
+    if `min_row_widths` is not None. If `min_row_widths` is None,
+    then it can be treated as a list whose length is `row_widths`, and all values are 1.
+    Fractal numbers and numbers less than one are not allowed.
+    The `k` argument is the coefficient for reducing large numbers.
 
-    current_sum = sum(row_lengths)
+    :param row_widths: List of widths for each column
+    :param max_width: Max table width (Required sum for `row_widths`)
+    :param min_row_widths: List of minimum widths for each column
+    :param k: Reduction coefficient for too large numbers
+    """
+    if min_row_widths:
+        assert sum(min_row_widths) <= max_width, f"{sum(min_row_widths)} <= {max_width}"
+    if min_row_widths is None:
+        min_row_widths = [1] * len(row_widths)
+
+    current_sum = sum(row_widths)
     difference = max_width - current_sum
 
-    if difference == 0 and all(n >= m for n, m in zip(row_lengths, min_row_lengths)):
-        return row_lengths
+    if difference == 0 and all(n >= m for n, m in zip(row_widths, min_row_widths)):
+        return row_widths
 
-    proportions = [n / current_sum for n in row_lengths]
+    proportions = [n / current_sum for n in row_widths]
     distributed = [
         max(m, n + round(difference * p))
-        for n, p, m in zip(row_lengths, proportions, min_row_lengths)
+        for n, p, m in zip(row_widths, proportions, min_row_widths)
     ]
 
     total = sum(distributed)
     final_difference = max_width - total
 
-    # Корректируем, если итоговая сумма больше или меньше целевой
+    # We adjust if the final amount is more or less than the target
     if final_difference > 0:
         for i in range(final_difference):
             idx = i % len(distributed)
@@ -579,19 +587,19 @@ def proportional_change(
     elif final_difference < 0:
         for i in range(-final_difference):
             idx = i % len(distributed)
-            if distributed[idx] > min_row_lengths[idx]:
+            if distributed[idx] > min_row_widths[idx]:
                 distributed[idx] -= 1
 
-    # Этап уменьшения больших значений с коэффициентом
+    # Reduction of large values by a coefficient
     for i in range(len(distributed)):
         distributed[i] = max(
-            min_row_lengths[i],
+            min_row_widths[i],
             distributed[i]
             - round(distributed[i] * k)
             + round(sum(distributed) * k / len(distributed)),
         )
 
-    # Проверка и финальная корректировка суммы
+    # Checking and final adjustment of the amount
     total = sum(distributed)
     final_difference = max_width - total
 
@@ -605,7 +613,7 @@ def proportional_change(
                         break
         elif final_difference < 0:
             for i in range(len(distributed)):
-                if distributed[i] > min_row_lengths[i]:
+                if distributed[i] > min_row_widths[i]:
                     distributed[i] -= 1
                     final_difference += 1
                     if final_difference == 0:
@@ -643,19 +651,20 @@ def transform_align(
 def transform_width(
     width: Union[int, Tuple[int, ...], None],
     column_count: int,
-    row_lengths: List[int],
-    min_row_lengths: Optional[List[int]] = None,
-) -> Union[List[int]]:
+    row_widths: List[int],
+    min_row_widths: Optional[List[int]] = None,
+) -> List[int]:
     """
+    Convert width to a suitable view
 
     :param width:
     :param column_count:
-    :param row_lengths:
-    :param min_row_lengths:
+    :param row_widths:
+    :param min_row_widths:
     :return:
     """
     if width is None:
-        return row_lengths
+        return row_widths
 
     if isinstance(width, (tuple, list)):
         width_l = list(width[:column_count])
@@ -673,11 +682,11 @@ def transform_width(
         width_i = width
 
     if width_i < column_count * 4 + 1:
-        width_i = sum(1 if rl > 1 else 0 for rl in row_lengths) + (3 * column_count) + 1
+        width_i = sum(1 if rl > 1 else 0 for rl in row_widths) + (3 * column_count) + 1
 
     # Calculate the width of each column
     sum_column_width = (width_i - column_count * 3 - 1) or 1
-    max_widths = proportional_change(row_lengths, sum_column_width, min_row_lengths)
+    max_widths = proportional_change(row_widths, sum_column_width, min_row_widths)
     return max_widths
 
 
@@ -687,16 +696,15 @@ def line_spliter(
     height: Union[int, None] = None,
     line_break_symbol: str = "↩",
     cell_break_symbol: str = "…",
-    theme: Theme = Themes.ascii_thin,  # noqa
 ) -> List[List[str]]:
     """
+    Splits text to the desired width and height
 
     :param text:
     :param width:
     :param height:
     :param line_break_symbol: "↩" or chr(8617) or "\\U000021a9"
     :param cell_break_symbol: "…" or chr(8230) or "\\U00002026"
-    :param theme:
     :return:
     """
     lines = text.split("\n")
@@ -737,18 +745,19 @@ def line_spliter(
 def fill_line(
     rows: List[List[str]],
     symbols: List[List[str]],
-    subtable_columns: list[bool],
-    metadata_list: tuple[dict[str, str] | None, ...],
+    subtable_columns: List[bool],
+    metadata_list: Tuple[Dict[str, str] | None, ...],
     widths: List[int],
     align: Tuple[str, ...],
     theme: Theme = Themes.ascii_thin,
 ) -> str:
     """
+    Fills the line
 
     :param rows:
-    :param symbols:
-    :param subtable_columns:
-    :param metadata_list:
+    :param symbols: Line break or line ending characters
+    :param subtable_columns: A list indicating whether the column should be formatted as subtable
+    :param metadata_list: Tuple of dictionaries to join boundaries
     :param widths:
     :param align:
     :param theme:
@@ -858,32 +867,40 @@ def fill_line(
 
 def apply_metadata(
     string: str,
-    style: str,
+    side: str,
     theme: Theme,
     metadata_list: tuple[dict | None, ...],
     max_widths: list[int],
 ) -> str:
-    string = MutableString(string)
+    """
+    Connects table and subtable boundaries
+    :param string:
+    :param side: "border_left" or "border_right" or "border_top" or "border_bottom"
+    :param theme:
+    :param metadata_list: Tuple of dictionaries to join boundaries
+    :param max_widths:
+    """
+    string_list = list(string)
     index = 2
 
     for current_metadata, width in zip(metadata_list, max_widths):
         if current_metadata:
-            for border_r in current_metadata[style]:
-                border_l = string[index]
+            for border_r in current_metadata[side]:
+                border_l = string_list[index]
                 if border_l == " ":
                     border_l = theme.border.horizontal
-                if style == "border_top":
-                    string[index] = (
-                        translate_theme_border(style, theme, border_l, border_r)
+                if side == "border_top":
+                    string_list[index] = (
+                        translate_theme_border(side, theme, border_l, border_r)
                         or border_l
                     )
-                elif style == "border_bottom":
-                    string[index] = (
-                        translate_theme_border(style, theme, border_l, border_r)
+                elif side == "border_bottom":
+                    string_list[index] = (
+                        translate_theme_border(side, theme, border_l, border_r)
                         or border_l
                     )
                 index += 1
         else:
             index += width
         index += 3
-    return str(string)
+    return "".join(string_list)

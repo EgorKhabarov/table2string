@@ -1,4 +1,4 @@
-from table2string.table2string import get_row_lengths
+from table2string.table2string import Table, get_row_widths
 from table2string.utils import (
     get_text_width_in_console,
     proportional_change,
@@ -346,9 +346,46 @@ def test_fill_line():
     )
 
 
-def test_get_row_lengths():
-    assert get_row_lengths([["123"]]) == [3]
-    assert get_row_lengths([["123"], ["q"]]) == [3]
-    assert get_row_lengths([["123"], ["qqqq"]]) == [4]
-    assert get_row_lengths([["123", "q"]]) == [3, 1]
-    assert get_row_lengths([["123", "qqqq"]]) == [3, 4]
+def test_get_row_widths():
+    assert get_row_widths([["123"]]) == [3]
+    assert get_row_widths([["123"], ["q"]]) == [3]
+    assert get_row_widths([["123"], ["qqqq"]]) == [4]
+    assert get_row_widths([["123", "q"]]) == [3, 1]
+    assert get_row_widths([["123", "qqqq"]]) == [3, 4]
+    assert get_row_widths([["123", "qqqq"]], minimum=True) == [1, 1]
+    assert get_row_widths(
+        [
+            ("123", "123"),
+            (Table([("111", "222"), ("333", "444")]), "123"),
+        ]
+    ) == [9, 3]
+    assert get_row_widths(
+        [
+            ("123", "123"),
+            (Table([("111", "222"), ("333", "444")]), "123"),
+        ],
+        minimum=True,
+    ) == [5, 1]
+    assert get_row_widths(
+        [
+            ("123", "123"),
+            (
+                Table(
+                    [("111", "222"), ("333", Table([("111", "222"), ("333", "444")]))]
+                ),
+                "123",
+            ),
+        ]
+    ) == [15, 3]
+    assert get_row_widths(
+        [
+            ("123", "123"),
+            (
+                Table(
+                    [("111", "222"), ("333", Table([("111", "222"), ("333", "444")]))]
+                ),
+                "123",
+            ),
+        ],
+        minimum=True,
+    ) == [9, 1]
