@@ -14,7 +14,7 @@ def test_get_text_width_in_console():
     assert get_text_width_in_console("\U0001f34f\U0001f34e") == 4
 
 
-def test_decrease_numbers():
+def test_proportional_change():
     assert proportional_change([2, 2, 3], 10) == [3, 3, 4]
     assert proportional_change([2, 2, 3], 11) == [3, 3, 5]
     assert proportional_change([20, 2, 3], 10) == [5, 2, 3]
