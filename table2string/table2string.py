@@ -4,6 +4,7 @@ from typing import Union, Tuple, Any, Sequence, List, Dict
 
 from table2string.utils import (
     get_text_width_in_console,
+    ALLOWED_V_ALIGNS,
     transform_align,
     transform_width,
     ALLOWED_ALIGNS,
@@ -19,10 +20,13 @@ def print_table(
     table: Sequence[Sequence[Any]],
     *,
     align: Union[Tuple[str, ...], str] = "*",
+    v_align: Union[Tuple[str, ...], str] = "^",
     name: Union[str, None] = None,
     name_align: str = "^",
+    name_v_align: str = "-",
     column_names: Union[Sequence[str], None] = None,
     column_names_align: Union[Tuple[str, ...], str] = "^",
+    column_names_v_align: Union[Tuple[str, ...], str] = "-",
     max_width: Union[int, Tuple[int, ...], None] = None,
     max_height: Union[int, None] = None,
     maximize_height: bool = False,
@@ -40,10 +44,13 @@ def print_table(
 
     :param table: Two-dimensional matrix
     :param align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
+    :param v_align: Can be a line or list, should be from utils.ALLOWED_V_ALIGNS
     :param name: Table name
     :param name_align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
+    :param name_v_align: Can be a line or list, should be from utils.ALLOWED_V_ALIGNS
     :param column_names: Column names
     :param column_names_align: Aligns for column names
+    :param column_names_v_align: Vertical aligns for column names
     :param max_width: Table width or width of individual columns
     :param max_height: The maximum number of lines in one line
     :param maximize_height: Make all lines of the same height max_height
@@ -75,6 +82,14 @@ def print_table(
     assert (
         not not_allowed_aligns
     ), f"not allowed alignments: {tuple(not_allowed_aligns)}"
+    not_allowed_v_aligns = {
+        *((v_align,) if isinstance(v_align, str) else v_align),
+        name_v_align,
+        *column_names_v_align,
+    } - set(ALLOWED_V_ALIGNS)
+    assert (
+        not not_allowed_v_aligns
+    ), f"not allowed vertical alignments: {tuple(not_allowed_v_aligns)}"
 
     column_count = max(map(len, table))
 
@@ -112,6 +127,8 @@ def print_table(
     max_widths = transform_width(max_width, column_count, row_widths, min_row_widths, proportion_coefficient)
     align_t = transform_align(column_count, align)
     column_names_align_t = transform_align(column_count, column_names_align)
+    v_align_t = transform_align(column_count, v_align, is_v_align=True)
+    column_names_v_align_t = transform_align(column_count, column_names_v_align, is_v_align=True)
 
     horizontally = [(border.horizontal * (i + 2)) for i in max_widths]
     up_separator = "".join(
@@ -174,6 +191,7 @@ down_separator       = "└───┴───┴───┘"
 
     if name:
         name_align_t = transform_align(1, name_align)
+        name_v_align_t = transform_align(1, name_v_align, is_v_align=True)
 
         if up_separator.strip():
             print(up_separator, file=file)
@@ -194,13 +212,14 @@ down_separator       = "└───┴───┴───┘"
         )
         print(
             fill_line(
-                rows,
-                symbols,
-                subtable_columns,
-                metadata_list,
-                [max_name_width],
-                name_align_t,
-                theme,
+                rows=rows,
+                symbols=symbols,
+                subtable_columns=subtable_columns,
+                metadata_list=metadata_list,
+                widths=[max_name_width],
+                align=name_align_t,
+                v_align=name_v_align_t,
+                theme=theme,
             ),
             file=file,
         )
@@ -285,6 +304,7 @@ down_separator       = "└───┴───┴───┘"
             column[1].extend(extend_data)
 
         rows, symbols, subtable_columns, metadata_list = zip(*row)
+
         if ri == 0:
             prev_metadata = metadata_list
 
@@ -301,16 +321,18 @@ down_separator       = "└───┴───┴───┘"
         ):
             if (name and ri == 1) or ((not name) and ri == 1):
                 s = line_separator_plus
-                a = align_t
+                a, va = align_t, v_align_t
             elif name and ri == 0:
                 s = under_name_separator
                 a = column_names_align_t if column_names else align_t
+                va = column_names_v_align_t if column_names else v_align_t
             elif (not name) and ri == 0:
                 s = up_noname_separator
                 a = column_names_align_t if column_names else align_t
+                va = column_names_v_align_t if column_names else v_align_t
             else:
                 s = line_separator
-                a = align_t
+                a, va = align_t, v_align_t
 
             if s.strip():
                 s = apply_metadata(s, "border_top", theme, metadata_list, max_widths)
@@ -320,12 +342,19 @@ down_separator       = "└───┴───┴───┘"
                     )
                 result_table.append((s, "\n"))
         else:
-            a = align_t
+            a, va = align_t, v_align_t
 
         result_table.append(
             (
                 fill_line(
-                    rows, symbols, subtable_columns, metadata_list, max_widths, a, theme
+                    rows=rows,
+                    symbols=symbols,
+                    subtable_columns=subtable_columns,
+                    metadata_list=metadata_list,
+                    widths=max_widths,
+                    align=a,
+                    v_align=va,
+                    theme=theme,
                 ),
                 "",
             )
@@ -352,10 +381,13 @@ def stringify_table(
     table: Sequence[Sequence[Any]],
     *,
     align: Union[Tuple[str, ...], str] = "*",
+    v_align: Union[Tuple[str, ...], str] = "^",
     name: Union[str, None] = None,
     name_align: str = "^",
+    name_v_align: str = "-",
     column_names: Union[Sequence[str], None] = None,
     column_names_align: Union[Tuple[str, ...], str] = "^",
+    column_names_v_align: Union[Tuple[str, ...], str] = "-",
     max_width: Union[int, Tuple[int, ...], None] = None,
     max_height: Union[int, None] = None,
     maximize_height: bool = False,
@@ -371,10 +403,13 @@ def stringify_table(
 
     :param table: Two-dimensional matrix
     :param align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
+    :param v_align: Can be a line or list, should be from utils.ALLOWED_V_ALIGNS
     :param name: Table name
     :param name_align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
+    :param name_v_align: Can be a line or list, should be from utils.ALLOWED_V_ALIGNS
     :param column_names: Column names
     :param column_names_align: Aligns for column names
+    :param column_names_v_align: Vertical aligns for column names
     :param max_width: Table width or width of individual columns
     :param max_height: The maximum number of lines in one line
     :param maximize_height: Make all lines of the same height max_height
@@ -391,10 +426,13 @@ def stringify_table(
     print_table(
         table=table,
         align=align,
+        v_align=v_align,
         name=name,
         name_align=name_align,
+        name_v_align=name_v_align,
         column_names=column_names,
         column_names_align=column_names_align,
+        column_names_v_align=column_names_v_align,
         max_width=max_width,
         max_height=max_height,
         maximize_height=maximize_height,
@@ -464,8 +502,11 @@ class Table:
         self,
         *,
         align: Union[Tuple[str, ...], str] = "*",
+        v_align: Union[Tuple[str, ...], str] = "^",
         name_align: str = "^",
+        name_v_align: str = "-",
         column_names_align: Union[Tuple[str, ...], str] = "^",
+        column_names_v_align: Union[Tuple[str, ...], str] = "-",
         max_width: Union[int, Tuple[int, ...], None] = None,
         max_height: Union[int, None] = None,
         maximize_height: bool = False,
@@ -480,8 +521,11 @@ class Table:
         """
 
         :param align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
+        :param v_align: Can be a line or list, should be from utils.ALLOWED_V_ALIGNS
         :param name_align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
+        :param name_v_align: Can be a line or list, should be from utils.ALLOWED_V_ALIGNS
         :param column_names_align: Aligns for column names
+        :param column_names_v_align: Vertical aligns for column names
         :param max_width: Table width or width of individual columns
         :param max_height: The maximum number of lines in one line
         :param maximize_height: Make all lines of the same height max_height
@@ -498,9 +542,12 @@ class Table:
             table=self.table,
             align=align,
             name=self.name,
+            v_align=v_align,
             name_align=name_align,
+            name_v_align=name_v_align,
             column_names=self.column_names,
             column_names_align=column_names_align,
+            column_names_v_align=column_names_v_align,
             max_width=max_width,
             max_height=max_height,
             maximize_height=maximize_height,
@@ -517,8 +564,11 @@ class Table:
         self,
         *,
         align: Union[Tuple[str, ...], str] = "*",
+        v_align: Union[Tuple[str, ...], str] = "^",
         name_align: str = "^",
+        name_v_align: str = "-",
         column_names_align: Union[Tuple[str, ...], str] = "^",
+        column_names_v_align: Union[Tuple[str, ...], str] = "-",
         max_width: Union[int, Tuple[int, ...], None] = None,
         max_height: Union[int, None] = None,
         maximize_height: bool = False,
@@ -535,8 +585,11 @@ class Table:
         Print the table in sys.stdout or file
 
         :param align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
+        :param v_align: Can be a line or list, should be from utils.ALLOWED_V_ALIGNS
         :param name_align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
+        :param name_v_align: Can be a line or list, should be from utils.ALLOWED_V_ALIGNS
         :param column_names_align: Aligns for column names
+        :param column_names_v_align: Vertical aligns for column names
         :param max_width: Table width or width of individual columns
         :param max_height: The maximum number of lines in one line
         :param maximize_height: Make all lines of the same height max_height
@@ -553,10 +606,13 @@ class Table:
         print_table(
             table=self.table,
             align=align,
+            v_align=v_align,
             name=self.name,
             name_align=name_align,
+            name_v_align=name_v_align,
             column_names=self.column_names,
             column_names_align=column_names_align,
+            column_names_v_align=column_names_v_align,
             max_width=max_width,
             max_height=max_height,
             maximize_height=maximize_height,

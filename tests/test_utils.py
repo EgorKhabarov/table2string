@@ -56,6 +56,14 @@ def test_transform_align():
     assert transform_align(3, ("<",)) == ("<", "*", "*")
     assert transform_align(3, ("<", "<", "<")) == ("<", "<", "<")
 
+    assert transform_align(2, "^", True) == ("^", "^")
+    assert transform_align(2, "-", True) == ("-", "-")
+    assert transform_align(3, "_", True) == ("_", "_", "_")
+    assert transform_align(2, ("^",), True) == ("^", "^")
+    assert transform_align(2, ("-",), True) == ("-", "^")
+    assert transform_align(3, ("_",), True) == ("_", "^", "^")
+    assert transform_align(3, ("^", "-", "_"), True) == ("^", "-", "_")
+
 
 def test_transform_width():
     assert transform_width(1, 1, [1]) == [1]
@@ -66,7 +74,7 @@ def test_transform_width():
 
 
 def test_line_spliter():
-    assert line_spliter("", 1) == [[" "], [" "], False, None]
+    assert line_spliter("", 1) == [[""], [" "], False, None]
     assert line_spliter("1", 1) == [["1"], [" "], False, None]
     assert line_spliter("123\n456", 1) == [
         ["1", "2", "3", "4", "5", "6"],
@@ -75,7 +83,7 @@ def test_line_spliter():
         None,
     ]
     assert line_spliter("123\n\n456", 1) == [
-        ["1", "2", "3", " ", "4", "5", "6"],
+        ["1", "2", "3", "", "4", "5", "6"],
         ["↩", "↩", " ", " ", "↩", "↩", " "],
         False,
         None,
@@ -88,7 +96,7 @@ def test_line_spliter():
     ]
     assert line_spliter("123\n456", 3) == [["123", "456"], [" ", " "], False, None]
     assert line_spliter("123\n\n456", 3) == [
-        ["123", " ", "456"],
+        ["123", "", "456"],
         [" ", " ", " "],
         False,
         None,
@@ -128,6 +136,7 @@ def test_fill_line():
             (None,),
             [1],
             ("<",),
+            ("^",),
         )
         == """
 | 1↩|
@@ -146,6 +155,7 @@ def test_fill_line():
             (None,),
             [1],
             ("<",),
+            ("^",),
         )
         == """
 | 1↩|
@@ -165,6 +175,7 @@ def test_fill_line():
             (None,),
             [2],
             ("<",),
+            ("^",),
         )
         == """
 | 12↩|
@@ -181,6 +192,7 @@ def test_fill_line():
             (None,),
             [2],
             (">",),
+            ("^",),
         )
         == """
 | 12↩|
@@ -191,7 +203,7 @@ def test_fill_line():
     )
     assert (
         fill_line(
-            [["123", "456"]], [[" ", " "]], [False, False], (None, None), [3], ("<",)
+            [["123", "456"]], [[" ", " "]], [False, False], (None, None), [3], ("<",), ("^",)
         )
         == """
 | 123 |
@@ -206,6 +218,7 @@ def test_fill_line():
             (None, None),
             [3, 3],
             ("<", "<"),
+            ("^", "^",),
         )
         == "| 123 | 456 |"
     )
@@ -217,6 +230,7 @@ def test_fill_line():
             (None,),
             [11],
             ("^<",),
+            ("^",),
         )
         == """
 |   1234567   |
@@ -232,6 +246,7 @@ def test_fill_line():
             (None,),
             [12],
             ("^<",),
+            ("^",),
         )
         == """
 |   1234567    |
@@ -247,6 +262,7 @@ def test_fill_line():
             (None,),
             [13],
             ("^<",),
+            ("^",),
         )
         == """
 |    1234567    |
@@ -262,6 +278,7 @@ def test_fill_line():
             (None,),
             [11],
             ("^>",),
+            ("^",),
         )
         == """
 |   1234567   |
@@ -277,6 +294,7 @@ def test_fill_line():
             (None,),
             [12],
             ("^>",),
+            ("^",),
         )
         == """
 |   1234567    |
@@ -292,6 +310,7 @@ def test_fill_line():
             (None,),
             [11],
             ("^<",),
+            ("^",),
         )
         == """
 |   34        |
@@ -307,6 +326,7 @@ def test_fill_line():
             (None,),
             [12],
             ("^<",),
+            ("^",),
         )
         == """
 |   34         |
@@ -322,6 +342,7 @@ def test_fill_line():
             (None,),
             [11],
             ("^>",),
+            ("^",),
         )
         == """
 |        34   |
@@ -337,6 +358,7 @@ def test_fill_line():
             (None,),
             [12],
             ("^>",),
+            ("^",),
         )
         == """
 |        34    |
