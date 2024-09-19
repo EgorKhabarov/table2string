@@ -535,7 +535,7 @@ def proportional_change(
     row_widths: List[int],
     max_width: int = 120,
     min_row_widths: Optional[List[int]] = None,
-    k: float = 0.5,
+    proportion_coefficient: float = 0.5,
 ) -> List[int]:
     """
     The function changes the values in `row_widths` proportionally,
@@ -552,15 +552,16 @@ def proportional_change(
     if `min_row_widths` is not None. If `min_row_widths` is None,
     then it can be treated as a list whose length is `row_widths`, and all values are 1.
     Fractal numbers and numbers less than one are not allowed.
-    The `k` argument is the coefficient for reducing large numbers.
+    The `proportion_coefficient` argument is the coefficient for reducing large numbers.
 
     :param row_widths: List of widths for each column
     :param max_width: Max table width (Required sum for `row_widths`)
     :param min_row_widths: List of minimum widths for each column
-    :param k: Reduction coefficient for too large numbers
+    :param proportion_coefficient: Reduction coefficient for too large numbers
     """
     if min_row_widths:
         assert sum(min_row_widths) <= max_width, f"{sum(min_row_widths)} <= {max_width}"
+    assert 0.0 <= proportion_coefficient <= 2.0, f"0.0 <= {proportion_coefficient} <= 2.0"
     if min_row_widths is None:
         min_row_widths = [1] * len(row_widths)
 
@@ -595,8 +596,8 @@ def proportional_change(
         distributed[i] = max(
             min_row_widths[i],
             distributed[i]
-            - round(distributed[i] * k)
-            + round(sum(distributed) * k / len(distributed)),
+            - round(distributed[i] * proportion_coefficient)
+            + round(sum(distributed) * proportion_coefficient / len(distributed)),
         )
 
     # Checking and final adjustment of the amount
@@ -653,6 +654,7 @@ def transform_width(
     column_count: int,
     row_widths: List[int],
     min_row_widths: Optional[List[int]] = None,
+    proportion_coefficient: float = 0.5,
 ) -> List[int]:
     """
     Convert width to a suitable view
@@ -661,6 +663,7 @@ def transform_width(
     :param column_count:
     :param row_widths:
     :param min_row_widths:
+    :param proportion_coefficient:
     :return:
     """
     if width is None:
@@ -686,7 +689,7 @@ def transform_width(
 
     # Calculate the width of each column
     sum_column_width = (width_i - column_count * 3 - 1) or 1
-    max_widths = proportional_change(row_widths, sum_column_width, min_row_widths)
+    max_widths = proportional_change(row_widths, sum_column_width, min_row_widths, proportion_coefficient)
     return max_widths
 
 

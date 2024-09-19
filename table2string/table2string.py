@@ -33,6 +33,7 @@ def print_table(
     file: Union[TextIOWrapper, None] = None,
     theme: Theme = Themes.ascii_thin,
     ignore_width_errors: bool = False,
+    proportion_coefficient: float = 0.5,
 ) -> None:
     """
     Print the table in sys.stdout or file
@@ -53,6 +54,7 @@ def print_table(
     :param file: File where you can record the table by .write method.
     :param theme:
     :param ignore_width_errors:
+    :param proportion_coefficient:
     :return: None
     """
     table: List[List[Any]] = list(list(row) for row in table)
@@ -107,7 +109,7 @@ def print_table(
             assert sum_max_width >= min_width, f"{sum_max_width} >= {min_width}"
 
     border = theme.border
-    max_widths = transform_width(max_width, column_count, row_widths, min_row_widths)
+    max_widths = transform_width(max_width, column_count, row_widths, min_row_widths, proportion_coefficient)
     align_t = transform_align(column_count, align)
     column_names_align_t = transform_align(column_count, column_names_align)
 
@@ -363,6 +365,7 @@ def stringify_table(
     end: Union[str, None] = "",
     theme: Theme = Themes.ascii_thin,
     ignore_width_errors: bool = False,
+    proportion_coefficient: float = 0.5,
 ) -> str:
     """
 
@@ -381,6 +384,7 @@ def stringify_table(
     :param end: Configure the last symbol of the table. \\n or nothing
     :param theme:
     :param ignore_width_errors:
+    :param proportion_coefficient:
     :return: String table
     """
     file = StringIO()
@@ -401,6 +405,7 @@ def stringify_table(
         file=file,
         theme=theme,
         ignore_width_errors=ignore_width_errors,
+        proportion_coefficient=proportion_coefficient,
     )
     file.seek(0)
     return file.read()
@@ -470,6 +475,7 @@ class Table:
         end: Union[str, None] = "",
         theme: Theme = Themes.ascii_thin,
         ignore_width_errors: bool = False,
+        proportion_coefficient: float = 0.5,
     ) -> str:
         """
 
@@ -485,6 +491,7 @@ class Table:
         :param end: Configure the last symbol of the table. \\n or nothing
         :param theme:
         :param ignore_width_errors:
+        :param proportion_coefficient:
         :return: String table
         """
         return stringify_table(
@@ -503,6 +510,7 @@ class Table:
             end=end,
             theme=theme,
             ignore_width_errors=ignore_width_errors,
+            proportion_coefficient=proportion_coefficient,
         )
 
     def print(
@@ -521,6 +529,7 @@ class Table:
         file: Union[TextIOWrapper, None] = None,
         theme: Theme = Themes.ascii_thin,
         ignore_width_errors: bool = False,
+        proportion_coefficient: float = 0.5,
     ) -> None:
         """
         Print the table in sys.stdout or file
@@ -538,6 +547,7 @@ class Table:
         :param file: File where you can record the table by .write method.
         :param theme:
         :param ignore_width_errors:
+        :param proportion_coefficient:
         :return: None
         """
         print_table(
@@ -557,6 +567,7 @@ class Table:
             file=file,
             theme=theme,
             ignore_width_errors=ignore_width_errors,
+            proportion_coefficient=proportion_coefficient,
         )
 
     def __str__(self):
