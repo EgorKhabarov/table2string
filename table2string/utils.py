@@ -917,7 +917,7 @@ def apply_metadata(
     string: str,
     side: str,
     theme: Theme,
-    metadata_list: tuple[dict | None, ...],
+    metadata_list: Tuple[Optional[dict], ...],
     max_widths: list[int],
 ) -> str:
     """

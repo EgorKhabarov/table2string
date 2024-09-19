@@ -504,7 +504,7 @@ class Table:
         file: TextIOWrapper,
         name: Union[str, None] = None,
         column_names: bool = True,
-        reader_kwargs: dict[str, Any] = None,
+        reader_kwargs: Dict[str, Any] = None,
         **kwargs: Any,
     ) -> "Table":
         csv_table = list(csv.reader(file, **reader_kwargs or {}))
