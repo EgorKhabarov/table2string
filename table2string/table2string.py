@@ -234,11 +234,17 @@ down_separator       = "└───┴───┴───┘"
     ) -> List[List[str] | bool | Dict[str, Tuple[str, ...]]]:
         string_sub_table = sub_table.stringify(
             align=align,
+            v_align=v_align,
+            name_align=name_align,
+            name_v_align=name_v_align,
+            column_names_align=column_names_align,
+            column_names_v_align=column_names_v_align,
             max_width=max_widths[column_index] + 4,
             line_break_symbol=line_break_symbol,
             cell_break_symbol=cell_break_symbol,
             theme=theme.custom_sub_table_theme,
             ignore_width_errors=True,
+            proportion_coefficient=proportion_coefficient,
         )
         sub_table_lines = string_sub_table.splitlines()
         if max_height:
@@ -458,10 +464,12 @@ class Table:
         table: Sequence[Sequence[Any]],
         name: Union[str, None] = None,
         column_names: Union[Sequence[str], None] = None,
+        **kwargs: Any,
     ):
         self.table = table
         self.name = name
         self.column_names = column_names
+        self.config = kwargs
 
     @classmethod
     def from_table(
@@ -469,8 +477,9 @@ class Table:
         table: Sequence[Sequence[Any]],
         name: Union[str, None] = None,
         column_names: Union[Sequence[str], None] = None,
+        **kwargs: Any,
     ) -> "Table":
-        return cls(table=table, name=name, column_names=column_names)
+        return cls(table=table, name=name, column_names=column_names, **kwargs)
 
     @classmethod
     def from_db_cursor(
@@ -478,6 +487,7 @@ class Table:
         cursor,
         name: Union[str, None] = None,
         column_names: bool = False,
+        **kwargs: Any,
     ) -> "Table":
         table = cursor.fetchall()
 
@@ -486,7 +496,7 @@ class Table:
         else:
             column_names_ = None
 
-        return cls(table=table, name=name, column_names=column_names_)
+        return cls(table=table, name=name, column_names=column_names_, **kwargs)
 
     @classmethod
     def from_csv(
@@ -494,12 +504,13 @@ class Table:
         file: TextIOWrapper,
         name: Union[str, None] = None,
         column_names: bool = True,
-        **kwargs,
+        reader_kwargs: dict[str, Any] = None,
+        **kwargs: Any,
     ) -> "Table":
-        csv_table = list(csv.reader(file, **kwargs))
+        csv_table = list(csv.reader(file, **reader_kwargs or {}))
         table = csv_table[1:]
         column_names_ = csv_table[0] if column_names else None
-        return cls(table=table, name=name, column_names=column_names_)
+        return cls(table=table, name=name, column_names=column_names_, **kwargs)
 
     def stringify(
         self,
@@ -543,24 +554,27 @@ class Table:
         """
         return stringify_table(
             table=self.table,
-            align=align,
+            align=self.config.get("align") or align,
+            v_align=self.config.get("v_align") or v_align,
             name=self.name,
-            v_align=v_align,
-            name_align=name_align,
-            name_v_align=name_v_align,
+            name_align=self.config.get("name_align") or name_align,
+            name_v_align=self.config.get("name_v_align") or name_v_align,
             column_names=self.column_names,
-            column_names_align=column_names_align,
-            column_names_v_align=column_names_v_align,
+            column_names_align=self.config.get("column_names_align")
+            or column_names_align,
+            column_names_v_align=self.config.get("column_names_v_align")
+            or column_names_v_align,
             max_width=max_width,
             max_height=max_height,
             maximize_height=maximize_height,
-            line_break_symbol=line_break_symbol,
-            cell_break_symbol=cell_break_symbol,
+            line_break_symbol=self.config.get("line_break_symbol") or line_break_symbol,
+            cell_break_symbol=self.config.get("cell_break_symbol") or cell_break_symbol,
             sep=sep,
             end=end,
             theme=theme,
             ignore_width_errors=ignore_width_errors,
-            proportion_coefficient=proportion_coefficient,
+            proportion_coefficient=self.config.get("proportion_coefficient")
+            or proportion_coefficient,
         )
 
     def print(
@@ -608,25 +622,28 @@ class Table:
         """
         print_table(
             table=self.table,
-            align=align,
-            v_align=v_align,
+            align=self.config.get("align") or align,
+            v_align=self.config.get("v_align") or v_align,
             name=self.name,
-            name_align=name_align,
-            name_v_align=name_v_align,
+            name_align=self.config.get("name_align") or name_align,
+            name_v_align=self.config.get("name_v_align") or name_v_align,
             column_names=self.column_names,
-            column_names_align=column_names_align,
-            column_names_v_align=column_names_v_align,
+            column_names_align=self.config.get("column_names_align")
+            or column_names_align,
+            column_names_v_align=self.config.get("column_names_v_align")
+            or column_names_v_align,
             max_width=max_width,
             max_height=max_height,
             maximize_height=maximize_height,
-            line_break_symbol=line_break_symbol,
-            cell_break_symbol=cell_break_symbol,
+            line_break_symbol=self.config.get("line_break_symbol") or line_break_symbol,
+            cell_break_symbol=self.config.get("cell_break_symbol") or cell_break_symbol,
             sep=sep,
             end=end,
             file=file,
             theme=theme,
             ignore_width_errors=ignore_width_errors,
-            proportion_coefficient=proportion_coefficient,
+            proportion_coefficient=self.config.get("proportion_coefficient")
+            or proportion_coefficient,
         )
 
     def __str__(self):

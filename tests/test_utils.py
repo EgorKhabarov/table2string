@@ -4,8 +4,11 @@ from table2string.utils import (
     proportional_change,
     transform_align,
     transform_width,
+    apply_metadata,
+    apply_v_align,
     line_spliter,
     fill_line,
+    Themes,
 )
 
 
@@ -420,3 +423,22 @@ def test_get_row_widths():
         ],
         minimum=True,
     ) == [9, 1]
+
+
+def test_apply_v_align():
+    assert apply_v_align(["a", "", " "], "^") == ["a", " ", " "]
+    assert apply_v_align([" ", "a", " "], "-") == [" ", "a", " "]
+    assert apply_v_align([" ", "a", " "], "_") == [" ", " ", "a"]
+
+
+def test_apply_metadata():
+    assert (
+        apply_metadata(
+            "+-------+",
+            "border_top",
+            Themes.ascii_thin,
+            ({"border_top": ("-", "+", "+", "-", "+")},),
+            [3],
+        )
+        == "+--++-+-+"
+    )
