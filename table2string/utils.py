@@ -566,7 +566,9 @@ def proportional_change(
     """
     if min_row_widths:
         assert sum(min_row_widths) <= max_width, f"{sum(min_row_widths)} <= {max_width}"
-    assert 0.0 <= proportion_coefficient <= 2.0, f"0.0 <= {proportion_coefficient} <= 2.0"
+    assert (
+        0.0 <= proportion_coefficient <= 2.0
+    ), f"0.0 <= {proportion_coefficient} <= 2.0"
     if min_row_widths is None:
         min_row_widths = [1] * len(row_widths)
 
@@ -641,8 +643,8 @@ def transform_align(
     :param is_v_align:
     :return:
     """
-    allowed_list = (ALLOWED_V_ALIGNS if is_v_align else ALLOWED_ALIGNS)
-    string_allowed_list_name = ("ALLOWED_V_ALIGNS" if is_v_align else "ALLOWED_ALIGNS")
+    allowed_list = ALLOWED_V_ALIGNS if is_v_align else ALLOWED_ALIGNS
+    string_allowed_list_name = "ALLOWED_V_ALIGNS" if is_v_align else "ALLOWED_ALIGNS"
     default = "^" if is_v_align else "*"
     if align is None:
         align = default
@@ -703,7 +705,9 @@ def transform_width(
 
     # Calculate the width of each column
     sum_column_width = (width_i - column_count * 3 - 1) or 1
-    max_widths = proportional_change(row_widths, sum_column_width, min_row_widths, proportion_coefficient)
+    max_widths = proportional_change(
+        row_widths, sum_column_width, min_row_widths, proportion_coefficient
+    )
     return max_widths
 
 

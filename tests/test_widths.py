@@ -10,7 +10,9 @@ def test_widths():
             ("9", "10", "11"),
         ],
     )
-    assert table.stringify() == """
+    assert (
+        table.stringify()
+        == """
 +---+----+----+
 | 1 |  2 |  3 |
 +---+----+----+
@@ -21,7 +23,10 @@ def test_widths():
 | 9 | 10 | 11 |
 +---+----+----+
 """.strip()
-    assert table.stringify(max_width=14) == """
+    )
+    assert (
+        table.stringify(max_width=14)
+        == """
 +---+---+----+
 | 1 | 2 |  3 |
 +---+---+----+
@@ -33,7 +38,10 @@ def test_widths():
 |   | 0 |    |
 +---+---+----+
 """.strip()
-    assert table.stringify(max_width=15) == """
+    )
+    assert (
+        table.stringify(max_width=15)
+        == """
 +---+----+----+
 | 1 |  2 |  3 |
 +---+----+----+
@@ -44,7 +52,10 @@ def test_widths():
 | 9 | 10 | 11 |
 +---+----+----+
 """.strip()
-    assert table.stringify(max_width=13) == """
+    )
+    assert (
+        table.stringify(max_width=13)
+        == """
 +---+---+---+
 | 1 | 2 | 3 |
 +---+---+---+
@@ -56,7 +67,10 @@ def test_widths():
 |   | 0 | 1 |
 +---+---+---+
 """.strip()
-    assert table.stringify(max_width=(2, 1, 5)) == """
+    )
+    assert (
+        table.stringify(max_width=(2, 1, 5))
+        == """
 +----+---+-------+
 |  1 | 2 |     3 |
 +----+---+-------+
@@ -68,3 +82,4 @@ def test_widths():
 |    | 0 |       |
 +----+---+-------+
 """.strip()
+    )

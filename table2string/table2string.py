@@ -124,11 +124,15 @@ def print_table(
             assert sum_max_width >= min_width, f"{sum_max_width} >= {min_width}"
 
     border = theme.border
-    max_widths = transform_width(max_width, column_count, row_widths, min_row_widths, proportion_coefficient)
+    max_widths = transform_width(
+        max_width, column_count, row_widths, min_row_widths, proportion_coefficient
+    )
     align_t = transform_align(column_count, align)
     column_names_align_t = transform_align(column_count, column_names_align)
     v_align_t = transform_align(column_count, v_align, is_v_align=True)
-    column_names_v_align_t = transform_align(column_count, column_names_v_align, is_v_align=True)
+    column_names_v_align_t = transform_align(
+        column_count, column_names_v_align, is_v_align=True
+    )
 
     horizontally = [(border.horizontal * (i + 2)) for i in max_widths]
     up_separator = "".join(
@@ -231,7 +235,6 @@ down_separator       = "└───┴───┴───┘"
         string_sub_table = sub_table.stringify(
             align=align,
             max_width=max_widths[column_index] + 4,
-            max_height=max_height,
             line_break_symbol=line_break_symbol,
             cell_break_symbol=cell_break_symbol,
             theme=theme.custom_sub_table_theme,

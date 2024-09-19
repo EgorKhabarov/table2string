@@ -5,21 +5,24 @@ def test_coefficient():
     table = Table(
         [
             (
-                " "*10,
-                " "*1,
-                " "*7,
-                " "*2,
-                " "*5,
-                " "*20,
-                " "*3000,
-                " "*3,
-                " "*30,
-                " "*50,
+                " " * 10,
+                " " * 1,
+                " " * 7,
+                " " * 2,
+                " " * 5,
+                " " * 20,
+                " " * 3000,
+                " " * 3,
+                " " * 30,
+                " " * 50,
             ),
         ]
     )
     results = [
-        f"{i / 10}: " + table.stringify(max_width=90, max_height=1, proportion_coefficient=i / 10).splitlines()[0]
+        f"{i / 10}: "
+        + table.stringify(
+            max_width=90, max_height=1, proportion_coefficient=i / 10
+        ).splitlines()[0]
         for i in range(0, 11)
     ]
     assert results == [
