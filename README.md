@@ -1370,6 +1370,9 @@ t.print(align="^", sep=(1,))
 
 ## Subtable
 
+<details>
+<summary>Example</summary>
+
 ```pycon
 >>> table = Table(
 ...     [
@@ -1472,3 +1475,4 @@ t.print(align="^", sep=(1,))
 +-----+-----+-----+
 
 ```
+</details>
