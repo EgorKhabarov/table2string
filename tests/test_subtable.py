@@ -388,7 +388,9 @@ def test_subtable():
             ),
         ],
     )
-    assert table.stringify() == """
+    assert (
+        table.stringify()
+        == """
 +---+---------------+
 | 1 |             2 |
 +---+---+-----------+
@@ -401,3 +403,4 @@ def test_subtable():
 |   |   |   | 3 | 4 |
 +---+---+---+---+---+
 """.strip()
+    )

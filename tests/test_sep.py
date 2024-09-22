@@ -10,7 +10,9 @@ def test_sep():
             ("9", "10", "11"),
         ],
     )
-    assert table.stringify() == """
+    assert (
+        table.stringify()
+        == """
 +---+----+----+
 | 1 |  2 |  3 |
 +---+----+----+
@@ -21,7 +23,10 @@ def test_sep():
 | 9 | 10 | 11 |
 +---+----+----+
 """.strip()
-    assert table.stringify(sep=False) == """
+    )
+    assert (
+        table.stringify(sep=False)
+        == """
 +---+----+----+
 | 1 |  2 |  3 |
 | 3 |  4 |  5 |
@@ -29,16 +34,10 @@ def test_sep():
 | 9 | 10 | 11 |
 +---+----+----+
 """.strip()
-    assert table.stringify(sep=range(0, 100, 2)) == """
-+---+----+----+
-| 1 |  2 |  3 |
-| 3 |  4 |  5 |
-+---+----+----+
-| 6 |  7 |  8 |
-| 9 | 10 | 11 |
-+---+----+----+
-""".strip()
-    assert table.stringify(sep=range(0, 100, 2)) == """
+    )
+    assert (
+        table.stringify(sep=range(0, 100, 2))
+        == """
 +---+----+----+
 | 1 |  2 |  3 |
 | 3 |  4 |  5 |
@@ -47,3 +46,16 @@ def test_sep():
 | 9 | 10 | 11 |
 +---+----+----+
 """.strip()
+    )
+    assert (
+        table.stringify(sep=range(0, 100, 2))
+        == """
++---+----+----+
+| 1 |  2 |  3 |
+| 3 |  4 |  5 |
++---+----+----+
+| 6 |  7 |  8 |
+| 9 | 10 | 11 |
++---+----+----+
+""".strip()
+    )

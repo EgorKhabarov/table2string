@@ -8,12 +8,22 @@ def test_themes():
             ("3", Table([("4.1", "4.2"), ("4.3", "4.4")]), "5"),
             ("6", "7", "8"),
             ("9", "10", "11"),
-            (Table([("1",), (Table([("2", "3")]),)]), Table([(Table([("2", "3")]),), ("1",)]), "14"),
-            ("15", Table([("1", Table([("2",), ("3",)]))]), Table([(Table([("2",), ("3",)]), "1")])),
+            (
+                Table([("1",), (Table([("2", "3")]),)]),
+                Table([(Table([("2", "3")]),), ("1",)]),
+                "14",
+            ),
+            (
+                "15",
+                Table([("1", Table([("2",), ("3",)]))]),
+                Table([(Table([("2",), ("3",)]), "1")]),
+            ),
         ],
     )
 
-    assert table.stringify(theme=Themes.ascii_booktabs) == """
+    assert (
+        table.stringify(theme=Themes.ascii_booktabs)
+        == """
  --------------------------- 
       1           2       3  
  =========================== 
@@ -33,8 +43,13 @@ def test_themes():
                ===== ===     
                   3   3      
  --------------------------- 
-""".strip("\n")
-    assert table.stringify(theme=Themes.ascii_double) == """
+""".strip(
+            "\n"
+        )
+    )
+    assert (
+        table.stringify(theme=Themes.ascii_double)
+        == """
 +=======+===========+=======+
 ‖     1 ‖         2 ‖     3 ‖
 +=======+=====+=====+=======+
@@ -55,7 +70,10 @@ def test_themes():
 ‖       ‖     ‖   3 ‖ 3 ‖   ‖
 +=======+=====+=====+===+===+
 """.strip()
-    assert table.stringify(theme=Themes.ascii_double_thin) == """
+    )
+    assert (
+        table.stringify(theme=Themes.ascii_double_thin)
+        == """
 +=======+===========+=======+
 ‖     1 ‖         2 ‖     3 ‖
 +-------+-----+-----+-------+
@@ -76,7 +94,10 @@ def test_themes():
 ‖       ‖     ‖   3 ‖ 3 ‖   ‖
 +=======+=====+=====+===+===+
 """.strip()
-    assert table.stringify(theme=Themes.ascii_thin) == """
+    )
+    assert (
+        table.stringify(theme=Themes.ascii_thin)
+        == """
 +-------+-----------+-------+
 |     1 |         2 |     3 |
 +-------+-----+-----+-------+
@@ -97,7 +118,10 @@ def test_themes():
 |       |     |   3 | 3 |   |
 +-------+-----+-----+---+---+
 """.strip()
-    assert table.stringify(theme=Themes.ascii_thin_double) == """
+    )
+    assert (
+        table.stringify(theme=Themes.ascii_thin_double)
+        == """
 +-------+-----------+-------+
 |     1 |         2 |     3 |
 +=======+=====+=====+=======+
@@ -118,7 +142,10 @@ def test_themes():
 |       |     |   3 | 3 |   |
 +-------+-----+-----+---+---+
 """.strip()
-    assert table.stringify(theme=Themes.booktabs) == """
+    )
+    assert (
+        table.stringify(theme=Themes.booktabs)
+        == """
  ─────────────────────────── 
       1           2       3  
  ━━━━━━━━━━━━━━━━━━━━━━━━━━━ 
@@ -138,8 +165,13 @@ def test_themes():
                ━━━━━ ━━━     
                   3   3      
  ─────────────────────────── 
-""".strip("\n")
-    assert table.stringify(theme=Themes.double) == """
+""".strip(
+            "\n"
+        )
+    )
+    assert (
+        table.stringify(theme=Themes.double)
+        == """
 ╔═══════╦═══════════╦═══════╗
 ║     1 ║         2 ║     3 ║
 ╠═══════╬═════╦═════╬═══════╣
@@ -160,7 +192,10 @@ def test_themes():
 ║       ║     ║   3 ║ 3 ║   ║
 ╚═══════╩═════╩═════╩═══╩═══╝
 """.strip()
-    assert table.stringify(theme=Themes.double_thin) == """
+    )
+    assert (
+        table.stringify(theme=Themes.double_thin)
+        == """
 ╔═══════╦═══════════╦═══════╗
 ║     1 ║         2 ║     3 ║
 ╟───────╫─────╥─────╫───────╢
@@ -181,7 +216,10 @@ def test_themes():
 ║       ║     ║   3 ║ 3 ║   ║
 ╚═══════╩═════╩═════╩═══╩═══╝
 """.strip()
-    assert table.stringify(theme=Themes.markdown) == """
+    )
+    assert (
+        table.stringify(theme=Themes.markdown)
+        == """
 |     1 |         2 |     3 |
 |-------|-----------|-------|
 |     3 | 4.1 | 4.2 |     5 |
@@ -196,7 +234,10 @@ def test_themes():
 |       |     +-----|---+   |
 |       |     |   3 | 3 |   |
 """.strip()
-    assert table.stringify(theme=Themes.rounded) == """
+    )
+    assert (
+        table.stringify(theme=Themes.rounded)
+        == """
 ╭───────┬───────────┬───────╮
 │     1 │         2 │     3 │
 ├───────┼─────┬─────┼───────┤
@@ -217,7 +258,10 @@ def test_themes():
 │       │     │   3 │ 3 │   │
 ╰───────┴─────┴─────┴───┴───╯
 """.strip()
-    assert table.stringify(theme=Themes.rounded_double) == """
+    )
+    assert (
+        table.stringify(theme=Themes.rounded_double)
+        == """
 ╭───────┬───────────┬───────╮
 │     1 │         2 │     3 │
 ╞═══════╪═════╤═════╪═══════╡
@@ -238,7 +282,10 @@ def test_themes():
 │       │     │   3 │ 3 │   │
 ╰───────┴─────┴─────┴───┴───╯
 """.strip()
-    assert table.stringify(theme=Themes.rounded_thick) == """
+    )
+    assert (
+        table.stringify(theme=Themes.rounded_thick)
+        == """
 ╭───────┬───────────┬───────╮
 │     1 │         2 │     3 │
 ┝━━━━━━━┿━━━━━┯━━━━━┿━━━━━━━┥
@@ -259,7 +306,10 @@ def test_themes():
 │       │     │   3 │ 3 │   │
 ╰───────┴─────┴─────┴───┴───╯
 """.strip()
-    assert table.stringify(theme=Themes.thick) == """
+    )
+    assert (
+        table.stringify(theme=Themes.thick)
+        == """
 ┏━━━━━━━┳━━━━━━━━━━━┳━━━━━━━┓
 ┃     1 ┃         2 ┃     3 ┃
 ┣━━━━━━━╋━━━━━┳━━━━━╋━━━━━━━┫
@@ -280,7 +330,10 @@ def test_themes():
 ┃       ┃     ┃   3 ┃ 3 ┃   ┃
 ┗━━━━━━━┻━━━━━┻━━━━━┻━━━┻━━━┛
 """.strip()
-    assert table.stringify(theme=Themes.thick_thin) == """
+    )
+    assert (
+        table.stringify(theme=Themes.thick_thin)
+        == """
 ┏━━━━━━━┳━━━━━━━━━━━┳━━━━━━━┓
 ┃     1 ┃         2 ┃     3 ┃
 ┠───────╂─────┰─────╂───────┨
@@ -301,7 +354,10 @@ def test_themes():
 ┃       ┃     ┃   3 ┃ 3 ┃   ┃
 ┗━━━━━━━┻━━━━━┻━━━━━┻━━━┻━━━┛
 """.strip()
-    assert table.stringify(theme=Themes.thin) == """
+    )
+    assert (
+        table.stringify(theme=Themes.thin)
+        == """
 ┌───────┬───────────┬───────┐
 │     1 │         2 │     3 │
 ├───────┼─────┬─────┼───────┤
@@ -322,7 +378,10 @@ def test_themes():
 │       │     │   3 │ 3 │   │
 └───────┴─────┴─────┴───┴───┘
 """.strip()
-    assert table.stringify(theme=Themes.thin_double) == """
+    )
+    assert (
+        table.stringify(theme=Themes.thin_double)
+        == """
 ┌───────┬───────────┬───────┐
 │     1 │         2 │     3 │
 ╞═══════╪═════╤═════╪═══════╡
@@ -343,7 +402,10 @@ def test_themes():
 │       │     │   3 │ 3 │   │
 └───────┴─────┴─────┴───┴───┘
 """.strip()
-    assert table.stringify(theme=Themes.thin_thick) == """
+    )
+    assert (
+        table.stringify(theme=Themes.thin_thick)
+        == """
 ┌───────┬───────────┬───────┐
 │     1 │         2 │     3 │
 ┝━━━━━━━┿━━━━━┯━━━━━┿━━━━━━━┥
@@ -364,3 +426,4 @@ def test_themes():
 │       │     │   3 │ 3 │   │
 └───────┴─────┴─────┴───┴───┘
 """.strip()
+    )

@@ -21,6 +21,12 @@ ALLOWED_ALIGNS = [
     "*",
     "**",
 ]
+ALLOWED_V_ALIGNS = [
+    "^",
+    "-",
+    "_",
+]
+ANSI_REGEX = re.compile(r"\x1b\[[0-9;]*[a-zA-Z]")  # [mGKHf]
 
 
 @dataclass
@@ -521,7 +527,7 @@ def get_text_width_in_console(text: str) -> int:
     """
     Calculates the number of positions that a line will occupy in the console.
     """
-    text = re.sub(r"\x1b\[[0-9;]*[a-zA-Z]", "", text)
+    text = ANSI_REGEX.sub("", text)
     width = 0
     for char in text:
         if unicodedata.east_asian_width(char) in ("W", "F"):
@@ -561,7 +567,9 @@ def proportional_change(
     """
     if min_row_widths:
         assert sum(min_row_widths) <= max_width, f"{sum(min_row_widths)} <= {max_width}"
-    assert 0.0 <= proportion_coefficient <= 2.0, f"0.0 <= {proportion_coefficient} <= 2.0"
+    assert (
+        0.0 <= proportion_coefficient <= 2.0
+    ), f"0.0 <= {proportion_coefficient} <= 2.0"
     if min_row_widths is None:
         min_row_widths = [1] * len(row_widths)
 
@@ -624,27 +632,36 @@ def proportional_change(
 
 
 def transform_align(
-    column_count: int, align: Union[Tuple[str, ...], str] = "*"
+    column_count: int,
+    align: Optional[Union[Tuple[str, ...], str]] = None,
+    is_v_align: bool = False,
 ) -> Tuple[str, ...]:
     """
     Convert align to a suitable view
 
     :param column_count:
     :param align:
+    :param is_v_align:
     :return:
     """
+    allowed_list = ALLOWED_V_ALIGNS if is_v_align else ALLOWED_ALIGNS
+    string_allowed_list_name = "ALLOWED_V_ALIGNS" if is_v_align else "ALLOWED_ALIGNS"
+    default = "^" if is_v_align else "*"
+    if align is None:
+        align = default
+
     wrong_align = [
         a
         for a in ((align,) if isinstance(align, str) else align)
-        if a not in ALLOWED_ALIGNS
+        if a not in allowed_list
     ]
     if wrong_align:
-        raise ValueError(f"{wrong_align[0]} not in ALLOWED_ALIGNS")
+        raise ValueError(f"{wrong_align[0]} not in {string_allowed_list_name}")
 
     if isinstance(align, str):
         align = (align, *(align,) * (column_count - 1))
     else:
-        align = (*align, *("*",) * (column_count - len(align)))
+        align = (*align, *(default,) * (column_count - len(align)))
 
     return align[:column_count]
 
@@ -689,7 +706,9 @@ def transform_width(
 
     # Calculate the width of each column
     sum_column_width = (width_i - column_count * 3 - 1) or 1
-    max_widths = proportional_change(row_widths, sum_column_width, min_row_widths, proportion_coefficient)
+    max_widths = proportional_change(
+        row_widths, sum_column_width, min_row_widths, proportion_coefficient
+    )
     return max_widths
 
 
@@ -720,7 +739,7 @@ def line_spliter(
 
     for line in lines:
         if get_text_width_in_console(line) == 0:
-            result_lines.append(" ")
+            result_lines.append("")
             result_breaks.append(" ")
         else:
             while line:
@@ -752,6 +771,7 @@ def fill_line(
     metadata_list: Tuple[Dict[str, str] | None, ...],
     widths: List[int],
     align: Tuple[str, ...],
+    v_align: Tuple[str, ...],
     theme: Theme = Themes.ascii_thin,
 ) -> str:
     """
@@ -763,6 +783,7 @@ def fill_line(
     :param metadata_list: Tuple of dictionaries to join boundaries
     :param widths:
     :param align:
+    :param v_align:
     :param theme:
     :return:
     """
@@ -790,89 +811,114 @@ def fill_line(
                 align_left[n] = "<"
                 align_right[n] = "<"
 
+    for ci, column in enumerate(rows):
+        if not subtable_columns[ci]:
+            rows[ci][:] = apply_v_align(column, v_align[ci])
+
     lines = []
     symbol = list(zip(*symbols))
     vertical = border.vertical
+    tags = [False for _ in subtable_columns]
 
     for ri, row in enumerate(zip(*rows)):  # ri - row index
-        row = list(row)
+        current_align = []
+        for ci, column in enumerate(row):
+            if tags[ci]:
+                current_align.append(align_right[ci])
+            else:
+                current_align.append(align_left[ci])
+            if not column.isspace():
+                tags[ci] = True
 
-        if ri == 0:
-            current_align = align_left
-        else:
-            current_align = align_right
-
-        def get_width(ci: int):
-            return widths[ci] - (get_text_width_in_console(row[ci]) - len(row[ci]))
-
-        def get_template() -> str:
-            template_list = []
-            row_length = len(row)
-            for ci in range(row_length):  # ci - column index
-                if subtable_columns[ci]:
-                    metadata = metadata_list[ci]
-                    if ci == 0:
-                        template_list.append(
-                            translate_theme_border(
-                                "border_left",
-                                theme,
-                                vertical,
-                                metadata["border_left"][0],
-                            )
+        template_list = []
+        row_length = len(row)
+        for ci in range(row_length):  # ci - column index
+            if subtable_columns[ci]:
+                metadata = metadata_list[ci]
+                if ci == 0:
+                    template_list.append(
+                        translate_theme_border(
+                            "border_left",
+                            theme,
+                            vertical,
+                            metadata["border_left"][0],
                         )
-                    elif ci == row_length - 1:
-                        template_list[-1] = translate_theme_border(
-                            "border_right",
+                    )
+                elif ci == row_length - 1:
+                    template_list[-1] = translate_theme_border(
+                        "border_right",
+                        theme,
+                        template_list[-1] or vertical,
+                        metadata["border_right"][-1],
+                    )
+
+                try:
+                    metadata_border_left_ri = metadata["border_left"][ri]
+                    metadata_border_right_ri = metadata["border_right"][ri]
+                except IndexError:
+                    metadata_border_left_ri = " "
+                    metadata_border_right_ri = " "
+                if template_list:
+                    template_list[-1] = (
+                        translate_theme_border(
+                            "border_left",
                             theme,
                             template_list[-1] or vertical,
-                            metadata["border_right"][-1],
+                            metadata_border_left_ri,
                         )
-
-                    try:
-                        metadata_border_left_ri = metadata["border_left"][ri]
-                        metadata_border_right_ri = metadata["border_right"][ri]
-                    except IndexError:
-                        metadata_border_left_ri = " "
-                        metadata_border_right_ri = " "
-                    if template_list:
-                        template_list[-1] = (
-                            translate_theme_border(
-                                "border_left",
-                                theme,
-                                template_list[-1] or vertical,
-                                metadata_border_left_ri,
-                            )
-                            or template_list[-1]
-                        )
-
-                    template_list.append(f"{{:<{widths[ci]+2}}}")
-
-                    border_right = translate_theme_border(
-                        "border_right", theme, vertical, metadata_border_right_ri
-                    )
-                    template_list.append(border_right)
-                else:
-                    if ci == 0:
-                        template_list.append(vertical)
-                    template_list.append(
-                        f" {{:{current_align[ci]}{get_width(ci)}}}{symbol[ri][ci]}"
+                        or template_list[-1]
                     )
 
+                template_list.append(f"{{:<{widths[ci]+2}}}")
+
+                border_right = translate_theme_border(
+                    "border_right", theme, vertical, metadata_border_right_ri
+                )
+                template_list.append(border_right)
+            else:
+                if ci == 0:
                     template_list.append(vertical)
+                width = widths[ci] - (get_text_width_in_console(row[ci]) - len(row[ci]))
+                template_list.append(
+                    f" {{:{current_align[ci]}{width}}}{symbol[ri][ci]}"
+                )
 
-            return "".join(template_list)
+                template_list.append(vertical)
 
-        template = get_template()
+        template = "".join(template_list)
         lines.append(template.format(*row))
 
     return "\n".join(lines)
+
+
+def apply_v_align(column: List[str], v_align: str) -> List[str]:
+    if v_align == "_":
+        while column[-1].isspace():
+            column.insert(0, column.pop())
+    elif v_align == "-":
+        rows_count = len(column)
+        while column[0].isspace():
+            column.pop(0)
+        while column[-1].isspace():
+            column.pop()
+
+        not_empty_rows_count = len(column)
+        difference = rows_count - not_empty_rows_count
+        top = difference // 2
+        bottom = difference - top
+        for _ in range(top):
+            column.insert(0, " ")
+        for _ in range(bottom):
+            column.append(" ")
+
+    return [s if s else " " for s in column]
 
 
 def apply_metadata(
     string: str,
     side: str,
     theme: Theme,
-    metadata_list: tuple[dict | None, ...],
+    metadata_list: Tuple[Optional[dict], ...],
     max_widths: list[int],
 ) -> str:
     """
