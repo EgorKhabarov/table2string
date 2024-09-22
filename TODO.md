@@ -143,3 +143,13 @@ Table(table).print(**kwargs)
 │   77777   │   88888   │
 └───────────┴───────────┘
 ```
+
+# Table Console Editor
+
+```pycon
+console_editor(
+    table,         # [(1, 2), (3, 4)]
+    setitem=None,  # (row, column, new_value): table[row][column] = new_value,
+    export=print,  # (table): print(table)
+)
+```

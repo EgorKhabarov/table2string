@@ -228,13 +228,12 @@ down_separator       = "└───┴───┴───┘"
             file=file,
         )
 
-    # Trimming long lines
     def line_spliter_for_sub_table(
         sub_table: Table, column_index: int
     ) -> List[List[str] | bool | Dict[str, Tuple[str, ...]]]:
         string_sub_table = sub_table.stringify(
-            align=align,
-            v_align=v_align,
+            align=align_t[column_index],
+            v_align=v_align_t[column_index],
             name_align=name_align,
             name_v_align=name_v_align,
             column_names_align=column_names_align,
@@ -273,6 +272,7 @@ down_separator       = "└───┴───┴───┘"
         if ri != 0:
             result_table.append(("", "\n"))
 
+        # Trimming long lines
         for ci, column in enumerate(row):
             if isinstance(column, Table):
                 column_lines = line_spliter_for_sub_table(column, ci)
@@ -565,8 +565,8 @@ class Table:
             column_names_v_align=self.config.get("column_names_v_align")
             or column_names_v_align,
             max_width=max_width,
-            max_height=max_height,
-            maximize_height=maximize_height,
+            max_height=self.config.get("max_height") or max_height,
+            maximize_height=self.config.get("maximize_height") or maximize_height,
             line_break_symbol=self.config.get("line_break_symbol") or line_break_symbol,
             cell_break_symbol=self.config.get("cell_break_symbol") or cell_break_symbol,
             sep=sep,
@@ -633,8 +633,8 @@ class Table:
             column_names_v_align=self.config.get("column_names_v_align")
             or column_names_v_align,
             max_width=max_width,
-            max_height=max_height,
-            maximize_height=maximize_height,
+            max_height=self.config.get("max_height") or max_height,
+            maximize_height=self.config.get("maximize_height") or maximize_height,
             line_break_symbol=self.config.get("line_break_symbol") or line_break_symbol,
             cell_break_symbol=self.config.get("cell_break_symbol") or cell_break_symbol,
             sep=sep,

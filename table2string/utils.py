@@ -26,6 +26,7 @@ ALLOWED_V_ALIGNS = [
     "-",
     "_",
 ]
+ANSI_REGEX = re.compile(r"\x1b\[[0-9;]*[a-zA-Z]")  # [mGKHf]
 
 
 @dataclass
@@ -526,7 +527,7 @@ def get_text_width_in_console(text: str) -> int:
     """
     Calculates the number of positions that a line will occupy in the console.
     """
-    text = re.sub(r"\x1b\[[0-9;]*[a-zA-Z]", "", text)
+    text = ANSI_REGEX.sub("", text)
     width = 0
     for char in text:
         if unicodedata.east_asian_width(char) in ("W", "F"):
