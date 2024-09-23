@@ -1,8 +1,8 @@
 import os
 import re
 import unicodedata
+from functools import lru_cache
 from dataclasses import dataclass
-from cachetools import cached, LRUCache
 from typing import Union, List, Tuple, Optional, Dict
 
 
@@ -28,6 +28,38 @@ ALLOWED_V_ALIGNS = [
     "_",
 ]
 ANSI_REGEX = re.compile(r"\x1b\[[0-9;]*[a-zA-Z]")
+translate_border_dict = {
+    "border_left": {
+        ("vertical", "vertical_left"): "vertical_left",
+        ("vertical", "vertical_left_plus"): "vertical_left_plus",
+        ("vertical_right", "vertical_left"): "central",
+        ("vertical_right", "vertical_left_plus"): "central_plus",
+        ("vertical", "central"): "vertical_left",
+    },
+    "border_right": {
+        ("vertical", "vertical_right"): "vertical_right",
+        ("vertical", "vertical_right_plus"): "vertical_right_plus",
+        ("vertical_left", "vertical_right"): "central",
+        ("vertical_left", "vertical_right_plus"): "central_plus",
+        ("vertical", "central"): "vertical_right",
+    },
+    "border_top": {
+        ("horizontal", "top_horizontal"): "top_horizontal",
+        ("top_horizontal", "bottom_horizontal"): "central",
+        ("bottom_horizontal", "top_horizontal"): "central",
+        ("horizontal_plus", "top_horizontal"): "top_horizontal_plus",
+        ("horizontal", "central"): "central",
+        ("horizontal_plus", "central"): "central",
+    },
+    "border_bottom": {
+        ("horizontal", "bottom_horizontal"): "bottom_horizontal",
+        ("top_horizontal", "bottom_horizontal"): "central",
+        ("bottom_horizontal", "top_horizontal"): "central",
+        ("horizontal_plus", "bottom_horizontal"): "bottom_horizontal_plus",
+        ("horizontal", "central"): "central",
+        ("horizontal_plus", "central"): "central",
+    },
+}
 
 
 @dataclass
@@ -87,6 +119,8 @@ class Border:
                 return "top_horizontal_plus"
             case self.bottom_horizontal_plus:
                 return "bottom_horizontal_plus"
+
+        return "central"
 
 
 class Theme:
@@ -467,42 +501,7 @@ class Themes:
     )
 
 
-translate_border_dict = {
-    "border_left": {
-        ("vertical", "vertical_left"): "vertical_left",
-        ("vertical", "vertical_left_plus"): "vertical_left_plus",
-        ("vertical_right", "vertical_left"): "central",
-        ("vertical_right", "vertical_left_plus"): "central_plus",
-        ("vertical", "central"): "vertical_left",
-    },
-    "border_right": {
-        ("vertical", "vertical_right"): "vertical_right",
-        ("vertical", "vertical_right_plus"): "vertical_right_plus",
-        ("vertical_left", "vertical_right"): "central",
-        ("vertical_left", "vertical_right_plus"): "central_plus",
-        ("vertical", "central"): "vertical_right",
-    },
-    "border_top": {
-        ("horizontal", "top_horizontal"): "top_horizontal",
-        ("top_horizontal", "bottom_horizontal"): "central",
-        ("bottom_horizontal", "top_horizontal"): "central",
-        ("horizontal_plus", "top_horizontal"): "top_horizontal_plus",
-        ("horizontal", "central"): "central",
-        ("horizontal_plus", "central"): "central",
-    },
-    "border_bottom": {
-        ("horizontal", "bottom_horizontal"): "bottom_horizontal",
-        ("top_horizontal", "bottom_horizontal"): "central",
-        ("bottom_horizontal", "top_horizontal"): "central",
-        ("horizontal_plus", "bottom_horizontal"): "bottom_horizontal_plus",
-        ("horizontal", "central"): "central",
-        ("horizontal_plus", "central"): "central",
-    },
-}
-border_translate_cache = LRUCache(maxsize=100)
-
-
-@cached(border_translate_cache)
+@lru_cache(maxsize=100)
 def translate_theme_border(
     side: str, theme: Theme, border_from: str, border_to: str
 ) -> str:
@@ -715,11 +714,11 @@ def transform_width(
 
 def line_spliter(
     text: str,
-    width: Union[int, None] = None,
-    height: Union[int, None] = None,
+    width: Optional[int] = None,
+    height: Optional[int] = None,
     line_break_symbol: str = "↩",
     cell_break_symbol: str = "…",
-) -> List[List[str]]:
+) -> List[List[str] | List[bool] | bool | None]:
     """
     Splits text to the desired width and height
 
@@ -766,7 +765,7 @@ def line_spliter(
 
 
 def fill_line(
-    rows: List[List[str]],
+    rows: List[List[str] | List[bool] | bool | None],
     symbols: List[List[str]],
     subtable_columns: List[bool],
     metadata_list: Tuple[Dict[str, str] | None, ...],
@@ -893,6 +892,12 @@ def fill_line(
 
 
 def apply_v_align(column: List[str], v_align: str) -> List[str]:
+    """
+    Apply v_align
+
+    :param column:
+    :param v_align:
+    """
     if v_align == "_":
         while column[-1].isspace():
             column.insert(0, column.pop())
@@ -924,6 +929,7 @@ def apply_metadata(
 ) -> str:
     """
     Connects table and subtable boundaries
+
     :param string:
     :param side: "border_left" or "border_right" or "border_top" or "border_bottom"
     :param theme:

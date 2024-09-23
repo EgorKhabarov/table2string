@@ -1,6 +1,6 @@
 import csv
 from io import TextIOWrapper, StringIO
-from typing import Union, Tuple, Any, Sequence, List, Dict
+from typing import Union, Tuple, Any, Sequence, List, Dict, Optional
 
 from table2string.utils import (
     get_text_width_in_console,
@@ -21,20 +21,20 @@ def print_table(
     *,
     align: Union[Tuple[str, ...], str] = "*",
     v_align: Union[Tuple[str, ...], str] = "^",
-    name: Union[str, None] = None,
+    name: Optional[str] = None,
     name_align: str = "^",
     name_v_align: str = "-",
-    column_names: Union[Sequence[str], None] = None,
+    column_names: Optional[Sequence[str]] = None,
     column_names_align: Union[Tuple[str, ...], str] = "^",
     column_names_v_align: Union[Tuple[str, ...], str] = "-",
     max_width: Union[int, Tuple[int, ...], None] = None,
-    max_height: Union[int, None] = None,
+    max_height: Optional[int] = None,
     maximize_height: bool = False,
     line_break_symbol: str = "↩",
     cell_break_symbol: str = "…",
     sep: Union[bool, range, tuple] = True,
-    end: Union[str, None] = "\n",
-    file: Union[TextIOWrapper, None] = None,
+    end: Optional[str] = "\n",
+    file: Optional[TextIOWrapper] = None,
     theme: Theme = Themes.ascii_thin,
     ignore_width_errors: bool = False,
     proportion_coefficient: float = 0.5,
@@ -391,19 +391,19 @@ def stringify_table(
     *,
     align: Union[Tuple[str, ...], str] = "*",
     v_align: Union[Tuple[str, ...], str] = "^",
-    name: Union[str, None] = None,
+    name: Optional[str] = None,
     name_align: str = "^",
     name_v_align: str = "-",
-    column_names: Union[Sequence[str], None] = None,
+    column_names: Optional[Sequence[str]] = None,
     column_names_align: Union[Tuple[str, ...], str] = "^",
     column_names_v_align: Union[Tuple[str, ...], str] = "-",
     max_width: Union[int, Tuple[int, ...], None] = None,
-    max_height: Union[int, None] = None,
+    max_height: Optional[int] = None,
     maximize_height: bool = False,
     line_break_symbol: str = "↩",
     cell_break_symbol: str = "…",
     sep: Union[bool, range, tuple] = True,
-    end: Union[str, None] = "",
+    end: Optional[str] = "",
     theme: Theme = Themes.ascii_thin,
     ignore_width_errors: bool = False,
     proportion_coefficient: float = 0.5,
@@ -462,8 +462,8 @@ class Table:
     def __init__(
         self,
         table: Sequence[Sequence[Any]],
-        name: Union[str, None] = None,
-        column_names: Union[Sequence[str], None] = None,
+        name: Optional[str] = None,
+        column_names: Optional[Sequence[str]] = None,
         **kwargs: Any,
     ):
         self.table = table
@@ -475,8 +475,8 @@ class Table:
     def from_table(
         cls,
         table: Sequence[Sequence[Any]],
-        name: Union[str, None] = None,
-        column_names: Union[Sequence[str], None] = None,
+        name: Optional[str] = None,
+        column_names: Optional[Sequence[str]] = None,
         **kwargs: Any,
     ) -> "Table":
         return cls(table=table, name=name, column_names=column_names, **kwargs)
@@ -485,7 +485,7 @@ class Table:
     def from_db_cursor(
         cls,
         cursor,
-        name: Union[str, None] = None,
+        name: Optional[str] = None,
         column_names: bool = False,
         **kwargs: Any,
     ) -> "Table":
@@ -502,9 +502,9 @@ class Table:
     def from_csv(
         cls,
         file: TextIOWrapper,
-        name: Union[str, None] = None,
+        name: Optional[str] = None,
         column_names: bool = True,
-        reader_kwargs: Dict[str, Any] = None,
+        reader_kwargs: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ) -> "Table":
         csv_table = list(csv.reader(file, **reader_kwargs or {}))
@@ -522,12 +522,12 @@ class Table:
         column_names_align: Union[Tuple[str, ...], str] = "^",
         column_names_v_align: Union[Tuple[str, ...], str] = "-",
         max_width: Union[int, Tuple[int, ...], None] = None,
-        max_height: Union[int, None] = None,
+        max_height: Optional[int] = None,
         maximize_height: bool = False,
         line_break_symbol: str = "↩",
         cell_break_symbol: str = "…",
         sep: Union[bool, range, tuple] = True,
-        end: Union[str, None] = "",
+        end: Optional[str] = "",
         theme: Theme = Themes.ascii_thin,
         ignore_width_errors: bool = False,
         proportion_coefficient: float = 0.5,
@@ -587,13 +587,13 @@ class Table:
         column_names_align: Union[Tuple[str, ...], str] = "^",
         column_names_v_align: Union[Tuple[str, ...], str] = "-",
         max_width: Union[int, Tuple[int, ...], None] = None,
-        max_height: Union[int, None] = None,
+        max_height: Optional[int] = None,
         maximize_height: bool = False,
         line_break_symbol: str = "↩",
         cell_break_symbol: str = "…",
         sep: Union[bool, range, tuple] = True,
-        end: Union[str, None] = "\n",
-        file: Union[TextIOWrapper, None] = None,
+        end: Optional[str] = "\n",
+        file: Optional[TextIOWrapper] = None,
         theme: Theme = Themes.ascii_thin,
         ignore_width_errors: bool = False,
         proportion_coefficient: float = 0.5,
