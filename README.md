@@ -101,6 +101,14 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 | qwe | rty |    |
 |     | uio |    |
 +-----+-----+----+
+>>> Table([("c1", Table([("1", "2"), ("3", "4")]),)], name="Table Name").print(v_align=("-",))
++------------+
+| Table Name |
++----+---+---+
+|    | 1 | 2 |
+| c1 +---+---+
+|    | 3 | 4 |
++----+---+---+
 >>> from table2string import print_table, stringify_table
 >>> print_table([("1", "2", "3"), ("qwe", "rty\nuio", "")], name="Table Name")
 +---------------+
@@ -120,14 +128,6 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 | qwe | rty |   |
 |     | uio |   |
 +-----+-----+---+
->>> Table([("\nf1", Table([("1", "2"), ("3", "4")]),)], name="Table Name").print()
-+------------+
-| Table Name |
-+----+---+---+
-|    | 1 | 2 |
-| f1 +---+---+
-|    | 3 | 4 |
-+----+---+---+
 
 ```
 
@@ -145,7 +145,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 
 ```pycon
 >>> # Width of the entire table with borders
->>> print_table([(1,), (2.345,), ("example",)], max_width=10)
+>>> Table([(1,), (2.345,), ("example",)]).print(max_width=10)
 +--------+
 |      1 |
 +--------+
@@ -155,7 +155,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 | e      |
 +--------+
 >>> # Width of each column individually
->>> print_table([(1,), (2.345,), ("example",)], max_width=(10,))
+>>> Table([(1,), (2.345,), ("example",)]).print(max_width=(10,))
 +------------+
 |          1 |
 +------------+
@@ -163,19 +163,18 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 +------------+
 | example    |
 +------------+
->>> print_table([("123456\n\n789000", "example")], max_width=(3, 4), max_height=4)
+>>> Table([("123456\n\n789000", "example")]).print(max_width=(3, 4), max_height=4)
 +-----+------+
 | 123↩| exam↩|
 | 456 | ple  |
 |     |      |
 | 789…|      |
 +-----+------+
->>> print_table([("123456789",)], max_width=(1,), max_height=1)
+>>> Table([("123456789",)]).print(max_width=(1,), max_height=1)
 +---+
 | 1…|
 +---+
->>> print_table(
-...     table=[("123\n456\n789",)],
+>>> Table([("123\n456\n789",)]).print(
 ...     max_width=(3,),
 ...     max_height=4,
 ...     maximize_height=True,
@@ -186,8 +185,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 | 789 |
 |     |
 +-----+
->>> print_table(
-...     table=[("123456789",)],
+>>> Table([("123456789",)]).print(
 ...     max_width=(3,),
 ...     max_height=4,
 ...     maximize_height=True,
@@ -229,13 +227,12 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 <summary>Example</summary>
 
 ```pycon
->>> kwargs_1 = {
-...     "table": [("1", "123456789\nqwerty\nasdfghjklzxcvb")],
-...     "name": "Table Name\nName\nNaaaaame",
-...     "column_names": ("1", "col 2\nc2"),
-...     "max_width": (5, 15),
-... }
->>> print_table(**kwargs_1)
+>>> table_1 = Table(
+...     [("1", "123456789\nqwerty\nasdfghjklzxcvb")],
+...     name="Table Name\nName\nNaaaaame",
+...     column_names=("1", "col 2\nc2"),
+... )
+>>> table_1.print(max_width=(5, 15))
 +-------------------------+
 |       Table Name        |
 |          Name           |
@@ -248,7 +245,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 |       | qwerty          |
 |       | asdfghjklzxcvb  |
 +-------+-----------------+
->>> print_table(**kwargs_1, align="*", name_align="*", column_names_align="*")  # align="**", name_align="**", column_names_align="**"
+>>> table_1.print(max_width=(5, 15), align="*", name_align="*", column_names_align="*")  # align="**", name_align="**", column_names_align="**"
 +-------------------------+
 | Table Name              |
 | Name                    |
@@ -261,7 +258,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 |       | qwerty          |
 |       | asdfghjklzxcvb  |
 +-------+-----------------+
->>> print_table(**kwargs_1, align="<", name_align="<", column_names_align="<")  # align="<<", name_align="<<", column_names_align="<<"
+>>> table_1.print(max_width=(5, 15), align="<", name_align="<", column_names_align="<")  # align="<<", name_align="<<", column_names_align="<<"
 +-------------------------+
 | Table Name              |
 | Name                    |
@@ -274,7 +271,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 |       | qwerty          |
 |       | asdfghjklzxcvb  |
 +-------+-----------------+
->>> print_table(**kwargs_1, align=">", name_align=">", column_names_align=">")  # align=">>", name_align=">>", column_names_align=">>"
+>>> table_1.print(max_width=(5, 15), align=">", name_align=">", column_names_align=">")  # align=">>", name_align=">>", column_names_align=">>"
 +-------------------------+
 |              Table Name |
 |                    Name |
@@ -287,7 +284,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 |       |          qwerty |
 |       |  asdfghjklzxcvb |
 +-------+-----------------+
->>> print_table(**kwargs_1, align="^", name_align="^", column_names_align="^")  # align="^^", name_align="^^", column_names_align="^^"
+>>> table_1.print(max_width=(5, 15), align="^", name_align="^", column_names_align="^")  # align="^^", name_align="^^", column_names_align="^^"
 +-------------------------+
 |       Table Name        |
 |          Name           |
@@ -300,7 +297,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 |       |     qwerty      |
 |       | asdfghjklzxcvb  |
 +-------+-----------------+
->>> print_table(**kwargs_1, align="^<", name_align="^<", column_names_align="^<")
+>>> table_1.print(max_width=(5, 15), align="^<", name_align="^<", column_names_align="^<")
 +-------------------------+
 |       Table Name        |
 |       Name              |
@@ -313,7 +310,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 |       | qwerty          |
 |       | asdfghjklzxcvb  |
 +-------+-----------------+
->>> print_table(**kwargs_1, align="^>", name_align="^>", column_names_align="^>")
+>>> table_1.print(max_width=(5, 15), align="^>", name_align="^>", column_names_align="^>")
 +-------------------------+
 |       Table Name        |
 |             Name        |
@@ -326,13 +323,14 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 |       |         qwerty  |
 |       | asdfghjklzxcvb  |
 +-------+-----------------+
->>> print_table([("qwerty\n123456789\nasdfghjklzxcvb",)], max_width=(18,), align="^<")
+>>> table_2 = Table([("qwerty\n123456789\nasdfghjklzxcvb",)])
+>>> table_2.print(max_width=(18,), align="^<")
 +--------------------+
 |   qwerty           |
 |   123456789        |
 |   asdfghjklzxcvb   |
 +--------------------+
->>> print_table([("qwerty\n123456789\nasdfghjklzxcvb",)], max_width=(18,), align="^>")
+>>> table_2.print(max_width=(18,), align="^>")
 +--------------------+
 |           qwerty   |
 |        123456789   |
@@ -356,12 +354,12 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 <summary>Example</summary>
 
 ```pycon
->>> table_1 = [("qwe", "rty\nuio"), ("123456\n\n789000", "example")]
+>>> table_1 = Table([("qwe", "rty\nuio"), ("123456\n\n789000", "example")])
 >>> kwargs = {
 ...     "max_width": (3, 4),
 ...     "max_height": 4,
 ... }
->>> print_table(table_1, **kwargs, sep=True)
+>>> table_1.print(**kwargs, sep=True)
 +-----+------+
 | qwe | rty  |
 |     | uio  |
@@ -371,7 +369,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 |     |      |
 | 789…|      |
 +-----+------+
->>> print_table(table_1, **kwargs, sep=False)
+>>> table_1.print(**kwargs, sep=False)
 +-----+------+
 | qwe | rty  |
 |     | uio  |
@@ -380,8 +378,8 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 |     |      |
 | 789…|      |
 +-----+------+
->>> table_2 = [("1", "2"), ("3", "4")]
->>> print_table(table_2, sep=True, name="Name")
+>>> table_2 = Table([("1", "2"), ("3", "4")], name="Name")
+>>> table_2.print(sep=True)
 +-------+
 | Name  |
 +---+---+
@@ -389,15 +387,15 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 +---+---+
 | 3 | 4 |
 +---+---+
->>> print_table(table_2, sep=False, name="Name")
+>>> table_2.print(sep=False)
 +-------+
 | Name  |
 +---+---+
 | 1 | 2 |
 | 3 | 4 |
 +---+---+
->>> table_3 = [("1", "2"), ("3", "4"), ("5", "6"), ("7", "8")]
->>> print_table(table_3, sep=(1,))
+>>> table_3 = Table([("1", "2"), ("3", "4"), ("5", "6"), ("7", "8")])
+>>> table_3.print(sep=(1,))
 +---+---+
 | 1 | 2 |
 +---+---+
@@ -405,7 +403,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 | 5 | 6 |
 | 7 | 8 |
 +---+---+
->>> print_table(table_3, sep=(2,))
+>>> table_3.print(sep=(2,))
 +---+---+
 | 1 | 2 |
 | 3 | 4 |
@@ -413,7 +411,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 | 5 | 6 |
 | 7 | 8 |
 +---+---+
->>> print_table(table_3, sep=(1, 3))
+>>> table_3.print(sep=(1, 3))
 +---+---+
 | 1 | 2 |
 +---+---+
@@ -422,7 +420,8 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 +---+---+
 | 7 | 8 |
 +---+---+
->>> print_table(table_3, sep=(1,), name="Name")
+>>> table_4 = Table([("1", "2"), ("3", "4"), ("5", "6"), ("7", "8")], name="Name")
+>>> table_4.print(sep=(1,))
 +-------+
 | Name  |
 +---+---+
@@ -432,7 +431,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 | 5 | 6 |
 | 7 | 8 |
 +---+---+
->>> print_table(table_3, sep=(2,), name="Name")
+>>> table_4.print(sep=(2,))
 +-------+
 | Name  |
 +---+---+
@@ -442,7 +441,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 | 5 | 6 |
 | 7 | 8 |
 +---+---+
->>> print_table(table_3, sep=(1, 3), name="Name")
+>>> table_4.print(sep=(1, 3))
 +-------+
 | Name  |
 +---+---+
