@@ -923,7 +923,7 @@ def apply_metadata(
     side: str,
     theme: Theme,
     metadata_list: Tuple[Optional[dict], ...],
-    max_widths: list[int],
+    max_widths: List[int],
 ) -> str:
     """
     Connects table and subtable boundaries

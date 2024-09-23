@@ -684,9 +684,9 @@ def get_row_widths(table: Sequence[Sequence], minimum: bool = False) -> List[int
                     else (
                         max(
                             get_text_width_in_console(line)
-                            for line in str_cell.splitlines() or [""]
+                            for line in str(cell).splitlines() or [""]
                         )
-                        if (str_cell := str(cell))
+                        if str(cell)
                         else 1
                     )
                 )
