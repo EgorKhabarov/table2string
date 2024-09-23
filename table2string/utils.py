@@ -1,3 +1,4 @@
+import os
 import re
 import unicodedata
 from dataclasses import dataclass
@@ -26,7 +27,7 @@ ALLOWED_V_ALIGNS = [
     "-",
     "_",
 ]
-ANSI_REGEX = re.compile(r"\x1b\[[0-9;]*[a-zA-Z]")  # [mGKHf]
+ANSI_REGEX = re.compile(r"\x1b\[[0-9;]*[a-zA-Z]")
 
 
 @dataclass
@@ -953,3 +954,12 @@ def apply_metadata(
             index += width
         index += 3
     return "".join(string_list)
+
+
+def terminal_size() -> tuple[int, int]:
+    try:
+        size = os.get_terminal_size()
+    except OSError:
+        return 120, 30
+
+    return size.columns, size.lines
