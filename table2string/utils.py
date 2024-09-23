@@ -867,7 +867,7 @@ def fill_line(
                         or template_list[-1]
                     )
 
-                template_list.append(f"{{:<{widths[ci]+2}}}")
+                template_list.append(f"{{:<{widths[ci] + 2}}}")
 
                 border_right = translate_theme_border(
                     "border_right", theme, vertical, metadata_border_right_ri
