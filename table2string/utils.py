@@ -514,10 +514,9 @@ def translate_theme_border(
     """
     border_from_name = theme.border.get_border_name(border_from)
     border_to_name = theme.border.get_border_name(border_to)
+    border_result = translate_border_dict[side].get((border_from_name, border_to_name))
 
-    if border_result := translate_border_dict[side].get(
-        (border_from_name, border_to_name)
-    ):
+    if border_result:
         return getattr(theme.border, border_result)
     return border_from
 
@@ -717,7 +716,7 @@ def line_spliter(
     height: Optional[int] = None,
     line_break_symbol: str = "↩",
     cell_break_symbol: str = "…",
-) -> List[List[str] | List[bool] | bool | None]:
+) -> List[Union[List[str], List[bool], bool, None]]:
     """
     Splits text to the desired width and height
 
@@ -764,10 +763,10 @@ def line_spliter(
 
 
 def fill_line(
-    rows: List[List[str] | List[bool] | bool | None],
+    rows: List[Union[List[str], List[bool], bool, None]],
     symbols: List[List[str]],
     subtable_columns: List[bool],
-    metadata_list: Tuple[Dict[str, str] | None, ...],
+    metadata_list: Tuple[Optional[Dict[str, str]], ...],
     widths: List[int],
     align: Tuple[str, ...],
     v_align: Tuple[str, ...],

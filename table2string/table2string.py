@@ -230,7 +230,7 @@ down_separator       = "└───┴───┴───┘"
 
     def line_spliter_for_sub_table(
         sub_table: Table, column_index: int
-    ) -> List[List[str] | bool | Dict[str, Tuple[str, ...]]]:
+    ) -> List[Union[List[str], bool, Dict[str, Tuple[str, ...]]]]:
         string_sub_table = sub_table.stringify(
             align=align_t[column_index],
             v_align=v_align_t[column_index],
