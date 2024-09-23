@@ -960,7 +960,7 @@ def apply_metadata(
     return "".join(string_list)
 
 
-def terminal_size() -> tuple[int, int]:
+def terminal_size() -> Tuple[int, int]:
     try:
         size = os.get_terminal_size()
     except OSError:
