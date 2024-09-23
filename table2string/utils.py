@@ -83,44 +83,43 @@ class Border:
     top_horizontal_plus: str = "+"
     bottom_horizontal_plus: str = "+"
 
-    def get_border_name(self, border: str) -> str:
-        match border:
-            case self.horizontal:
-                return "horizontal"
-            case self.vertical:
-                return "vertical"
-            case self.central:
-                return "central"
-            case self.top_left:
-                return "top_left"
-            case self.top_right:
-                return "top_right"
-            case self.bottom_left:
-                return "bottom_left"
-            case self.bottom_right:
-                return "bottom_right"
-            case self.vertical_left:
-                return "vertical_left"
-            case self.vertical_right:
-                return "vertical_right"
-            case self.top_horizontal:
-                return "top_horizontal"
-            case self.bottom_horizontal:
-                return "bottom_horizontal"
-            case self.vertical_left_plus:
-                return "vertical_left_plus"
-            case self.horizontal_plus:
-                return "horizontal_plus"
-            case self.central_plus:
-                return "central_plus"
-            case self.vertical_right_plus:
-                return "vertical_right_plus"
-            case self.top_horizontal_plus:
-                return "top_horizontal_plus"
-            case self.bottom_horizontal_plus:
-                return "bottom_horizontal_plus"
+    def get_border_name(self, border: str) -> Optional[str]:
+        if border == self.horizontal:
+            return "horizontal"
+        elif border == self.vertical:
+            return "vertical"
+        elif border == self.central:
+            return "central"
+        elif border == self.top_left:
+            return "top_left"
+        elif border == self.top_right:
+            return "top_right"
+        elif border == self.bottom_left:
+            return "bottom_left"
+        elif border == self.bottom_right:
+            return "bottom_right"
+        elif border == self.vertical_left:
+            return "vertical_left"
+        elif border == self.vertical_right:
+            return "vertical_right"
+        elif border == self.top_horizontal:
+            return "top_horizontal"
+        elif border == self.bottom_horizontal:
+            return "bottom_horizontal"
+        elif border == self.vertical_left_plus:
+            return "vertical_left_plus"
+        elif border == self.horizontal_plus:
+            return "horizontal_plus"
+        elif border == self.central_plus:
+            return "central_plus"
+        elif border == self.vertical_right_plus:
+            return "vertical_right_plus"
+        elif border == self.top_horizontal_plus:
+            return "top_horizontal_plus"
+        elif border == self.bottom_horizontal_plus:
+            return "bottom_horizontal_plus"
 
-        return "central"
+        return None
 
 
 class Theme:
