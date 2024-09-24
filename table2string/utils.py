@@ -506,6 +506,7 @@ def translate_theme_border(
 ) -> str:
     """
     Used to connect table boundaries to a subtable
+
     :param side: "border_left" or "border_right" or "border_top" or "border_bottom"
     :param theme: Theme
     :param border_from: The border to be connected to border_to
@@ -523,7 +524,11 @@ def translate_theme_border(
 
 def get_text_width_in_console(text: str) -> int:
     """
-    Calculates the number of positions that a line will occupy in the console.
+    Calculates the length of the text in the console
+    Some special characters and emoji
+
+    :param text: Text
+    :return: Calculates the length of the text in the console
     """
     text = ANSI_REGEX.sub("", text)
     width = 0
@@ -637,10 +642,10 @@ def transform_align(
     """
     Convert align to a suitable view
 
-    :param column_count:
-    :param align:
-    :param is_v_align:
-    :return:
+    :param column_count: Number of columns
+    :param align: Alignments
+    :param is_v_align: Is this vertical alignment
+    :return: Transformed alignment
     """
     allowed_list = ALLOWED_V_ALIGNS if is_v_align else ALLOWED_ALIGNS
     string_allowed_list_name = "ALLOWED_V_ALIGNS" if is_v_align else "ALLOWED_ALIGNS"
@@ -674,12 +679,12 @@ def transform_width(
     """
     Convert width to a suitable view
 
-    :param width:
-    :param column_count:
-    :param row_widths:
-    :param min_row_widths:
-    :param proportion_coefficient:
-    :return:
+    :param width: Required width or widths
+    :param column_count: Number of columns
+    :param row_widths: Column width
+    :param min_row_widths: List of minimum widths for columns
+    :param proportion_coefficient: Proportion coefficient
+    :return: Transformed widths
     """
     if width is None:
         return row_widths
@@ -720,12 +725,12 @@ def line_spliter(
     """
     Splits text to the desired width and height
 
-    :param text:
-    :param width:
-    :param height:
+    :param text: Text
+    :param width: Width
+    :param height: Height
     :param line_break_symbol: "↩" or chr(8617) or "\\U000021a9"
     :param cell_break_symbol: "…" or chr(8230) or "\\U00002026"
-    :return:
+    :return: Split text by width and height
     """
     lines = text.split("\n")
 
@@ -775,15 +780,15 @@ def fill_line(
     """
     Fills the line
 
-    :param rows:
+    :param rows: List of rows
     :param symbols: Line break or line ending characters
     :param subtable_columns: A list indicating whether the column should be formatted as subtable
     :param metadata_list: Tuple of dictionaries to join boundaries
-    :param widths:
-    :param align:
-    :param v_align:
-    :param theme:
-    :return:
+    :param widths: List of widths
+    :param align: Tuple of alignments
+    :param v_align: Tuple of vertical alignments
+    :param theme: Theme
+    :return: Filled line
     """
     border = theme.border
 
@@ -809,9 +814,9 @@ def fill_line(
                 align_left[n] = "<"
                 align_right[n] = "<"
 
-    for ci, column in enumerate(rows):
+    for ci, cell in enumerate(rows):
         if not subtable_columns[ci]:
-            rows[ci][:] = apply_v_align(column, v_align[ci])
+            rows[ci][:] = apply_v_align(cell, v_align[ci])
 
     lines = []
     symbol = list(zip(*symbols))
@@ -889,37 +894,38 @@ def fill_line(
     return "\n".join(lines)
 
 
-def apply_v_align(column: List[str], v_align: str) -> List[str]:
+def apply_v_align(cell: List[str], v_align: str) -> List[str]:
     """
     Apply v_align
 
-    :param column:
-    :param v_align:
+    :param cell: List of strings in a cell
+    :param v_align: Vertical alignment
+    :return: Applied vertical alignments
     """
     if v_align == "_":
-        while column[-1].isspace():
-            column.insert(0, column.pop())
+        while cell[-1].isspace():
+            cell.insert(0, cell.pop())
     elif v_align == "-":
-        rows_count = len(column)
-        while column[0].isspace():
-            column.pop(0)
-        while column[-1].isspace():
-            column.pop()
+        rows_count = len(cell)
+        while cell[0].isspace():
+            cell.pop(0)
+        while cell[-1].isspace():
+            cell.pop()
 
-        not_empty_rows_count = len(column)
+        not_empty_rows_count = len(cell)
         difference = rows_count - not_empty_rows_count
         top = difference // 2
         bottom = difference - top
         for _ in range(top):
-            column.insert(0, " ")
+            cell.insert(0, " ")
         for _ in range(bottom):
-            column.append(" ")
+            cell.append(" ")
 
-    return [s if s else " " for s in column]
+    return [s if s else " " for s in cell]
 
 
 def apply_metadata(
-    string: str,
+    string_border: str,
     side: str,
     theme: Theme,
     metadata_list: Tuple[Optional[dict], ...],
@@ -928,28 +934,28 @@ def apply_metadata(
     """
     Connects table and subtable boundaries
 
-    :param string:
+    :param string_border: String border
     :param side: "border_left" or "border_right" or "border_top" or "border_bottom"
-    :param theme:
+    :param theme: Theme
     :param metadata_list: Tuple of dictionaries to join boundaries
-    :param max_widths:
+    :param max_widths: List of widths for each column
     """
-    string_list = list(string)
+    string_border_list = list(string_border)
     index = 2
 
     for current_metadata, width in zip(metadata_list, max_widths):
         if current_metadata:
             for border_r in current_metadata[side]:
-                border_l = string_list[index]
+                border_l = string_border_list[index]
                 if border_l == " ":
                     border_l = theme.border.horizontal
                 if side == "border_top":
-                    string_list[index] = (
+                    string_border_list[index] = (
                         translate_theme_border(side, theme, border_l, border_r)
                         or border_l
                     )
                 elif side == "border_bottom":
-                    string_list[index] = (
+                    string_border_list[index] = (
                         translate_theme_border(side, theme, border_l, border_r)
                         or border_l
                     )
@@ -957,7 +963,7 @@ def apply_metadata(
         else:
             index += width
         index += 3
-    return "".join(string_list)
+    return "".join(string_border_list)
 
 
 def terminal_size() -> Tuple[int, int]:

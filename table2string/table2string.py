@@ -59,9 +59,9 @@ def print_table(
     :param sep: Settings of dividers. You can specify specific lines with dividers.
     :param end: Configure the last symbol of the table. \\n or nothing
     :param file: File where you can record the table by .write method.
-    :param theme:
-    :param ignore_width_errors:
-    :param proportion_coefficient:
+    :param theme: Theme
+    :param ignore_width_errors: Raise error when width is not enough
+    :param proportion_coefficient: Proportion coefficient
     :return: None
     """
     table: List[List[Any]] = list(list(row) for row in table)
@@ -426,9 +426,9 @@ def stringify_table(
     :param cell_break_symbol: "…" or chr(8230) or "\\U00002026"
     :param sep: Settings of dividers. You can specify specific lines with dividers.
     :param end: Configure the last symbol of the table. \\n or nothing
-    :param theme:
-    :param ignore_width_errors:
-    :param proportion_coefficient:
+    :param theme: Theme
+    :param ignore_width_errors: Raise error when width is not enough
+    :param proportion_coefficient: Proportion coefficient
     :return: String table
     """
     file = StringIO()
@@ -547,9 +547,9 @@ class Table:
         :param cell_break_symbol: "…" or chr(8230) or "\\U00002026"
         :param sep: Settings of dividers. You can specify specific lines with dividers.
         :param end: Configure the last symbol of the table. \\n or nothing
-        :param theme:
-        :param ignore_width_errors:
-        :param proportion_coefficient:
+        :param theme: Theme
+        :param ignore_width_errors: Raise error when width is not enough
+        :param proportion_coefficient: Proportion coefficient
         :return: String table
         """
         return stringify_table(
@@ -615,9 +615,9 @@ class Table:
         :param sep: Settings of dividers. You can specify specific lines with dividers.
         :param end: Configure the last symbol of the table. \\n or nothing
         :param file: File where you can record the table by .write method.
-        :param theme:
-        :param ignore_width_errors:
-        :param proportion_coefficient:
+        :param theme: Theme
+        :param ignore_width_errors: Raise error when width is not enough
+        :param proportion_coefficient: Proportion coefficient
         :return: None
         """
         print_table(

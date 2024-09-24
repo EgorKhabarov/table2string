@@ -145,24 +145,24 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 
 ```pycon
 >>> # Width of the entire table with borders
->>> Table([(1,), (2.345,), ("example",)]).print(max_width=10)
-+--------+
-|      1 |
-+--------+
-|  2.345 |
-+--------+
-| exampl↩|
-| e      |
-+--------+
+>>> Table([(1, 12345, "example")]).print(max_width=30)
++-----+----------+-----------+
+|   1 |    12345 | example   |
++-----+----------+-----------+
 >>> # Width of each column individually
->>> Table([(1,), (2.345,), ("example",)]).print(max_width=(10,))
-+------------+
-|          1 |
-+------------+
-|      2.345 |
-+------------+
-| example    |
-+------------+
+>>> Table([(1, 12345, "example")]).print(max_width=(10,))
++------------+------------+------------+
+|          1 |      12345 | example    |
++------------+------------+------------+
+>>> Table([(1, 12345, "example")]).print(max_width=(1, 5, 6))
++---+-------+--------+
+| 1 | 12345 | exampl↩|
+|   |       | e      |
++---+-------+--------+
+>>> Table([(1, 12345, "example")]).print(max_width=(1, 5, 7))
++---+-------+---------+
+| 1 | 12345 | example |
++---+-------+---------+
 >>> Table([("123456\n\n789000", "example")]).print(max_width=(3, 4), max_height=4)
 +-----+------+
 | 123↩| exam↩|
