@@ -98,7 +98,9 @@ def print_table(
         *column_names_v_align,
     } - set(ALLOWED_V_ALIGNS)
     if not_allowed_v_aligns:
-        raise ValueError(f"not allowed vertical alignments: {tuple(not_allowed_v_aligns)}")
+        raise ValueError(
+            f"not allowed vertical alignments: {tuple(not_allowed_v_aligns)}"
+        )
 
     column_count = max(map(len, table_))
 
