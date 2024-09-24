@@ -568,11 +568,12 @@ def proportional_change(
     :param min_row_widths: List of minimum widths for each column
     :param proportion_coefficient: Reduction coefficient for too large numbers
     """
-    if min_row_widths:
-        assert sum(min_row_widths) <= max_width, f"{sum(min_row_widths)} <= {max_width}"
-    assert (
-        0.0 <= proportion_coefficient <= 2.0
-    ), f"0.0 <= {proportion_coefficient} <= 2.0"
+    if min_row_widths and sum(min_row_widths) > max_width:
+        raise ValueError(f"{sum(min_row_widths)} <= {max_width}")
+
+    if not (0.0 <= proportion_coefficient <= 2.0):
+        raise ValueError(f"0.0 <= {proportion_coefficient} <= 2.0")
+
     if min_row_widths is None:
         min_row_widths = [1] * len(row_widths)
 

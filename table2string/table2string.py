@@ -64,34 +64,43 @@ def print_table(
     :param proportion_coefficient: Proportion coefficient
     :return: None
     """
-    table: List[List[Any]] = list(list(row) for row in table)
-    assert any(table), table
-    assert sum(hasattr(row, "__getitem__") for row in table)
-    if column_names is not None:
-        assert column_names and column_names[0], column_names
+    table_: List[List[Any]] = list(list(row) for row in table)
 
-    assert max_height >= 1 if max_height else True, max_height
-    assert len(line_break_symbol) == 1, len(line_break_symbol)
-    assert len(cell_break_symbol) == 1, len(cell_break_symbol)
-    assert isinstance(theme, Theme), type(theme)
+    # Raise error
+    if not any(table_) or not sum(hasattr(row, "__getitem__") for row in table_):
+        raise ValueError(table_)
+
+    if column_names is not None and not (column_names and column_names[0]):
+        raise ValueError(column_names)
+
+    if not (max_height >= 1 if max_height else True):
+        raise ValueError(max_height)
+
+    if len(line_break_symbol) != 1:
+        raise ValueError(line_break_symbol)
+
+    if len(cell_break_symbol) != 1:
+        raise ValueError(cell_break_symbol)
+
+    if not isinstance(theme, Theme):
+        raise TypeError(theme)
+
     not_allowed_aligns = {
         *((align,) if isinstance(align, str) else align),
         name_align,
         *column_names_align,
     } - set(ALLOWED_ALIGNS)
-    assert (
-        not not_allowed_aligns
-    ), f"not allowed alignments: {tuple(not_allowed_aligns)}"
+    if not_allowed_aligns:
+        raise ValueError(f"not allowed alignments: {tuple(not_allowed_aligns)}")
     not_allowed_v_aligns = {
         *((v_align,) if isinstance(v_align, str) else v_align),
         name_v_align,
         *column_names_v_align,
     } - set(ALLOWED_V_ALIGNS)
-    assert (
-        not not_allowed_v_aligns
-    ), f"not allowed vertical alignments: {tuple(not_allowed_v_aligns)}"
+    if not_allowed_v_aligns:
+        raise ValueError(f"not allowed vertical alignments: {tuple(not_allowed_v_aligns)}")
 
-    column_count = max(map(len, table))
+    column_count = max(map(len, table_))
 
     if column_names:
         column_names = list(column_names)
@@ -102,26 +111,28 @@ def print_table(
         else:
             column_names.extend((" ",) * (column_count - column_names_len))
 
-        table.insert(0, column_names)
+        table_.insert(0, column_names)
 
-    row_widths = get_row_widths(table)
-    min_row_widths = get_row_widths(table, minimum=True)
+    row_widths = get_row_widths(table_)
+    min_row_widths = get_row_widths(table_, minimum=True)
 
     if max_width is not None and not ignore_width_errors:
         min_width = sum(min_row_widths) + 3 * len(min_row_widths) + 1
         if isinstance(max_width, int):
-            assert max_width >= min_width, f"{max_width} >= {min_width}"
+            if max_width < min_width:
+                raise ValueError(f"{max_width} >= {min_width}")
         else:
-            assert not [mw for mw in max_width if mw < 1], [
-                mw for mw in max_width if mw < 1
-            ]
+            invalid_widths = [mw for mw in max_width if mw < 1]
+            if invalid_widths:
+                raise ValueError(invalid_widths)
             max_width = max_width[:column_count]
             max_width = (
                 *max_width,
                 *(max_width[-1],) * (column_count - len(max_width)),
             )
             sum_max_width = sum(max_width) + 3 * len(max_width) + 1
-            assert sum_max_width >= min_width, f"{sum_max_width} >= {min_width}"
+            if sum_max_width < min_width:
+                raise ValueError(f"{sum_max_width} >= {min_width}")
 
     border = theme.border
     max_widths = transform_width(
@@ -268,7 +279,7 @@ down_separator       = "└───┴───┴───┘"
     prev_metadata = None
     result_table = []
 
-    for ri, row in enumerate(table):
+    for ri, row in enumerate(table_):
         if ri != 0:
             result_table.append(("", "\n"))
 
