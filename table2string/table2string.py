@@ -2,31 +2,31 @@ import csv
 from io import TextIOWrapper, StringIO
 from typing import Union, Tuple, Any, Sequence, List, Dict, Optional
 
+from table2string.themes import Theme, Themes
+from table2string.aligns import HorizontalAlignment, VerticalAlignment
 from table2string.utils import (
+    line_spliter_for_sub_table,
     get_text_width_in_console,
-    ALLOWED_V_ALIGNS,
+    generate_borders,
     transform_align,
     transform_width,
-    ALLOWED_ALIGNS,
     apply_metadata,
     line_spliter,
     fill_line,
-    Themes,
-    Theme,
 )
 
 
 def print_table(
     table: Sequence[Sequence[Any]],
     *,
-    align: Union[Tuple[str, ...], str] = "*",
-    v_align: Union[Tuple[str, ...], str] = "^",
+    h_align: Union[Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]] = "*",
+    v_align: Union[Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]] = "^",
     name: Optional[str] = None,
-    name_align: str = "^",
-    name_v_align: str = "-",
+    name_h_align: Union[HorizontalAlignment, str] = "^",
+    name_v_align: Union[VerticalAlignment, str] = "-",
     column_names: Optional[Sequence[str]] = None,
-    column_names_align: Union[Tuple[str, ...], str] = "^",
-    column_names_v_align: Union[Tuple[str, ...], str] = "-",
+    column_names_h_align: Union[Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]] = "^",
+    column_names_v_align: Union[Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]] = "-",
     max_width: Union[int, Tuple[int, ...], None] = None,
     max_height: Optional[int] = None,
     maximize_height: bool = False,
@@ -43,13 +43,13 @@ def print_table(
     Print the table in sys.stdout or file
 
     :param table: Two-dimensional matrix
-    :param align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
+    :param h_align: Can be a line or list, should be from utils.ALLOWED_H_ALIGNS
     :param v_align: Can be a line or list, should be from utils.ALLOWED_V_ALIGNS
     :param name: Table name
-    :param name_align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
+    :param name_h_align: Can be a line or list, should be from utils.ALLOWED_H_ALIGNS
     :param name_v_align: Can be a line or list, should be from utils.ALLOWED_V_ALIGNS
     :param column_names: Column names
-    :param column_names_align: Aligns for column names
+    :param column_names_h_align: Horizontal aligns for column names
     :param column_names_v_align: Vertical aligns for column names
     :param max_width: Table width or width of individual columns
     :param max_height: The maximum number of lines in one line
@@ -65,13 +65,14 @@ def print_table(
     :return: None
     """
     table_: List[List[Any]] = list(list(row) for row in table)
+    column_names_: Optional[List[str]] = list(column_names) if column_names else None
 
-    # Raise error
+    # Raise errors
     if not any(table_) or not sum(hasattr(row, "__getitem__") for row in table_):
         raise ValueError(table_)
 
-    if column_names is not None and not (column_names and column_names[0]):
-        raise ValueError(column_names)
+    if column_names_ is not None and not (column_names_ and column_names_[0]):
+        raise ValueError(column_names_)
 
     if not (max_height >= 1 if max_height else True):
         raise ValueError(max_height)
@@ -85,35 +86,18 @@ def print_table(
     if not isinstance(theme, Theme):
         raise TypeError(theme)
 
-    not_allowed_aligns = {
-        *((align,) if isinstance(align, str) else align),
-        name_align,
-        *column_names_align,
-    } - set(ALLOWED_ALIGNS)
-    if not_allowed_aligns:
-        raise ValueError(f"not allowed alignments: {tuple(not_allowed_aligns)}")
-    not_allowed_v_aligns = {
-        *((v_align,) if isinstance(v_align, str) else v_align),
-        name_v_align,
-        *column_names_v_align,
-    } - set(ALLOWED_V_ALIGNS)
-    if not_allowed_v_aligns:
-        raise ValueError(
-            f"not allowed vertical alignments: {tuple(not_allowed_v_aligns)}"
-        )
-
     column_count = max(map(len, table_))
 
-    if column_names:
-        column_names = list(column_names)
-        column_names_len = len(column_names)
+    # If there are column names, we write them at the beginning of the table
+    if column_names_:
+        column_names_len = len(column_names_)
 
         if column_names_len > column_count:
-            column_names = column_names[: column_names_len - 1]
+            column_names_ = column_names_[: column_names_len - 1]
         else:
-            column_names.extend((" ",) * (column_count - column_names_len))
+            column_names_.extend((" ",) * (column_count - column_names_len))
 
-        table_.insert(0, column_names)
+        table_.insert(0, column_names_)
 
     row_widths = get_row_widths(table_)
     min_row_widths = get_row_widths(table_, minimum=True)
@@ -136,80 +120,29 @@ def print_table(
             if sum_max_width < min_width:
                 raise ValueError(f"{sum_max_width} >= {min_width}")
 
-    border = theme.border
+    h_align_t = transform_align(column_count, h_align)
+    name_h_align_t = transform_align(1, name_h_align)
+    column_names_h_align_t = transform_align(column_count, column_names_h_align)
+
+    v_align_t = transform_align(column_count, v_align, default="^")
+    name_v_align_t = transform_align(1, name_v_align, default="^")
+    column_names_v_align_t = transform_align(
+        column_count, column_names_v_align, default="^"
+    )
+
     max_widths = transform_width(
         max_width, column_count, row_widths, min_row_widths, proportion_coefficient
     )
-    align_t = transform_align(column_count, align)
-    column_names_align_t = transform_align(column_count, column_names_align)
-    v_align_t = transform_align(column_count, v_align, is_v_align=True)
-    column_names_v_align_t = transform_align(
-        column_count, column_names_v_align, is_v_align=True
-    )
-
-    horizontally = [(border.horizontal * (i + 2)) for i in max_widths]
-    up_separator = "".join(
-        (
-            border.top_left,
-            "".join(horizontally),
-            border.horizontal * (len(max_widths) - 1),
-            border.top_right,
-        )
-    )
-    under_name_separator = "".join(
-        (
-            border.vertical_left,
-            border.top_horizontal.join(horizontally),
-            border.vertical_right,
-        )
-    )
-    up_noname_separator = "".join(
-        (
-            border.top_left,
-            border.top_horizontal.join(horizontally),
-            border.top_right,
-        )
-    )
-    line_separator = "".join(
-        (
-            border.vertical_left,
-            border.central.join(horizontally),
-            border.vertical_right,
-        )
-    )
-    line_separator_plus = "".join(
-        (
-            border.vertical_left_plus,
-            border.central_plus.join(
-                (border.horizontal_plus * (i + 2)) for i in max_widths
-            ),
-            border.vertical_right_plus,
-        )
-    )
-    down_separator = "".join(
-        (
-            border.bottom_left,
-            border.bottom_horizontal.join(horizontally),
-            border.bottom_right,
-        )
-    )
-
-    """
-# EXAMPLE
-
-theme                = Themes.thin_double
-up_separator         = "┌───────────┐"
-under_name_separator = "├───┬───┬───┤"
-up_noname_separator  = "┌───┬───┬───┐"
-line_separator       = "├───┼───┼───┤"
-line_separator_plus  = "╞═══╪═══╪═══╡"
-down_separator       = "└───┴───┴───┘"
-    """
+    (
+        up_separator,
+        under_name_separator,
+        up_noname_separator,
+        line_separator,
+        line_separator_plus,
+        down_separator,
+    ) = generate_borders(theme, max_widths)
 
     if name:
-        name_align_t = transform_align(1, name_align)
-        name_v_align_t = transform_align(1, name_v_align, is_v_align=True)
-
         if up_separator.strip():
             print(up_separator, file=file)
 
@@ -234,49 +167,12 @@ down_separator       = "└───┴───┴───┘"
                 subtable_columns=subtable_columns,
                 metadata_list=metadata_list,
                 widths=[max_name_width],
-                align=name_align_t,
+                h_align=name_h_align_t,
                 v_align=name_v_align_t,
                 theme=theme,
             ),
             file=file,
         )
-
-    def line_spliter_for_sub_table(
-        sub_table: Table, column_index: int
-    ) -> List[Union[List[str], bool, Dict[str, Tuple[str, ...]]]]:
-        string_sub_table = sub_table.stringify(
-            align=align_t[column_index],
-            v_align=v_align_t[column_index],
-            name_align=name_align,
-            name_v_align=name_v_align,
-            column_names_align=column_names_align,
-            column_names_v_align=column_names_v_align,
-            max_width=max_widths[column_index] + 4,
-            line_break_symbol=line_break_symbol,
-            cell_break_symbol=cell_break_symbol,
-            theme=theme.custom_sub_table_theme,
-            ignore_width_errors=True,
-            proportion_coefficient=proportion_coefficient,
-        )
-        sub_table_lines = string_sub_table.splitlines()
-        if max_height:
-            sub_table_lines = sub_table_lines[: max_height + 2]
-        blank_line = ""
-        sub_table_symbols = [blank_line for _ in range(len(sub_table_lines))]
-        result = [
-            [line[1:-1] for line in sub_table_lines[1:-1]],
-            sub_table_symbols,
-            True,
-            {
-                "border_top": tuple(sub_table_lines[0][2:-2]),
-                "border_bottom": tuple(sub_table_lines[-1][2:-2]),
-                "border_left": tuple(line[0] for line in sub_table_lines[1:-1])
-                or (" ",),
-                "border_right": tuple(line[-1] for line in sub_table_lines[1:-1])
-                or (" ",),
-            },
-        ]
-        return result
 
     prev_metadata = None
     result_table = []
@@ -288,7 +184,21 @@ down_separator       = "└───┴───┴───┘"
         # Trimming long lines
         for ci, column in enumerate(row):
             if isinstance(column, Table):
-                column_lines = line_spliter_for_sub_table(column, ci)
+                string_sub_table = column.stringify(
+                    h_align=h_align_t[ci],
+                    v_align=v_align_t[ci],
+                    name_h_align=name_h_align,
+                    name_v_align=name_v_align,
+                    column_names_h_align=column_names_h_align,
+                    column_names_v_align=column_names_v_align,
+                    max_width=max_widths[ci] + 4,
+                    line_break_symbol=line_break_symbol,
+                    cell_break_symbol=cell_break_symbol,
+                    theme=theme.custom_sub_table_theme,
+                    ignore_width_errors=True,
+                    proportion_coefficient=proportion_coefficient,
+                )
+                column_lines = line_spliter_for_sub_table(string_sub_table, max_height)
             else:
                 column_lines = line_spliter(
                     str(column),
@@ -330,41 +240,39 @@ down_separator       = "└───┴───┴───┘"
         if ri == 0:
             prev_metadata = metadata_list
 
-        def n_in_sep():
-            if column_names:
-                return ri - 1 in sep
-            else:
-                return ri in sep
-
         if (
-            (sep is True or ri == 0)
-            or (isinstance(sep, (range, tuple)) and n_in_sep())
-            or (ri == 1 and column_names)
+            (sep is True or ri == 0)  # under table name
+            or (column_names_ and ri == 1)  # under column names
+            or (
+                isinstance(sep, (range, tuple))
+                and (ri - 1 in sep if column_names_ else ri in sep)
+            )  # if sep allows
         ):
-            if (name and ri == 1) or ((not name) and ri == 1):
+            if ri == 0:
+                # separator under table name
+                s = under_name_separator if name else up_noname_separator
+                ha = column_names_h_align_t if column_names_ else h_align_t
+                va = column_names_v_align_t if column_names_ else v_align_t
+            elif ri == 1:
+                # separator under column names (if theme supports)
                 s = line_separator_plus
-                a, va = align_t, v_align_t
-            elif name and ri == 0:
-                s = under_name_separator
-                a = column_names_align_t if column_names else align_t
-                va = column_names_v_align_t if column_names else v_align_t
-            elif (not name) and ri == 0:
-                s = up_noname_separator
-                a = column_names_align_t if column_names else align_t
-                va = column_names_v_align_t if column_names else v_align_t
+                ha, va = h_align_t, v_align_t
             else:
+                # normal separator
                 s = line_separator
-                a, va = align_t, v_align_t
+                ha, va = h_align_t, v_align_t
 
             if s.strip():
+                # connect the borders from above
                 s = apply_metadata(s, "border_top", theme, metadata_list, max_widths)
+                # if possible, connect the borders from below.
                 if ri > 0:
                     s = apply_metadata(
                         s, "border_bottom", theme, prev_metadata, max_widths
                     )
                 result_table.append((s, "\n"))
         else:
-            a, va = align_t, v_align_t
+            ha, va = h_align_t, v_align_t
 
         result_table.append(
             (
@@ -374,7 +282,7 @@ down_separator       = "└───┴───┴───┘"
                     subtable_columns=subtable_columns,
                     metadata_list=metadata_list,
                     widths=max_widths,
-                    align=a,
+                    h_align=ha,
                     v_align=va,
                     theme=theme,
                 ),
@@ -402,14 +310,14 @@ down_separator       = "└───┴───┴───┘"
 def stringify_table(
     table: Sequence[Sequence[Any]],
     *,
-    align: Union[Tuple[str, ...], str] = "*",
-    v_align: Union[Tuple[str, ...], str] = "^",
+    h_align: Union[Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]] = "*",
+    v_align: Union[Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]] = "^",
     name: Optional[str] = None,
-    name_align: str = "^",
-    name_v_align: str = "-",
+    name_h_align: Union[HorizontalAlignment, str] = "^",
+    name_v_align: Union[VerticalAlignment, str] = "-",
     column_names: Optional[Sequence[str]] = None,
-    column_names_align: Union[Tuple[str, ...], str] = "^",
-    column_names_v_align: Union[Tuple[str, ...], str] = "-",
+    column_names_h_align: Union[Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]] = "^",
+    column_names_v_align: Union[Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]] = "-",
     max_width: Union[int, Tuple[int, ...], None] = None,
     max_height: Optional[int] = None,
     maximize_height: bool = False,
@@ -424,13 +332,13 @@ def stringify_table(
     """
 
     :param table: Two-dimensional matrix
-    :param align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
+    :param h_align: Can be a line or list, should be from utils.ALLOWED_H_ALIGNS
     :param v_align: Can be a line or list, should be from utils.ALLOWED_V_ALIGNS
     :param name: Table name
-    :param name_align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
+    :param name_h_align: Can be a line or list, should be from utils.ALLOWED_H_ALIGNS
     :param name_v_align: Can be a line or list, should be from utils.ALLOWED_V_ALIGNS
     :param column_names: Column names
-    :param column_names_align: Aligns for column names
+    :param column_names_h_align: Horizontal aligns for column names
     :param column_names_v_align: Vertical aligns for column names
     :param max_width: Table width or width of individual columns
     :param max_height: The maximum number of lines in one line
@@ -447,13 +355,13 @@ def stringify_table(
     file = StringIO()
     print_table(
         table=table,
-        align=align,
+        h_align=h_align,
         v_align=v_align,
         name=name,
-        name_align=name_align,
+        name_h_align=name_h_align,
         name_v_align=name_v_align,
         column_names=column_names,
-        column_names_align=column_names_align,
+        column_names_h_align=column_names_h_align,
         column_names_v_align=column_names_v_align,
         max_width=max_width,
         max_height=max_height,
@@ -528,12 +436,12 @@ class Table:
     def stringify(
         self,
         *,
-        align: Union[Tuple[str, ...], str] = "*",
-        v_align: Union[Tuple[str, ...], str] = "^",
-        name_align: str = "^",
-        name_v_align: str = "-",
-        column_names_align: Union[Tuple[str, ...], str] = "^",
-        column_names_v_align: Union[Tuple[str, ...], str] = "-",
+        h_align: Union[Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]] = "*",
+        v_align: Union[Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]] = "^",
+        name_h_align: Union[HorizontalAlignment, str] = "^",
+        name_v_align: Union[VerticalAlignment, str] = "-",
+        column_names_h_align: Union[Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]] = "^",
+        column_names_v_align: Union[Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]] = "-",
         max_width: Union[int, Tuple[int, ...], None] = None,
         max_height: Optional[int] = None,
         maximize_height: bool = False,
@@ -547,11 +455,11 @@ class Table:
     ) -> str:
         """
 
-        :param align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
+        :param h_align: Can be a line or list, should be from utils.ALLOWED_H_ALIGNS
         :param v_align: Can be a line or list, should be from utils.ALLOWED_V_ALIGNS
-        :param name_align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
+        :param name_h_align: Can be a line or list, should be from utils.ALLOWED_H_ALIGNS
         :param name_v_align: Can be a line or list, should be from utils.ALLOWED_V_ALIGNS
-        :param column_names_align: Aligns for column names
+        :param column_names_h_align: Horizontal aligns for column names
         :param column_names_v_align: Vertical aligns for column names
         :param max_width: Table width or width of individual columns
         :param max_height: The maximum number of lines in one line
@@ -567,14 +475,14 @@ class Table:
         """
         return stringify_table(
             table=self.table,
-            align=self.config.get("align") or align,
+            h_align=self.config.get("h_align") or h_align,
             v_align=self.config.get("v_align") or v_align,
             name=self.name,
-            name_align=self.config.get("name_align") or name_align,
+            name_h_align=self.config.get("name_h_align") or name_h_align,
             name_v_align=self.config.get("name_v_align") or name_v_align,
             column_names=self.column_names,
-            column_names_align=self.config.get("column_names_align")
-            or column_names_align,
+            column_names_h_align=self.config.get("column_names_h_align")
+            or column_names_h_align,
             column_names_v_align=self.config.get("column_names_v_align")
             or column_names_v_align,
             max_width=max_width,
@@ -593,12 +501,12 @@ class Table:
     def print(
         self,
         *,
-        align: Union[Tuple[str, ...], str] = "*",
-        v_align: Union[Tuple[str, ...], str] = "^",
-        name_align: str = "^",
-        name_v_align: str = "-",
-        column_names_align: Union[Tuple[str, ...], str] = "^",
-        column_names_v_align: Union[Tuple[str, ...], str] = "-",
+        h_align: Union[Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]] = "*",
+        v_align: Union[Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]] = "^",
+        name_h_align: Union[HorizontalAlignment, str] = "^",
+        name_v_align: Union[VerticalAlignment, str] = "-",
+        column_names_h_align: Union[Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]] = "^",
+        column_names_v_align: Union[Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]] = "-",
         max_width: Union[int, Tuple[int, ...], None] = None,
         max_height: Optional[int] = None,
         maximize_height: bool = False,
@@ -614,11 +522,11 @@ class Table:
         """
         Print the table in sys.stdout or file
 
-        :param align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
+        :param h_align: Can be a line or list, should be from utils.ALLOWED_H_ALIGNS
         :param v_align: Can be a line or list, should be from utils.ALLOWED_V_ALIGNS
-        :param name_align: Can be a line or list, should be from utils.ALLOWED_ALIGNS
+        :param name_h_align: Can be a line or list, should be from utils.ALLOWED_H_ALIGNS
         :param name_v_align: Can be a line or list, should be from utils.ALLOWED_V_ALIGNS
-        :param column_names_align: Aligns for column names
+        :param column_names_h_align: Horizontal aligns for column names
         :param column_names_v_align: Vertical aligns for column names
         :param max_width: Table width or width of individual columns
         :param max_height: The maximum number of lines in one line
@@ -635,14 +543,14 @@ class Table:
         """
         print_table(
             table=self.table,
-            align=self.config.get("align") or align,
+            h_align=self.config.get("h_align") or h_align,
             v_align=self.config.get("v_align") or v_align,
             name=self.name,
-            name_align=self.config.get("name_align") or name_align,
+            name_h_align=self.config.get("name_h_align") or name_h_align,
             name_v_align=self.config.get("name_v_align") or name_v_align,
             column_names=self.column_names,
-            column_names_align=self.config.get("column_names_align")
-            or column_names_align,
+            column_names_h_align=self.config.get("column_names_h_align")
+            or column_names_h_align,
             column_names_v_align=self.config.get("column_names_v_align")
             or column_names_v_align,
             max_width=max_width,

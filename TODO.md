@@ -101,13 +101,13 @@
 from table2string import Table, Themes, CutomMarkup, CutomRow
 table = [
     ("11111", "22222"),
-    (CutomAlign("33", align="<", v_align="_"), "44444"),
+    (CutomAlign("33", h_align="<", v_align="_"), "44444"),
     CutomRow(
         (
             "55555",
             CutomAlign(  # maybe max_width: Tuple[int, ...]
                 "66666",
-                align=">",
+                h_align=">",
                 v_align="-",
             ),
         ),
@@ -117,7 +117,7 @@ table = [
     CutomRow(("77777", "88888"), max_height=1),
 ]
 kwargs = {
-    "align": "^",
+    "h_align": "^",
     "theme": Themes.thin,
     "max_width": (9,),
     "max_height": 3,

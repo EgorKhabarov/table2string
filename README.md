@@ -14,6 +14,7 @@ While there are several libraries available for converting tables to strings in 
 
 - **Line Break Support**: Easily include line breaks within cells for enhanced readability.
 - **Subtable Support**: Easily include a table within a table for a more flexible presentation.
+- **Alignment**: Easily align text in a cell in any direction.
 - **Emoji Integration**: Effortlessly incorporate emoji characters into your tables to add visual appeal and context.
 
 ---
@@ -245,7 +246,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 |       | qwerty          |
 |       | asdfghjklzxcvb  |
 +-------+-----------------+
->>> table_1.print(max_width=(5, 15), align="*", name_align="*", column_names_align="*")  # align="**", name_align="**", column_names_align="**"
+>>> table_1.print(max_width=(5, 15), h_align="*", name_h_align="*", column_names_h_align="*")  # h_align="**", name_h_align="**", column_names_h_align="**"
 +-------------------------+
 | Table Name              |
 | Name                    |
@@ -258,7 +259,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 |       | qwerty          |
 |       | asdfghjklzxcvb  |
 +-------+-----------------+
->>> table_1.print(max_width=(5, 15), align="<", name_align="<", column_names_align="<")  # align="<<", name_align="<<", column_names_align="<<"
+>>> table_1.print(max_width=(5, 15), h_align="<", name_h_align="<", column_names_h_align="<")  # h_align="<<", name_h_align="<<", column_names_h_align="<<"
 +-------------------------+
 | Table Name              |
 | Name                    |
@@ -271,7 +272,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 |       | qwerty          |
 |       | asdfghjklzxcvb  |
 +-------+-----------------+
->>> table_1.print(max_width=(5, 15), align=">", name_align=">", column_names_align=">")  # align=">>", name_align=">>", column_names_align=">>"
+>>> table_1.print(max_width=(5, 15), h_align=">", name_h_align=">", column_names_h_align=">")  # h_align=">>", name_h_align=">>", column_names_h_align=">>"
 +-------------------------+
 |              Table Name |
 |                    Name |
@@ -284,7 +285,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 |       |          qwerty |
 |       |  asdfghjklzxcvb |
 +-------+-----------------+
->>> table_1.print(max_width=(5, 15), align="^", name_align="^", column_names_align="^")  # align="^^", name_align="^^", column_names_align="^^"
+>>> table_1.print(max_width=(5, 15), h_align="^", name_h_align="^", column_names_h_align="^")  # h_align="^^", name_h_align="^^", column_names_h_align="^^"
 +-------------------------+
 |       Table Name        |
 |          Name           |
@@ -297,7 +298,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 |       |     qwerty      |
 |       | asdfghjklzxcvb  |
 +-------+-----------------+
->>> table_1.print(max_width=(5, 15), align="^<", name_align="^<", column_names_align="^<")
+>>> table_1.print(max_width=(5, 15), h_align="^<", name_h_align="^<", column_names_h_align="^<")
 +-------------------------+
 |       Table Name        |
 |       Name              |
@@ -310,7 +311,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 |       | qwerty          |
 |       | asdfghjklzxcvb  |
 +-------+-----------------+
->>> table_1.print(max_width=(5, 15), align="^>", name_align="^>", column_names_align="^>")
+>>> table_1.print(max_width=(5, 15), h_align="^>", name_h_align="^>", column_names_h_align="^>")
 +-------------------------+
 |       Table Name        |
 |             Name        |
@@ -324,13 +325,13 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 |       | asdfghjklzxcvb  |
 +-------+-----------------+
 >>> table_2 = Table([("qwerty\n123456789\nasdfghjklzxcvb",)])
->>> table_2.print(max_width=(18,), align="^<")
+>>> table_2.print(max_width=(18,), h_align="^<")
 +--------------------+
 |   qwerty           |
 |   123456789        |
 |   asdfghjklzxcvb   |
 +--------------------+
->>> table_2.print(max_width=(18,), align="^>")
+>>> table_2.print(max_width=(18,), h_align="^>")
 +--------------------+
 |           qwerty   |
 |        123456789   |
@@ -1333,12 +1334,12 @@ table = [
         "👨‍👨‍👧‍👧👨‍👩‍👦‍👦",
     ),
 ]
-t = PrettyTable(title="prettytable", field_names=names, align="c")
+t = PrettyTable(title="prettytable", field_names=names, h_align="c")
 t.add_rows(table)
 print(t)
 
 t = Table(table, name="table2string", column_names=names)
-t.print(align="^", sep=(1,))
+t.print(h_align="^", sep=(1,))
 ```
 
 <details>

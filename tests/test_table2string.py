@@ -80,7 +80,7 @@ def test_stringify_table():
 """.strip()
     )
     assert (
-        stringify_table(table_2, align="<", name="Table Name")
+        stringify_table(table_2, h_align="<", name="Table Name")
         == """
 +---------------------+
 |     Table Name      |
@@ -96,7 +96,7 @@ def test_stringify_table():
 """.strip()
     )
     assert (
-        stringify_table(table_2, align=">", name="Table Name")
+        stringify_table(table_2, h_align=">", name="Table Name")
         == """
 +---------------------+
 |     Table Name      |
@@ -113,7 +113,7 @@ def test_stringify_table():
     )
     table_3 = [("coll 1", "coll 2")]
     assert (
-        stringify_table(table_3, name="Table\nName", name_align="<")
+        stringify_table(table_3, name="Table\nName", name_h_align="<")
         == """
 +-----------------+
 | Table           |
@@ -124,7 +124,7 @@ def test_stringify_table():
 """.strip()
     )
     assert (
-        stringify_table(table_3, name="Table\nName", name_align="^")
+        stringify_table(table_3, name="Table\nName", name_h_align="^")
         == """
 +-----------------+
 |      Table      |
@@ -135,7 +135,7 @@ def test_stringify_table():
 """.strip()
     )
     assert (
-        stringify_table(table_3, name="Table\nName", name_align=">")
+        stringify_table(table_3, name="Table\nName", name_h_align=">")
         == """
 +-----------------+
 |           Table |
@@ -146,7 +146,7 @@ def test_stringify_table():
 """.strip()
     )
     assert (
-        stringify_table(table_3, name="Table\nName", name_align="<<")
+        stringify_table(table_3, name="Table\nName", name_h_align="<<")
         == """
 +-----------------+
 | Table           |
@@ -157,7 +157,7 @@ def test_stringify_table():
 """.strip()
     )
     assert (
-        stringify_table(table_3, name="Table\nName", name_align=">>")
+        stringify_table(table_3, name="Table\nName", name_h_align=">>")
         == """
 +-----------------+
 |           Table |
@@ -168,7 +168,7 @@ def test_stringify_table():
 """.strip()
     )
     assert (
-        stringify_table(table_3, name="Table\nName", name_align="<>")
+        stringify_table(table_3, name="Table\nName", name_h_align="<>")
         == """
 +-----------------+
 | Table           |
@@ -179,7 +179,7 @@ def test_stringify_table():
 """.strip()
     )
     assert (
-        stringify_table(table_3, name="Table\nName", name_align="><")
+        stringify_table(table_3, name="Table\nName", name_h_align="><")
         == """
 +-----------------+
 |           Table |
@@ -296,7 +296,7 @@ def test_stringify_table():
     )
     table_12 = [("long string",), ("1234567\n34\n787878",)]
     assert (
-        stringify_table(table_12, align="^<")
+        stringify_table(table_12, h_align="^<")
         == """
 +-------------+
 | long string |
@@ -329,7 +329,7 @@ Never gonna tell a lie and hurt you
         ),
     ]
     assert (
-        stringify_table(table_13, align="^<")
+        stringify_table(table_13, h_align="^<")
         == """
 +------------------------------------------------------------------------+
 | filler filler filler filler filler filler filler filler filler filler  |
@@ -352,7 +352,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_13, align="^>")
+        stringify_table(table_13, h_align="^>")
         == """
 +------------------------------------------------------------------------+
 | filler filler filler filler filler filler filler filler filler filler  |
@@ -375,7 +375,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_13, align="^>", max_width=20)
+        stringify_table(table_13, h_align="^>", max_width=20)
         == """
 +------------------+
 | filler filler fi↩|
@@ -420,7 +420,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_13[:1], name=table_13[1][0], name_align="^<")
+        stringify_table(table_13[:1], name=table_13[1][0], name_h_align="^<")
         == """
 +------------------------------------------------------------------------+
 |                We're no strangers to love                              |
@@ -444,7 +444,7 @@ Never gonna tell a lie and hurt you
     )
     table_14 = [("filler " * 2,), ("12345\n67890",)]
     assert (
-        stringify_table(table_14, align="<>")
+        stringify_table(table_14, h_align="<>")
         == """
 +----------------+
 | filler filler  |
@@ -455,7 +455,7 @@ Never gonna tell a lie and hurt you
 """.strip()
     )
     assert (
-        stringify_table(table_14, align="><")
+        stringify_table(table_14, h_align="><")
         == """
 +----------------+
 | filler filler  |
@@ -1320,7 +1320,7 @@ def test_column_names():
             table_2,
             name="Name",
             column_names=["q", "w", "e", "r"],
-            column_names_align="*",
+            column_names_h_align="*",
             theme=Themes.rounded_double,
         )
         == """
@@ -1341,7 +1341,7 @@ def test_column_names():
             table_2,
             name="Name",
             column_names=["q", "w", "e", "r"],
-            column_names_align="^",
+            column_names_h_align="^",
             theme=Themes.rounded_double,
         )
         == """
@@ -1362,7 +1362,7 @@ def test_column_names():
             table_2,
             name="Name",
             column_names=["q", "w", "e", "r"],
-            column_names_align="<",
+            column_names_h_align="<",
             theme=Themes.rounded_double,
         )
         == """
@@ -1383,7 +1383,7 @@ def test_column_names():
             table_2,
             name="Name",
             column_names=["q", "w", "e", "r"],
-            column_names_align=">",
+            column_names_h_align=">",
             theme=Themes.rounded_double,
         )
         == """
@@ -1404,7 +1404,7 @@ def test_column_names():
         stringify_table(
             table_2,
             column_names=["q", "w", "e", "r"],
-            column_names_align="*",
+            column_names_h_align="*",
             theme=Themes.rounded_double,
         )
         == """
@@ -1422,7 +1422,7 @@ def test_column_names():
         stringify_table(
             table_2,
             column_names=["q", "1", "e", "r"],
-            column_names_align="*",
+            column_names_h_align="*",
             theme=Themes.rounded_double,
         )
         == """
@@ -1440,7 +1440,7 @@ def test_column_names():
         stringify_table(
             table_2,
             column_names=["q", "w", "e", "r"],
-            column_names_align="^",
+            column_names_h_align="^",
             theme=Themes.rounded_double,
         )
         == """
@@ -1458,7 +1458,7 @@ def test_column_names():
         stringify_table(
             table_2,
             column_names=["q", "w", "e", "r"],
-            column_names_align="<",
+            column_names_h_align="<",
             theme=Themes.rounded_double,
         )
         == """
@@ -1476,7 +1476,7 @@ def test_column_names():
         stringify_table(
             table_2,
             column_names=["q", "w", "e", "r"],
-            column_names_align=">",
+            column_names_h_align=">",
             theme=Themes.rounded_double,
         )
         == """
@@ -1494,7 +1494,7 @@ def test_column_names():
         stringify_table(
             table_2,
             column_names=["q\nw\ne", "w", "e", "r"],
-            column_names_align=("<", ">"),
+            column_names_h_align=("<", ">"),
             theme=Themes.rounded_double,
         )
         == """

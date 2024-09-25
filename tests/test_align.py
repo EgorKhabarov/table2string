@@ -113,7 +113,7 @@ def test_align_together():
     )
     assert (
         table.stringify(
-            align="^", v_align="^", max_width=(10,), max_height=5, maximize_height=True
+            h_align="^", v_align="^", max_width=(10,), max_height=5, maximize_height=True
         )
         == """
 +------------+------------+
@@ -127,7 +127,7 @@ def test_align_together():
     )
     assert (
         table.stringify(
-            align="^", v_align="-", max_width=(10,), max_height=5, maximize_height=True
+            h_align="^", v_align="-", max_width=(10,), max_height=5, maximize_height=True
         )
         == """
 +------------+------------+
@@ -141,7 +141,7 @@ def test_align_together():
     )
     assert (
         table.stringify(
-            align="^", v_align="_", max_width=(10,), max_height=5, maximize_height=True
+            h_align="^", v_align="_", max_width=(10,), max_height=5, maximize_height=True
         )
         == """
 +------------+------------+
@@ -155,7 +155,7 @@ def test_align_together():
     )
     assert (
         table.stringify(
-            align="<", v_align="^", max_width=(10,), max_height=5, maximize_height=True
+            h_align="<", v_align="^", max_width=(10,), max_height=5, maximize_height=True
         )
         == """
 +------------+------------+
@@ -169,7 +169,7 @@ def test_align_together():
     )
     assert (
         table.stringify(
-            align="<", v_align="-", max_width=(10,), max_height=5, maximize_height=True
+            h_align="<", v_align="-", max_width=(10,), max_height=5, maximize_height=True
         )
         == """
 +------------+------------+
@@ -183,7 +183,7 @@ def test_align_together():
     )
     assert (
         table.stringify(
-            align="<", v_align="_", max_width=(10,), max_height=5, maximize_height=True
+            h_align="<", v_align="_", max_width=(10,), max_height=5, maximize_height=True
         )
         == """
 +------------+------------+
@@ -197,7 +197,7 @@ def test_align_together():
     )
     assert (
         table.stringify(
-            align=">", v_align="^", max_width=(10,), max_height=5, maximize_height=True
+            h_align=">", v_align="^", max_width=(10,), max_height=5, maximize_height=True
         )
         == """
 +------------+------------+
@@ -211,7 +211,7 @@ def test_align_together():
     )
     assert (
         table.stringify(
-            align=">", v_align="-", max_width=(10,), max_height=5, maximize_height=True
+            h_align=">", v_align="-", max_width=(10,), max_height=5, maximize_height=True
         )
         == """
 +------------+------------+
@@ -225,7 +225,7 @@ def test_align_together():
     )
     assert (
         table.stringify(
-            align=">", v_align="_", max_width=(10,), max_height=5, maximize_height=True
+            h_align=">", v_align="_", max_width=(10,), max_height=5, maximize_height=True
         )
         == """
 +------------+------------+

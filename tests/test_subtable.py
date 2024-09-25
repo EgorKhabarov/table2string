@@ -8,7 +8,7 @@ def test_subtable():
         Table(
             [
                 map(
-                    lambda t: t.stringify(theme=Themes.thin, align="^"),
+                    lambda t: t.stringify(theme=Themes.thin, h_align="^"),
                     (
                         Table([("1",), (Table([("2", "3")]),)]),
                         Table([(Table([("2", "3")]),), ("1",)]),
@@ -31,7 +31,7 @@ def test_subtable():
                     Table([(Table([("2",), ("3",)]), "1")]),
                 ),
             ]
-        ).stringify(theme=Themes.thin_thick, align="^")
+        ).stringify(theme=Themes.thin_thick, h_align="^")
         == """
 ┌───────────┬───────────┬───────┬───────┬───────────────┬───────────────┬───────────┬───────────┐
 │ ┌───────┐ │ ┌───┬───┐ │ ┌───┐ │ ┌───┐ │ ┌───┬───┬───┐ │ ┌───┬───┬───┐ │ ┌───┬───┐ │ ┌───┬───┐ │
@@ -90,7 +90,7 @@ def test_subtable():
                     ),
                 )
             ]
-        ).stringify(theme=Themes.thin_thick, align="^")
+        ).stringify(theme=Themes.thin_thick, h_align="^")
         == """
 ┌────────┬───┬──────────────────────┬───┬───┐
 │ 111111 │ 2 │ 33333333333333333333 │ 4 │ 0 │
@@ -125,7 +125,7 @@ def test_subtable():
                     ),
                 ),
             ]
-        ).stringify(theme=Themes.thin_thick, align="^")
+        ).stringify(theme=Themes.thin_thick, h_align="^")
         == """
 ┌───────────┐
 │     1     │
@@ -156,7 +156,7 @@ def test_subtable():
                     ),
                 ),
             ]
-        ).stringify(theme=Themes.thin_thick, align="^", max_width=50)
+        ).stringify(theme=Themes.thin_thick, h_align="^", max_width=50)
         == """
 ┌────────────────────────────────────────────────┐
 │                       1                        │
@@ -173,7 +173,7 @@ def test_subtable():
                 ("987",),
                 (Table([("123456", "789123")]),),
             ]
-        ).stringify(theme=Themes.thin_thick, align="^", max_width=9)
+        ).stringify(theme=Themes.thin_thick, h_align="^", max_width=9)
         == """
 ┌───────┐
 │  987  │
@@ -193,7 +193,7 @@ def test_subtable():
                 ("987qwertyuiop",),
                 (Table([("123456", "789123")]),),
             ]
-        ).stringify(theme=Themes.thin_thick, align="^", max_width=9)
+        ).stringify(theme=Themes.thin_thick, h_align="^", max_width=9)
         == """
 ┌───────┐
 │ 987qw↩│
@@ -222,7 +222,7 @@ def test_subtable():
                     ),
                 ),
             ]
-        ).stringify(theme=Themes.thin_thick, align="^")
+        ).stringify(theme=Themes.thin_thick, h_align="^")
         == """
 ┌────────────────────┐
 │   987qwertyuiop    │
@@ -246,7 +246,7 @@ def test_subtable():
                     ),
                 ),
             ]
-        ).stringify(theme=Themes.thin_thick, align="^", max_width=(9,))
+        ).stringify(theme=Themes.thin_thick, h_align="^", max_width=(9,))
         == """
 ┌───────────┐
 │ 987qwerty↩│
@@ -278,7 +278,7 @@ def test_subtable():
                     ),
                 ),
             ]
-        ).stringify(theme=Themes.thin_thick, align="^", max_width=13)
+        ).stringify(theme=Themes.thin_thick, h_align="^", max_width=13)
         == """
 ┌───────────┐
 │ 987qwerty↩│
@@ -338,7 +338,7 @@ def test_subtable():
 """.strip()
     )
     assert (
-        table.stringify(align="^")
+        table.stringify(h_align="^")
         == """
 +-----+---------+-----+
 | c1  |   c2    | c3  |

@@ -1,4 +1,5 @@
 from table2string.table2string import Table, get_row_widths
+from table2string.themes import Themes
 from table2string.utils import (
     get_text_width_in_console,
     proportional_change,
@@ -8,7 +9,6 @@ from table2string.utils import (
     apply_v_align,
     line_spliter,
     fill_line,
-    Themes,
 )
 
 
@@ -59,13 +59,13 @@ def test_transform_align():
     assert transform_align(3, ("<",)) == ("<", "*", "*")
     assert transform_align(3, ("<", "<", "<")) == ("<", "<", "<")
 
-    assert transform_align(2, "^", True) == ("^", "^")
-    assert transform_align(2, "-", True) == ("-", "-")
-    assert transform_align(3, "_", True) == ("_", "_", "_")
-    assert transform_align(2, ("^",), True) == ("^", "^")
-    assert transform_align(2, ("-",), True) == ("-", "^")
-    assert transform_align(3, ("_",), True) == ("_", "^", "^")
-    assert transform_align(3, ("^", "-", "_"), True) == ("^", "-", "_")
+    assert transform_align(2, "^", default="^") == ("^", "^")
+    assert transform_align(2, "-", default="^") == ("-", "-")
+    assert transform_align(3, "_", default="^") == ("_", "_", "_")
+    assert transform_align(2, ("^",), default="^") == ("^", "^")
+    assert transform_align(2, ("-",), default="^") == ("-", "^")
+    assert transform_align(3, ("_",), default="^") == ("_", "^", "^")
+    assert transform_align(3, ("^", "-", "_"), default="^") == ("^", "-", "_")
 
 
 def test_transform_width():
