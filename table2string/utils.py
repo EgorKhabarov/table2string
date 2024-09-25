@@ -58,7 +58,9 @@ def translate_theme_border(
     """
     border_from_name: str = theme.border.get_border_name(border_from) or ""
     border_to_name: str = theme.border.get_border_name(border_to) or ""
-    border_result: Optional[str] = translate_border_dict[side].get((border_from_name, border_to_name))
+    border_result: Optional[str] = translate_border_dict[side].get(
+        (border_from_name, border_to_name)
+    )
 
     if border_result:
         return getattr(theme.border, border_result)
@@ -180,7 +182,12 @@ def proportional_change(
 
 def transform_align(
     column_count: int,
-    align: Optional[Union[Tuple[Union[HorizontalAlignment, VerticalAlignment, str], ...], Union[HorizontalAlignment, VerticalAlignment, str]]] = None,
+    align: Optional[
+        Union[
+            Tuple[Union[HorizontalAlignment, VerticalAlignment, str], ...],
+            Union[HorizontalAlignment, VerticalAlignment, str],
+        ]
+    ] = None,
     default: str = "*",
 ) -> Tuple[str, ...]:
     """
@@ -197,14 +204,21 @@ def transform_align(
     if isinstance(align, str):
         return (align, *(align,) * (column_count - 1))[:column_count]
     elif isinstance(align, (HorizontalAlignment, VerticalAlignment)):
-        return (align.value, *(align.value,) * (column_count - 1))[:column_count]  # noqa
+        return (
+            align.value,
+            *(align.value,) * (column_count - 1),
+        )[:column_count]
     else:
         return (
             *[
-                a.value if isinstance(a, (HorizontalAlignment, VerticalAlignment)) else a
+                (
+                    a.value
+                    if isinstance(a, (HorizontalAlignment, VerticalAlignment))
+                    else a
+                )
                 for a in align
             ],
-            *(default,) * (column_count - len(align))
+            *(default,) * (column_count - len(align)),
         )[:column_count]
 
 

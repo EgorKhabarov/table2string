@@ -19,14 +19,22 @@ from table2string.utils import (
 def print_table(
     table: Sequence[Sequence[Any]],
     *,
-    h_align: Union[Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]] = "*",
-    v_align: Union[Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]] = "^",
+    h_align: Union[
+        Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]
+    ] = "*",
+    v_align: Union[
+        Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
+    ] = "^",
     name: Optional[str] = None,
     name_h_align: Union[HorizontalAlignment, str] = "^",
     name_v_align: Union[VerticalAlignment, str] = "-",
     column_names: Optional[Sequence[str]] = None,
-    column_names_h_align: Union[Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]] = "^",
-    column_names_v_align: Union[Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]] = "-",
+    column_names_h_align: Union[
+        Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]
+    ] = "^",
+    column_names_v_align: Union[
+        Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
+    ] = "-",
     max_width: Union[int, Tuple[int, ...], None] = None,
     max_height: Optional[int] = None,
     maximize_height: bool = False,
@@ -310,14 +318,22 @@ def print_table(
 def stringify_table(
     table: Sequence[Sequence[Any]],
     *,
-    h_align: Union[Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]] = "*",
-    v_align: Union[Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]] = "^",
+    h_align: Union[
+        Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]
+    ] = "*",
+    v_align: Union[
+        Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
+    ] = "^",
     name: Optional[str] = None,
     name_h_align: Union[HorizontalAlignment, str] = "^",
     name_v_align: Union[VerticalAlignment, str] = "-",
     column_names: Optional[Sequence[str]] = None,
-    column_names_h_align: Union[Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]] = "^",
-    column_names_v_align: Union[Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]] = "-",
+    column_names_h_align: Union[
+        Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]
+    ] = "^",
+    column_names_v_align: Union[
+        Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
+    ] = "-",
     max_width: Union[int, Tuple[int, ...], None] = None,
     max_height: Optional[int] = None,
     maximize_height: bool = False,
@@ -436,12 +452,20 @@ class Table:
     def stringify(
         self,
         *,
-        h_align: Union[Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]] = "*",
-        v_align: Union[Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]] = "^",
+        h_align: Union[
+            Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]
+        ] = "*",
+        v_align: Union[
+            Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
+        ] = "^",
         name_h_align: Union[HorizontalAlignment, str] = "^",
         name_v_align: Union[VerticalAlignment, str] = "-",
-        column_names_h_align: Union[Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]] = "^",
-        column_names_v_align: Union[Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]] = "-",
+        column_names_h_align: Union[
+            Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]
+        ] = "^",
+        column_names_v_align: Union[
+            Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
+        ] = "-",
         max_width: Union[int, Tuple[int, ...], None] = None,
         max_height: Optional[int] = None,
         maximize_height: bool = False,
@@ -501,12 +525,20 @@ class Table:
     def print(
         self,
         *,
-        h_align: Union[Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]] = "*",
-        v_align: Union[Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]] = "^",
+        h_align: Union[
+            Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]
+        ] = "*",
+        v_align: Union[
+            Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
+        ] = "^",
         name_h_align: Union[HorizontalAlignment, str] = "^",
         name_v_align: Union[VerticalAlignment, str] = "-",
-        column_names_h_align: Union[Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]] = "^",
-        column_names_v_align: Union[Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]] = "-",
+        column_names_h_align: Union[
+            Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]
+        ] = "^",
+        column_names_v_align: Union[
+            Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
+        ] = "-",
         max_width: Union[int, Tuple[int, ...], None] = None,
         max_height: Optional[int] = None,
         maximize_height: bool = False,
