@@ -73,7 +73,9 @@ def print_table(
     :return: None
     """
     table_: List[List[Union[str, Table, Any]]] = list(list(row) for row in table)
-    column_names_: List[Union[str, Table, Any]] = list(column_names) if column_names else []
+    column_names_: List[Union[str, Table, Any]] = (
+        list(column_names) if column_names else []
+    )
 
     # Raise errors
     if not any(table_) or not sum(hasattr(row, "__getitem__") for row in table_):
@@ -179,7 +181,7 @@ def print_table(
                     line_break_symbol,
                     cell_break_symbol,
                 )
-            )
+            ),
         )
         print(
             fill_line(
@@ -202,7 +204,9 @@ def print_table(
         if ri != 0:
             result_table.append(("", "\n"))
 
-        splitted_row: List[Tuple[List[str], List[str], bool, Dict[str, Tuple[str, ...]]]] = []
+        splitted_row: List[
+            Tuple[List[str], List[str], bool, Dict[str, Tuple[str, ...]]]
+        ] = []
 
         # Trimming long lines
         for ci, column in enumerate(row):

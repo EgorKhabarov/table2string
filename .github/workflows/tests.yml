@@ -45,6 +45,9 @@ jobs:
         # E501 line too long
         # W503 line break before binary operator
         # W291 trailing whitespace
+    - name: Type check with mypy
+      run: |
+        mypy .
     - name: Test with Pytest
       run: |
         pytest

@@ -456,7 +456,9 @@ def fill_line(
             else:
                 if ci == 0:
                     template_list.append(vertical)
-                width = widths[ci] - (get_text_width_in_console(line[ci]) - len(line[ci]))
+                width = widths[ci] - (
+                    get_text_width_in_console(line[ci]) - len(line[ci])
+                )
                 template_list.append(
                     f" {{:{current_h_align[ci]}{width}}}{symbol[li][ci]}"
                 )
