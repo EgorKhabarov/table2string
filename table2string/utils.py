@@ -396,7 +396,7 @@ def fill_line(
     symbol = list(zip(*symbols))
     vertical = border.vertical
     tags = [False for _ in subtable_columns]
-    line: Tuple[str]
+    line: Tuple[str, ...]
 
     for li, line in enumerate(zip(*rows)):  # li - line index
         current_h_align: List[str] = []
