@@ -1,6 +1,6 @@
 import csv
 from io import TextIOWrapper, StringIO
-from typing import Union, Tuple, Any, Sequence, List, Dict, Optional
+from typing import Union, Tuple, Any, Sequence, List, Dict, Optional, cast
 
 from table2string.themes import Theme, Themes
 from table2string.aligns import HorizontalAlignment, VerticalAlignment
@@ -72,14 +72,14 @@ def print_table(
     :param proportion_coefficient: Proportion coefficient
     :return: None
     """
-    table_: List[List[Any]] = list(list(row) for row in table)
-    column_names_: Optional[List[str]] = list(column_names) if column_names else None
+    table_: List[List[Union[str, Table, Any]]] = list(list(row) for row in table)
+    column_names_: List[Union[str, Table, Any]] = list(column_names) if column_names else []
 
     # Raise errors
     if not any(table_) or not sum(hasattr(row, "__getitem__") for row in table_):
         raise ValueError(table_)
 
-    if column_names_ is not None and not (column_names_ and column_names_[0]):
+    if column_names_ != [] and not (column_names_ and column_names_[0]):
         raise ValueError(column_names_)
 
     if not (max_height >= 1 if max_height else True):
@@ -150,6 +150,11 @@ def print_table(
         down_separator,
     ) = generate_borders(theme, max_widths)
 
+    rows: Tuple[List[str], ...]
+    symbols: Tuple[List[str], ...]
+    subtable_columns: Tuple[bool, ...]
+    metadata_list: Tuple[Dict[str, Tuple[str, ...]], ...]
+
     if name:
         if up_separator.strip():
             print(up_separator, file=file)
@@ -159,13 +164,21 @@ def print_table(
         else:
             max_name_width = sum(max_widths) + (3 * column_count) + 1 - 4
 
-        rows, symbols, subtable_columns, metadata_list = zip(
-            line_spliter(
-                name,
-                max_name_width,
-                max_height,
-                line_break_symbol,
-                cell_break_symbol,
+        rows, symbols, subtable_columns, metadata_list = cast(
+            Tuple[
+                Tuple[List[str], ...],
+                Tuple[List[str], ...],
+                Tuple[bool, ...],
+                Tuple[Dict[str, Tuple[str, ...]], ...],
+            ],
+            zip(
+                line_spliter(
+                    name,
+                    max_name_width,
+                    max_height,
+                    line_break_symbol,
+                    cell_break_symbol,
+                )
             )
         )
         print(
@@ -182,12 +195,14 @@ def print_table(
             file=file,
         )
 
-    prev_metadata = None
-    result_table = []
+    metadata_stack: List[Tuple[Dict[str, Tuple[str, ...]], ...]] = []
+    result_table: List[Tuple[Optional[str], ...]] = []
 
     for ri, row in enumerate(table_):
         if ri != 0:
             result_table.append(("", "\n"))
+
+        splitted_row: List[Tuple[List[str], List[str], bool, Dict[str, Tuple[str, ...]]]] = []
 
         # Trimming long lines
         for ci, column in enumerate(row):
@@ -215,14 +230,14 @@ def print_table(
                     line_break_symbol,
                     cell_break_symbol,
                 )
-            row[ci] = column_lines
+            splitted_row.append(column_lines)
 
         if maximize_height and max_height:
             max_row_height = max_height
         else:
-            max_row_height = max(map(len, tuple(zip(*row))[0]))
+            max_row_height = max(map(len, tuple(zip(*splitted_row))[0]))
 
-        for ci, column in enumerate(row):
+        for ci, column in enumerate(splitted_row):
             if column[2]:  # is subtable
                 metadata: dict = column[3]
                 string = (
@@ -243,10 +258,7 @@ def print_table(
             column[0].extend(extend_data)
             column[1].extend(extend_data)
 
-        rows, symbols, subtable_columns, metadata_list = zip(*row)
-
-        if ri == 0:
-            prev_metadata = metadata_list
+        rows, symbols, subtable_columns, metadata_list = zip(*splitted_row)
 
         if (
             (sep is True or ri == 0)  # under table name
@@ -276,7 +288,7 @@ def print_table(
                 # if possible, connect the borders from below.
                 if ri > 0:
                     s = apply_metadata(
-                        s, "border_bottom", theme, prev_metadata, max_widths
+                        s, "border_bottom", theme, metadata_stack.pop(), max_widths
                     )
                 result_table.append((s, "\n"))
         else:
@@ -297,14 +309,14 @@ def print_table(
                 "",
             )
         )
-        prev_metadata = metadata_list
+        metadata_stack.append(metadata_list)
 
     if down_separator.strip():
         s = apply_metadata(
             down_separator.rstrip("\n"),
             "border_bottom",
             theme,
-            prev_metadata,
+            metadata_stack.pop(),
             max_widths,
         )
         result_table.append(("\n" + s, end))

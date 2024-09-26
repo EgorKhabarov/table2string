@@ -462,7 +462,29 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 <details>
 <summary>Border types</summary>
 
-```text
+```pycon
+>>> from table2string import Themes, HorizontalAlignment
+>>> table = []
+>>> example_table = Table([(" ", " "), (" ", " "), (" ", " ")])
+>>> theme_names = (
+...     ("ascii_thin", "ascii_thin_double"),
+...     ("ascii_double", "ascii_double_thin"),
+...     ("thin", "thin_thick"),
+...     ("thin_double", "rounded_double"),
+...     ("rounded", "rounded_thick"),
+...     ("thick", "thick_thin"),
+...     ("double", "double_thin"),
+...     ("booktabs", "ascii_booktabs"),
+...     ("markdown", "None"),
+... )
+>>> for names in theme_names:
+...     table.append([])
+...     for name in names:
+...         string_table = example_table.stringify(
+...             theme=getattr(Themes, name, Themes.ascii_thin)
+...         )
+...         table[-1].append(f"{name}\n{string_table}")
+>>> Table(table).print(theme=Themes.thin, h_align=HorizontalAlignment.CENTER)
 ┌──────────────┬───────────────────┐
 │  ascii_thin  │ ascii_thin_double │
 │  +---+---+   │     +---+---+     │
@@ -510,13 +532,13 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 │  ╰───┴───╯   │     ╰───┴───╯     │
 ├──────────────┼───────────────────┤
 │    thick     │    thick_thin     │
-│  ┏━━━┳━━━┓   │     ┌───┬───┐     │
-│  ┃   ┃   ┃   │     │   │   │     │
-│  ┣━━━╋━━━┫   │     ┠━━━╂━━━┨     │
-│  ┃   ┃   ┃   │     │   │   │     │
-│  ┣━━━╋━━━┫   │     ├───┼───┤     │
-│  ┃   ┃   ┃   │     │   │   │     │
-│  ┗━━━┻━━━┛   │     └───┴───┘     │
+│  ┏━━━┳━━━┓   │     ┏━━━┳━━━┓     │
+│  ┃   ┃   ┃   │     ┃   ┃   ┃     │
+│  ┣━━━╋━━━┫   │     ┠───╂───┨     │
+│  ┃   ┃   ┃   │     ┃   ┃   ┃     │
+│  ┣━━━╋━━━┫   │     ┣━━━╋━━━┫     │
+│  ┃   ┃   ┃   │     ┃   ┃   ┃     │
+│  ┗━━━┻━━━┛   │     ┗━━━┻━━━┛     │
 ├──────────────┼───────────────────┤
 │    double    │    double_thin    │
 │  ╔═══╦═══╗   │     ╔═══╦═══╗     │
@@ -536,12 +558,16 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 │              │                   │
 │   ───────    │      -------      │
 ├──────────────┼───────────────────┤
-│   markdown   │                   │
-│  |   |   |   │                   │
-│  |---|---|   │                   │
-│  |   |   |   │                   │
-│  |   |   |   │                   │
+│   markdown   │       None        │
+│  |   |   |   │     +---+---+     │
+│  |---|---|   │     |   |   |     │
+│  |   |   |   │     +---+---+     │
+│  |   |   |   │     |   |   |     │
+│              │     +---+---+     │
+│              │     |   |   |     │
+│              │     +---+---+     │
 └──────────────┴───────────────────┘
+
 ```
 </details>
 

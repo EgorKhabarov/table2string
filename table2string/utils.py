@@ -274,7 +274,7 @@ def line_spliter(
     height: Optional[int] = None,
     line_break_symbol: str = "↩",
     cell_break_symbol: str = "…",
-) -> List[Union[List[str], List[bool], bool, None]]:
+) -> Tuple[List[str], List[str], bool, Dict[str, Tuple[str, ...]]]:
     """
     Splits text to the desired width and height
 
@@ -290,18 +290,18 @@ def line_spliter(
     if width is None:
         width = len(max(lines))
 
-    result_lines = []
-    result_breaks = []
+    result_lines: List[str] = []
+    result_symbol: List[str] = []
 
     for line in lines:
         if get_text_width_in_console(line) == 0:
             result_lines.append("")
-            result_breaks.append(" ")
+            result_symbol.append(" ")
         else:
             while line:
                 if get_text_width_in_console(line) <= width:
                     result_lines.append(line)
-                    result_breaks.append(" ")
+                    result_symbol.append(" ")
                     line = ""
                 else:
                     w = 0
@@ -309,28 +309,29 @@ def line_spliter(
                     while get_text_width_in_console(line[:w]) <= width - 1:
                         w += 1
                     result_lines.append(line[:w])
-                    result_breaks.append(line_break_symbol)
+                    result_symbol.append(line_break_symbol)
                     line = line[w:]
 
     if height and len(result_lines) > height:
         result_lines = result_lines[:height]
-        result_breaks = result_breaks[:height]
-        result_breaks[-1] = cell_break_symbol
+        result_symbol = result_symbol[:height]
+        result_symbol[-1] = cell_break_symbol
 
-    return [result_lines, result_breaks, False, None]
+    return result_lines, result_symbol, False, {}
 
 
 def line_spliter_for_sub_table(
-    string_sub_table: str, max_height: int
-) -> List[Union[List[str], bool, Dict[str, Tuple[str, ...]]]]:
+    string_sub_table: str, max_height: Optional[int]
+) -> Tuple[List[str], List[str], bool, Dict[str, Tuple[str, ...]]]:
     sub_table_lines = string_sub_table.splitlines()
+
     if max_height:
         sub_table_lines = sub_table_lines[: max_height + 2]
+
     blank_line = ""
-    sub_table_symbols = [blank_line for _ in range(len(sub_table_lines))]
-    result = [
+    return (
         [line[1:-1] for line in sub_table_lines[1:-1]],
-        sub_table_symbols,
+        [blank_line for _ in range(len(sub_table_lines))],
         True,
         {
             "border_top": tuple(sub_table_lines[0][2:-2]),
@@ -338,15 +339,14 @@ def line_spliter_for_sub_table(
             "border_left": tuple(line[0] for line in sub_table_lines[1:-1]) or (" ",),
             "border_right": tuple(line[-1] for line in sub_table_lines[1:-1]) or (" ",),
         },
-    ]
-    return result
+    )
 
 
 def fill_line(
-    rows: List[Union[List[str], List[bool], bool, None]],
-    symbols: List[List[str]],
-    subtable_columns: List[bool],
-    metadata_list: Tuple[Optional[Dict[str, str]], ...],
+    rows: Tuple[List[str], ...],
+    symbols: Tuple[List[str], ...],
+    subtable_columns: Tuple[bool, ...],
+    metadata_list: Tuple[Dict[str, Tuple[str, ...]], ...],
     widths: List[int],
     h_align: Tuple[str, ...],
     v_align: Tuple[str, ...],
@@ -389,18 +389,18 @@ def fill_line(
                 h_align_left[n] = "<"
                 h_align_right[n] = "<"
 
-    for ci, cell in enumerate(rows):
-        if not subtable_columns[ci]:
-            rows[ci][:] = apply_v_align(cell, v_align[ci])
+        if not subtable_columns[n]:
+            row[:] = apply_v_align(row, v_align[n])
 
     lines = []
     symbol = list(zip(*symbols))
     vertical = border.vertical
     tags = [False for _ in subtable_columns]
+    line: Tuple[str]
 
-    for ri, row in enumerate(zip(*rows)):  # ri - row index
-        current_h_align = []
-        for ci, column in enumerate(row):
+    for li, line in enumerate(zip(*rows)):  # li - line index
+        current_h_align: List[str] = []
+        for ci, column in enumerate(line):
             if tags[ci]:
                 current_h_align.append(h_align_right[ci])
             else:
@@ -409,10 +409,10 @@ def fill_line(
                 tags[ci] = True
 
         template_list = []
-        row_length = len(row)
+        row_length = len(line)
         for ci in range(row_length):  # ci - column index
             if subtable_columns[ci]:
-                metadata = metadata_list[ci]
+                metadata: Dict[str, Tuple[str, ...]] = metadata_list[ci]
                 if ci == 0:
                     template_list.append(
                         translate_theme_border(
@@ -431,8 +431,8 @@ def fill_line(
                     )
 
                 try:
-                    metadata_border_left_ri = metadata["border_left"][ri]
-                    metadata_border_right_ri = metadata["border_right"][ri]
+                    metadata_border_left_ri = metadata["border_left"][li]
+                    metadata_border_right_ri = metadata["border_right"][li]
                 except IndexError:
                     metadata_border_left_ri = " "
                     metadata_border_right_ri = " "
@@ -456,15 +456,15 @@ def fill_line(
             else:
                 if ci == 0:
                     template_list.append(vertical)
-                width = widths[ci] - (get_text_width_in_console(row[ci]) - len(row[ci]))
+                width = widths[ci] - (get_text_width_in_console(line[ci]) - len(line[ci]))
                 template_list.append(
-                    f" {{:{current_h_align[ci]}{width}}}{symbol[ri][ci]}"
+                    f" {{:{current_h_align[ci]}{width}}}{symbol[li][ci]}"
                 )
 
                 template_list.append(vertical)
 
         template = "".join(template_list)
-        lines.append(template.format(*row))
+        lines.append(template.format(*line))
 
     return "\n".join(lines)
 
@@ -503,7 +503,7 @@ def apply_metadata(
     string_border: str,
     side: str,
     theme: Theme,
-    metadata_list: Tuple[Optional[dict], ...],
+    metadata_list: Tuple[Dict[str, Tuple[str, ...]], ...],
     max_widths: List[int],
 ) -> str:
     """
