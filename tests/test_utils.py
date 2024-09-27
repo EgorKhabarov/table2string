@@ -3,9 +3,9 @@ from table2string.themes import Themes
 from table2string.utils import (
     get_text_width_in_console,
     proportional_change,
+    apply_border_data,
     transform_align,
     transform_width,
-    apply_metadata,
     apply_v_align,
     line_spliter,
     fill_line,
@@ -427,13 +427,14 @@ def test_get_row_widths():
 
 def test_apply_v_align():
     assert apply_v_align(["a", "", " "], "^") == ["a", " ", " "]
+    assert apply_v_align(["", "a", " "], "^") == [" ", "a", " "]
     assert apply_v_align([" ", "a", " "], "-") == [" ", "a", " "]
     assert apply_v_align([" ", "a", " "], "_") == [" ", " ", "a"]
 
 
-def test_apply_metadata():
+def test_apply_border_data():
     assert (
-        apply_metadata(
+        apply_border_data(
             "+-------+",
             "border_top",
             Themes.ascii_thin,
@@ -441,4 +442,14 @@ def test_apply_metadata():
             [3],
         )
         == "+--++-+-+"
+    )
+    assert (
+        apply_border_data(
+            "├───────────┤",
+            "border_top",
+            Themes.thin_thick,
+            ({"border_top": ("─", "─", "┬", "─", "─", "─", "┬", "─", "─")},),
+            [3],
+        )
+        == "├───┬───┬───┤"
     )

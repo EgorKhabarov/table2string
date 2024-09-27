@@ -7,10 +7,10 @@ from table2string.aligns import HorizontalAlignment, VerticalAlignment
 from table2string.utils import (
     line_spliter_for_sub_table,
     get_text_width_in_console,
+    apply_border_data,
     generate_borders,
     transform_align,
     transform_width,
-    apply_metadata,
     line_spliter,
     fill_line,
 )
@@ -155,7 +155,7 @@ def print_table(
     rows: Tuple[List[str], ...]
     symbols: Tuple[List[str], ...]
     subtable_columns: Tuple[bool, ...]
-    metadata_list: Tuple[Dict[str, Tuple[str, ...]], ...]
+    border_data_list: Tuple[Dict[str, Tuple[str, ...]], ...]
 
     if name:
         if up_separator.strip():
@@ -166,7 +166,7 @@ def print_table(
         else:
             max_name_width = sum(max_widths) + (3 * column_count) + 1 - 4
 
-        rows, symbols, subtable_columns, metadata_list = cast(
+        rows, symbols, subtable_columns, border_data_list = cast(
             Tuple[
                 Tuple[List[str], ...],
                 Tuple[List[str], ...],
@@ -188,7 +188,7 @@ def print_table(
                 rows=rows,
                 symbols=symbols,
                 subtable_columns=subtable_columns,
-                metadata_list=metadata_list,
+                border_data_list=border_data_list,
                 widths=[max_name_width],
                 h_align=name_h_align_t,
                 v_align=name_v_align_t,
@@ -197,7 +197,7 @@ def print_table(
             file=file,
         )
 
-    metadata_stack: List[Tuple[Dict[str, Tuple[str, ...]], ...]] = []
+    border_data_stack: List[Tuple[Dict[str, Tuple[str, ...]], ...]] = []
     result_table: List[Tuple[Optional[str], ...]] = []
 
     for ri, row in enumerate(table_):
@@ -243,7 +243,7 @@ def print_table(
 
         for ci, column in enumerate(splitted_row):
             if column[2]:  # is subtable
-                metadata: dict = column[3]
+                border_data: dict = column[3]
                 string = (
                     " "
                     + "".join(
@@ -252,7 +252,7 @@ def print_table(
                             if symbol == theme.border.bottom_horizontal
                             else " "
                         )
-                        for symbol in metadata["border_bottom"]
+                        for symbol in border_data["border_bottom"]
                     )
                     + " "
                 )
@@ -262,7 +262,7 @@ def print_table(
             column[0].extend(extend_data)
             column[1].extend(extend_data)
 
-        rows, symbols, subtable_columns, metadata_list = zip(*splitted_row)
+        rows, symbols, subtable_columns, border_data_list = zip(*splitted_row)
 
         if (
             (sep is True or ri == 0)  # under table name
@@ -288,11 +288,13 @@ def print_table(
 
             if s.strip():
                 # connect the borders from above
-                s = apply_metadata(s, "border_top", theme, metadata_list, max_widths)
+                s = apply_border_data(
+                    s, "border_top", theme, border_data_list, max_widths
+                )
                 # if possible, connect the borders from below.
                 if ri > 0:
-                    s = apply_metadata(
-                        s, "border_bottom", theme, metadata_stack.pop(), max_widths
+                    s = apply_border_data(
+                        s, "border_bottom", theme, border_data_stack.pop(), max_widths
                     )
                 result_table.append((s, "\n"))
         else:
@@ -304,7 +306,7 @@ def print_table(
                     rows=rows,
                     symbols=symbols,
                     subtable_columns=subtable_columns,
-                    metadata_list=metadata_list,
+                    border_data_list=border_data_list,
                     widths=max_widths,
                     h_align=ha,
                     v_align=va,
@@ -313,14 +315,14 @@ def print_table(
                 "",
             )
         )
-        metadata_stack.append(metadata_list)
+        border_data_stack.append(border_data_list)
 
     if down_separator.strip():
-        s = apply_metadata(
+        s = apply_border_data(
             down_separator.rstrip("\n"),
             "border_bottom",
             theme,
-            metadata_stack.pop(),
+            border_data_stack.pop(),
             max_widths,
         )
         result_table.append(("\n" + s, end))

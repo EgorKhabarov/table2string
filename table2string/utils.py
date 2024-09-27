@@ -346,7 +346,7 @@ def fill_line(
     rows: Tuple[List[str], ...],
     symbols: Tuple[List[str], ...],
     subtable_columns: Tuple[bool, ...],
-    metadata_list: Tuple[Dict[str, Tuple[str, ...]], ...],
+    border_data_list: Tuple[Dict[str, Tuple[str, ...]], ...],
     widths: List[int],
     h_align: Tuple[str, ...],
     v_align: Tuple[str, ...],
@@ -358,7 +358,7 @@ def fill_line(
     :param rows: List of rows
     :param symbols: Line break or line ending characters
     :param subtable_columns: A list indicating whether the column should be formatted as subtable
-    :param metadata_list: Tuple of dictionaries to join boundaries
+    :param border_data_list: Tuple of dictionaries to join boundaries
     :param widths: List of widths
     :param h_align: Tuple of horizontal alignments
     :param v_align: Tuple of vertical alignments
@@ -412,14 +412,14 @@ def fill_line(
         row_length = len(line)
         for ci in range(row_length):  # ci - column index
             if subtable_columns[ci]:
-                metadata: Dict[str, Tuple[str, ...]] = metadata_list[ci]
+                border_data: Dict[str, Tuple[str, ...]] = border_data_list[ci]
                 if ci == 0:
                     template_list.append(
                         translate_theme_border(
                             "border_left",
                             theme,
                             vertical,
-                            metadata["border_left"][0],
+                            border_data["border_left"][0],
                         )
                     )
                 elif ci == row_length - 1:
@@ -427,15 +427,15 @@ def fill_line(
                         "border_right",
                         theme,
                         template_list[-1] or vertical,
-                        metadata["border_right"][-1],
+                        border_data["border_right"][-1],
                     )
 
                 try:
-                    metadata_border_left_ri = metadata["border_left"][ri]
-                    metadata_border_right_ri = metadata["border_right"][ri]
+                    border_left_ri = border_data["border_left"][ri]
+                    border_right_ri = border_data["border_right"][ri]
                 except IndexError:
-                    metadata_border_left_ri = " "
-                    metadata_border_right_ri = " "
+                    border_left_ri = " "
+                    border_right_ri = " "
 
                 if template_list:
                     template_list[-1] = (
@@ -443,7 +443,7 @@ def fill_line(
                             "border_left",
                             theme,
                             template_list[-1] or vertical,
-                            metadata_border_left_ri,
+                            border_left_ri,
                         )
                         or template_list[-1]
                     )
@@ -451,7 +451,7 @@ def fill_line(
                 template_list.append(f"{{:<{widths[ci] + 2}}}")
 
                 border_right = translate_theme_border(
-                    "border_right", theme, vertical, metadata_border_right_ri
+                    "border_right", theme, vertical, border_right_ri
                 )
                 template_list.append(border_right)
             else:
@@ -504,11 +504,11 @@ def apply_v_align(cell: List[str], v_align: str) -> List[str]:
     return [s if s else " " for s in cell]
 
 
-def apply_metadata(
+def apply_border_data(
     string_border: str,
     side: str,
     theme: Theme,
-    metadata_list: Tuple[Dict[str, Tuple[str, ...]], ...],
+    border_data_list: Tuple[Dict[str, Tuple[str, ...]], ...],
     max_widths: List[int],
 ) -> str:
     """
@@ -517,15 +517,15 @@ def apply_metadata(
     :param string_border: String border
     :param side: "border_left" or "border_right" or "border_top" or "border_bottom"
     :param theme: Theme
-    :param metadata_list: Tuple of dictionaries to join boundaries
+    :param border_data_list: Tuple of dictionaries to join boundaries
     :param max_widths: List of widths for each column
     """
     string_border_list = list(string_border)
     index = 2
 
-    for current_metadata, width in zip(metadata_list, max_widths):
-        if current_metadata:
-            for border_r in current_metadata[side]:
+    for current_border_data, width in zip(border_data_list, max_widths):
+        if current_border_data:
+            for border_r in current_border_data[side]:
                 border_l = string_border_list[index]
                 if border_l == " ":
                     border_l = theme.border.horizontal
