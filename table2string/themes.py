@@ -4,24 +4,23 @@ from typing import Optional
 
 @dataclass
 class Border:
-    name: str = "ascii_thin"
-    horizontal: str = "-"
-    vertical: str = "|"
-    top_left: str = "+"
-    top_right: str = "+"
-    bottom_left: str = "+"
-    bottom_right: str = "+"
-    vertical_left: str = "+"
-    vertical_right: str = "+"
-    top_horizontal: str = "+"
-    bottom_horizontal: str = "+"
-    central: str = "+"
-    vertical_left_plus: str = "+"
-    horizontal_plus: str = "-"
-    central_plus: str = "+"
-    vertical_right_plus: str = "+"
-    top_horizontal_plus: str = "+"
-    bottom_horizontal_plus: str = "+"
+    horizontal: str
+    vertical: str
+    top_left: str
+    top_right: str
+    bottom_left: str
+    bottom_right: str
+    vertical_left: str
+    vertical_right: str
+    top_horizontal: str
+    bottom_horizontal: str
+    central: str
+    vertical_left_plus: str
+    horizontal_plus: str
+    central_plus: str
+    vertical_right_plus: str
+    top_horizontal_plus: str
+    bottom_horizontal_plus: str
 
     def get_border_name(self, border: str) -> Optional[str]:
         if border == self.horizontal:
@@ -65,21 +64,44 @@ class Border:
 class Theme:
     def __init__(
         self,
-        border: Border = Border(),
+        name: str,
+        border: Border,
         custom_sub_table_theme: Optional["Theme"] = None,
     ):
+        self.name = name
         self.border = border
         self.custom_sub_table_theme = custom_sub_table_theme or self
 
     def __repr__(self):
-        return f"Themes.{self.border.name}"
+        return f"Themes.{self.name}"
 
 
 class Themes:
-    ascii_thin: Theme = Theme()
-    ascii_thin_double: Theme = Theme(
+    ascii_thin: Theme = Theme(
+        name="ascii_thin",
         border=Border(
-            name="ascii_thin_double",
+            horizontal="-",
+            vertical="|",
+            top_left="+",
+            top_right="+",
+            bottom_left="+",
+            bottom_right="+",
+            vertical_left="+",
+            vertical_right="+",
+            top_horizontal="+",
+            bottom_horizontal="+",
+            central="+",
+            vertical_left_plus="+",
+            horizontal_plus="-",
+            central_plus="+",
+            vertical_right_plus="+",
+            top_horizontal_plus="+",
+            bottom_horizontal_plus="+",
+        ),
+    )
+    ascii_thin_double: Theme = Theme(
+        name="ascii_thin_double",
+        border=Border(
             horizontal="-",
             vertical="|",
             top_left="+",
@@ -101,8 +123,8 @@ class Themes:
         custom_sub_table_theme=ascii_thin,
     )
     ascii_double: Theme = Theme(
+        name="ascii_double",
         border=Border(
-            name="ascii_double",
             horizontal="=",
             vertical="‖",
             top_left="+",
@@ -123,8 +145,8 @@ class Themes:
         ),
     )
     ascii_double_thin: Theme = Theme(
+        name="ascii_double_thin",
         border=Border(
-            name="ascii_double_thin",
             horizontal="=",
             vertical="‖",
             top_left="+",
@@ -146,8 +168,8 @@ class Themes:
         custom_sub_table_theme=ascii_double,
     )
     ascii_booktabs: Theme = Theme(
+        name="ascii_booktabs",
         border=Border(
-            name="ascii_booktabs",
             horizontal="-",
             vertical=" ",
             top_left=" ",
@@ -168,8 +190,8 @@ class Themes:
         ),
     )
     thin: Theme = Theme(
+        name="thin",
         border=Border(
-            name="thin",
             horizontal="─",
             vertical="│",
             top_left="┌",
@@ -190,8 +212,8 @@ class Themes:
         ),
     )
     thin_thick: Theme = Theme(
+        name="thin_thick",
         border=Border(
-            name="thin_thick",
             horizontal="─",
             vertical="│",
             top_left="┌",
@@ -213,8 +235,8 @@ class Themes:
         custom_sub_table_theme=thin,
     )
     thin_double: Theme = Theme(
+        name="thin_double",
         border=Border(
-            name="thin_double",
             horizontal="─",
             vertical="│",
             top_left="┌",
@@ -236,8 +258,8 @@ class Themes:
         custom_sub_table_theme=thin,
     )
     rounded: Theme = Theme(
+        name="rounded",
         border=Border(
-            name="rounded",
             horizontal="─",
             vertical="│",
             top_left="╭",
@@ -258,8 +280,8 @@ class Themes:
         ),
     )
     rounded_thick: Theme = Theme(
+        name="rounded_thick",
         border=Border(
-            name="rounded_thick",
             horizontal="─",
             vertical="│",
             top_left="╭",
@@ -281,8 +303,8 @@ class Themes:
         custom_sub_table_theme=thin,
     )
     rounded_double: Theme = Theme(
+        name="rounded_double",
         border=Border(
-            name="rounded_double",
             horizontal="─",
             vertical="│",
             top_left="╭",
@@ -304,8 +326,8 @@ class Themes:
         custom_sub_table_theme=thin,
     )
     thick: Theme = Theme(
+        name="thick",
         border=Border(
-            name="thick",
             horizontal="━",
             vertical="┃",
             top_left="┏",
@@ -326,8 +348,8 @@ class Themes:
         ),
     )
     thick_thin: Theme = Theme(
+        name="thick_thin",
         border=Border(
-            name="thick_thin",
             horizontal="━",
             vertical="┃",
             top_left="┏",
@@ -349,8 +371,8 @@ class Themes:
         custom_sub_table_theme=thick,
     )
     double: Theme = Theme(
+        name="double",
         border=Border(
-            name="double",
             horizontal="═",
             vertical="║",
             top_left="╔",
@@ -371,8 +393,8 @@ class Themes:
         ),
     )
     double_thin: Theme = Theme(
+        name="double_thin",
         border=Border(
-            name="double_thin",
             horizontal="═",
             vertical="║",
             top_left="╔",
@@ -394,8 +416,8 @@ class Themes:
         custom_sub_table_theme=double,
     )
     booktabs: Theme = Theme(
+        name="booktabs",
         border=Border(
-            name="booktabs",
             horizontal="─",
             vertical=" ",
             top_left=" ",
@@ -416,8 +438,8 @@ class Themes:
         ),
     )
     markdown: Theme = Theme(
+        name="markdown",
         border=Border(
-            name="markdown",
             horizontal=" ",
             vertical="|",
             top_left=" ",
