@@ -98,7 +98,7 @@
 # Custom Markup & Row
 
 ```pycon
-from table2string import Table, Themes, CutomMarkup, CutomRow
+from table2string import Table, Themes, CutomAlign, CutomRow
 table = [
     ("11111", "22222"),
     (CutomAlign("33", h_align="<", v_align="_"), "44444"),

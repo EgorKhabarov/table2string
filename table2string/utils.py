@@ -398,7 +398,7 @@ def fill_line(
     tags = [False for _ in subtable_columns]
     line: Tuple[str, ...]
 
-    for li, line in enumerate(zip(*rows)):  # li - line index
+    for ri, line in enumerate(zip(*rows)):  # ri - row index
         current_h_align: List[str] = []
         for ci, column in enumerate(line):
             if tags[ci]:
@@ -431,11 +431,12 @@ def fill_line(
                     )
 
                 try:
-                    metadata_border_left_ri = metadata["border_left"][li]
-                    metadata_border_right_ri = metadata["border_right"][li]
+                    metadata_border_left_ri = metadata["border_left"][ri]
+                    metadata_border_right_ri = metadata["border_right"][ri]
                 except IndexError:
                     metadata_border_left_ri = " "
                     metadata_border_right_ri = " "
+
                 if template_list:
                     template_list[-1] = (
                         translate_theme_border(
@@ -456,13 +457,13 @@ def fill_line(
             else:
                 if ci == 0:
                     template_list.append(vertical)
+
                 width = widths[ci] - (
                     get_text_width_in_console(line[ci]) - len(line[ci])
                 )
                 template_list.append(
-                    f" {{:{current_h_align[ci]}{width}}}{symbol[li][ci]}"
+                    f" {{:{current_h_align[ci]}{width}}}{symbol[ri][ci]}"
                 )
-
                 template_list.append(vertical)
 
         template = "".join(template_list)
@@ -482,6 +483,7 @@ def apply_v_align(cell: List[str], v_align: str) -> List[str]:
     if v_align == "_":
         while cell[-1].isspace():
             cell.insert(0, cell.pop())
+
     elif v_align == "-":
         rows_count = len(cell)
         while cell[0].isspace():
@@ -493,6 +495,7 @@ def apply_v_align(cell: List[str], v_align: str) -> List[str]:
         difference = rows_count - not_empty_rows_count
         top = difference // 2
         bottom = difference - top
+
         for _ in range(top):
             cell.insert(0, " ")
         for _ in range(bottom):
@@ -543,11 +546,15 @@ def apply_metadata(
     return "".join(string_border_list)
 
 
-def terminal_size() -> Tuple[int, int]:
+def terminal_size(default: Tuple[int, int] = (120, 30)) -> Tuple[int, int]:
+    """
+    :param default: Will be returned if it is not possible to get the console size
+    :return: columns, lines
+    """
     try:
         size = os.get_terminal_size()
     except OSError:
-        return 120, 30
+        return default
 
     return size.columns, size.lines
 

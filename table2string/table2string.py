@@ -21,20 +21,20 @@ def print_table(
     *,
     h_align: Union[
         Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]
-    ] = "*",
+    ] = HorizontalAlignment.AUTO,
     v_align: Union[
         Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
-    ] = "^",
+    ] = VerticalAlignment.TOP,
     name: Optional[str] = None,
-    name_h_align: Union[HorizontalAlignment, str] = "^",
-    name_v_align: Union[VerticalAlignment, str] = "-",
+    name_h_align: Union[HorizontalAlignment, str] = HorizontalAlignment.CENTER,
+    name_v_align: Union[VerticalAlignment, str] = VerticalAlignment.CENTER,
     column_names: Optional[Sequence[str]] = None,
     column_names_h_align: Union[
         Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]
-    ] = "^",
+    ] = HorizontalAlignment.CENTER,
     column_names_v_align: Union[
         Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
-    ] = "-",
+    ] = VerticalAlignment.CENTER,
     max_width: Union[int, Tuple[int, ...], None] = None,
     max_height: Optional[int] = None,
     maximize_height: bool = False,
@@ -336,20 +336,20 @@ def stringify_table(
     *,
     h_align: Union[
         Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]
-    ] = "*",
+    ] = HorizontalAlignment.AUTO,
     v_align: Union[
         Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
-    ] = "^",
+    ] = VerticalAlignment.TOP,
     name: Optional[str] = None,
-    name_h_align: Union[HorizontalAlignment, str] = "^",
-    name_v_align: Union[VerticalAlignment, str] = "-",
+    name_h_align: Union[HorizontalAlignment, str] = HorizontalAlignment.CENTER,
+    name_v_align: Union[VerticalAlignment, str] = VerticalAlignment.CENTER,
     column_names: Optional[Sequence[str]] = None,
     column_names_h_align: Union[
         Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]
-    ] = "^",
+    ] = HorizontalAlignment.CENTER,
     column_names_v_align: Union[
         Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
-    ] = "-",
+    ] = VerticalAlignment.CENTER,
     max_width: Union[int, Tuple[int, ...], None] = None,
     max_height: Optional[int] = None,
     maximize_height: bool = False,
@@ -470,18 +470,18 @@ class Table:
         *,
         h_align: Union[
             Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]
-        ] = "*",
+        ] = HorizontalAlignment.AUTO,
         v_align: Union[
             Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
-        ] = "^",
-        name_h_align: Union[HorizontalAlignment, str] = "^",
-        name_v_align: Union[VerticalAlignment, str] = "-",
+        ] = VerticalAlignment.TOP,
+        name_h_align: Union[HorizontalAlignment, str] = HorizontalAlignment.CENTER,
+        name_v_align: Union[VerticalAlignment, str] = VerticalAlignment.CENTER,
         column_names_h_align: Union[
             Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]
-        ] = "^",
+        ] = HorizontalAlignment.CENTER,
         column_names_v_align: Union[
             Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
-        ] = "-",
+        ] = VerticalAlignment.CENTER,
         max_width: Union[int, Tuple[int, ...], None] = None,
         max_height: Optional[int] = None,
         maximize_height: bool = False,
@@ -543,18 +543,18 @@ class Table:
         *,
         h_align: Union[
             Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]
-        ] = "*",
+        ] = HorizontalAlignment.AUTO,
         v_align: Union[
             Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
-        ] = "^",
-        name_h_align: Union[HorizontalAlignment, str] = "^",
-        name_v_align: Union[VerticalAlignment, str] = "-",
+        ] = VerticalAlignment.TOP,
+        name_h_align: Union[HorizontalAlignment, str] = HorizontalAlignment.CENTER,
+        name_v_align: Union[VerticalAlignment, str] = VerticalAlignment.CENTER,
         column_names_h_align: Union[
             Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]
-        ] = "^",
+        ] = HorizontalAlignment.CENTER,
         column_names_v_align: Union[
             Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
-        ] = "-",
+        ] = VerticalAlignment.CENTER,
         max_width: Union[int, Tuple[int, ...], None] = None,
         max_height: Optional[int] = None,
         maximize_height: bool = False,

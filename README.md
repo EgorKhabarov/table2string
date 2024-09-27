@@ -38,7 +38,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 # Usage example
 
 ```pycon
->>> from table2string import Table
+>>> from table2string import Table, Themes, HorizontalAlignment, VerticalAlignment
 >>> Table([("1", "2", "3"), ("qwe", "rty\nuio", "")], name="Table Name").print()
 +---------------+
 |  Table Name   |
@@ -110,25 +110,6 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 | c1 +---+---+
 |    | 3 | 4 |
 +----+---+---+
->>> from table2string import print_table, stringify_table
->>> print_table([("1", "2", "3"), ("qwe", "rty\nuio", "")], name="Table Name")
-+---------------+
-|  Table Name   |
-+-----+-----+---+
-|   1 |   2 | 3 |
-+-----+-----+---+
-| qwe | rty |   |
-|     | uio |   |
-+-----+-----+---+
->>> print(stringify_table([("1", "2", "3"), ("qwe", "rty\nuio", "")], name="Table Name"))
-+---------------+
-|  Table Name   |
-+-----+-----+---+
-|   1 |   2 | 3 |
-+-----+-----+---+
-| qwe | rty |   |
-|     | uio |   |
-+-----+-----+---+
 
 ```
 
@@ -204,25 +185,34 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 ## Text alignment
 
 | Align                                     | Example           | Description                                                                                                                    |
-|-------------------------------------------|-------------------|--------------------------------------------------------------------------------------------------------------------------------|
+|:------------------------------------------|:------------------|:-------------------------------------------------------------------------------------------------------------------------------|
 | `"<align>"` or `("<align>",)`             | `"^"` or `("^",)` | Setting `align` (`"^"`) for all columns                                                                                        |
 | `("<align_1>", "<align_2>")`              | `("^", "<")`      | Setting `align_1` (`"^"`) for the first column and `align_2` (`"<"`) for all other columns                                     |
 | `("<align_1>", "<align_2>", "<align_3>")` | `("^", "<", ">")` | Setting `align_1` (`"^"`) for the first column and `align_2` (`"<"`) for the second and `align_3` (`">"`) for the third column |
 
-### ALLOWED_ALIGNS
+### HorizontalAlignment
 
-|    Align    | Description                                                                                                                                          |
-|:-----------:|------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `*` or `**` | Alignment depends on the type. If this is a number and there are no line breaks in this cell, then align to the right; otherwise, align to the left. |
-| `<` or `<<` | All lines are left aligned                                                                                                                           |
-| `^` or `^^` | All lines are center aligned                                                                                                                         |
-| `>` or `>>` | All lines are right aligned                                                                                                                          |
-|    `<^`     | The first line is left aligned and the remaining lines are centered                                                                                  |
-|    `<>`     | The first line is left aligned and the remaining lines are right aligned                                                                             |
-|    `^<`     | The first line is aligned to the center, and the remaining lines are aligned to the left of the first line.                                          |
-|    `^>`     | The first line is aligned to the center, and the remaining lines are aligned to the right of the first line.                                         |
-|    `><`     | The first line is right aligned and the remaining lines are left aligned                                                                             |
-|    `>^`     | The first line is right aligned and the remaining lines are centered                                                                                 |
+| Align                                      | Description                                                                                                                                          |
+|:-------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `AUTO` or `AUTO_AUTO` or `*` or `**`       | Alignment depends on the type. If this is a number and there are no line breaks in this cell, then align to the right; otherwise, align to the left. |
+| `LEFT` or `LEFT_LEFT` or `<` or `<<`       | All lines are left aligned                                                                                                                           |
+| `CENTER` or `CENTER_CENTER` or `^` or `^^` | All lines are center aligned                                                                                                                         |
+| `RIGHT` or `RIGHT_RIGHT` or `>` or `>>`    | All lines are right aligned                                                                                                                          |
+| `LEFT_CENTER` or `<^`                      | The first line is left aligned and the remaining lines are centered                                                                                  |
+| `LEFT_RIGHT` or `<>`                       | The first line is left aligned and the remaining lines are right aligned                                                                             |
+| `CENTER_LEFT` or `^<`                      | The first line is aligned to the center, and the remaining lines are aligned to the left of the first line.                                          |
+| `CENTER_RIGHT` or `^>`                     | The first line is aligned to the center, and the remaining lines are aligned to the right of the first line.                                         |
+| `RIGHT_LEFT` or `><`                       | The first line is right aligned and the remaining lines are left aligned                                                                             |
+| `RIGHT_CENTER` or `>^`                     | The first line is right aligned and the remaining lines are centered                                                                                 |
+
+### VerticalAlignment
+
+| Align           | Description             |
+|:----------------|:------------------------|
+| `TOP` or `^`    | Text are top aligned    |
+| `CENTER` or `-` | Text are centered       |
+| `BOTTOM` or `_` | Text are bottom aligned |
+
 
 <details>
 <summary>Example</summary>
@@ -233,6 +223,8 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 ...     name="Table Name\nName\nNaaaaame",
 ...     column_names=("1", "col 2\nc2"),
 ... )
+>>> # h_align="*", name_h_align="*", column_names_h_align="*"
+>>> # h_align=HorizontalAlignment.AUTO, name_h_align=HorizontalAlignment.CENTER, column_names_h_align=HorizontalAlignment.CENTER
 >>> table_1.print(max_width=(5, 15))
 +-------------------------+
 |       Table Name        |
@@ -246,7 +238,14 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 |       | qwerty          |
 |       | asdfghjklzxcvb  |
 +-------+-----------------+
->>> table_1.print(max_width=(5, 15), h_align="*", name_h_align="*", column_names_h_align="*")  # h_align="**", name_h_align="**", column_names_h_align="**"
+>>> # h_align="*", name_h_align="*", column_names_h_align="*"
+>>> # h_align="**", name_h_align="**", column_names_h_align="**"
+>>> table_1.print(
+...     max_width=(5, 15),
+...     h_align=HorizontalAlignment.AUTO,
+...     name_h_align=HorizontalAlignment.AUTO,
+...     column_names_h_align=HorizontalAlignment.AUTO,
+... )
 +-------------------------+
 | Table Name              |
 | Name                    |
@@ -259,7 +258,14 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 |       | qwerty          |
 |       | asdfghjklzxcvb  |
 +-------+-----------------+
->>> table_1.print(max_width=(5, 15), h_align="<", name_h_align="<", column_names_h_align="<")  # h_align="<<", name_h_align="<<", column_names_h_align="<<"
+>>> # h_align="<", name_h_align="<", column_names_h_align="<"
+>>> # h_align="<<", name_h_align="<<", column_names_h_align="<<"
+>>> table_1.print(
+...     max_width=(5, 15),
+...     h_align=HorizontalAlignment.LEFT,
+...     name_h_align=HorizontalAlignment.LEFT,
+...     column_names_h_align=HorizontalAlignment.LEFT,
+... )
 +-------------------------+
 | Table Name              |
 | Name                    |
@@ -272,7 +278,14 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 |       | qwerty          |
 |       | asdfghjklzxcvb  |
 +-------+-----------------+
->>> table_1.print(max_width=(5, 15), h_align=">", name_h_align=">", column_names_h_align=">")  # h_align=">>", name_h_align=">>", column_names_h_align=">>"
+>>> # h_align=">", name_h_align=">", column_names_h_align=">"
+>>> # h_align=">>", name_h_align=">>", column_names_h_align=">>"
+>>> table_1.print(
+...     max_width=(5, 15),
+...     h_align=HorizontalAlignment.RIGHT,
+...     name_h_align=HorizontalAlignment.RIGHT,
+...     column_names_h_align=HorizontalAlignment.RIGHT,
+... )
 +-------------------------+
 |              Table Name |
 |                    Name |
@@ -285,7 +298,14 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 |       |          qwerty |
 |       |  asdfghjklzxcvb |
 +-------+-----------------+
->>> table_1.print(max_width=(5, 15), h_align="^", name_h_align="^", column_names_h_align="^")  # h_align="^^", name_h_align="^^", column_names_h_align="^^"
+>>> # h_align="^", name_h_align="^", column_names_h_align="^"
+>>> # h_align="^^", name_h_align="^^", column_names_h_align="^^"
+>>> table_1.print(
+...     max_width=(5, 15),
+...     h_align=HorizontalAlignment.CENTER,
+...     name_h_align=HorizontalAlignment.CENTER,
+...     column_names_h_align=HorizontalAlignment.CENTER,
+... )
 +-------------------------+
 |       Table Name        |
 |          Name           |
@@ -298,7 +318,13 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 |       |     qwerty      |
 |       | asdfghjklzxcvb  |
 +-------+-----------------+
->>> table_1.print(max_width=(5, 15), h_align="^<", name_h_align="^<", column_names_h_align="^<")
+>>> # h_align="^<", name_h_align="^<", column_names_h_align="^<"
+>>> table_1.print(
+...     max_width=(5, 15),
+...     h_align=HorizontalAlignment.CENTER_LEFT,
+...     name_h_align=HorizontalAlignment.CENTER_LEFT,
+...     column_names_h_align=HorizontalAlignment.CENTER_LEFT,
+... )
 +-------------------------+
 |       Table Name        |
 |       Name              |
@@ -311,7 +337,13 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 |       | qwerty          |
 |       | asdfghjklzxcvb  |
 +-------+-----------------+
->>> table_1.print(max_width=(5, 15), h_align="^>", name_h_align="^>", column_names_h_align="^>")
+>>> # h_align="^>", name_h_align="^>", column_names_h_align="^>"
+>>> table_1.print(
+...     max_width=(5, 15),
+...     h_align=HorizontalAlignment.CENTER_RIGHT,
+...     name_h_align=HorizontalAlignment.CENTER_RIGHT,
+...     column_names_h_align=HorizontalAlignment.CENTER_RIGHT,
+... )
 +-------------------------+
 |       Table Name        |
 |             Name        |
@@ -324,6 +356,62 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 |       |         qwerty  |
 |       | asdfghjklzxcvb  |
 +-------+-----------------+
+>>> table_1.print(
+...     max_width=(5, 20),
+...     max_height=5,
+...     maximize_height=True,
+...     h_align=HorizontalAlignment.CENTER,
+...     name_h_align=HorizontalAlignment.CENTER,
+...     column_names_h_align=HorizontalAlignment.CENTER,
+...     v_align=VerticalAlignment.CENTER,
+...     name_v_align=VerticalAlignment.CENTER,
+...     column_names_v_align=VerticalAlignment.CENTER,
+... )
++------------------------------+
+|          Table Name          |
+|             Name             |
+|           Naaaaame           |
++-------+----------------------+
+|       |                      |
+|       |        col 2         |
+|   1   |          c2          |
+|       |                      |
+|       |                      |
++-------+----------------------+
+|       |                      |
+|       |      123456789       |
+|   1   |        qwerty        |
+|       |    asdfghjklzxcvb    |
+|       |                      |
++-------+----------------------+
+>>> table_1.print(
+...     max_width=(5, 20),
+...     max_height=5,
+...     maximize_height=True,
+...     h_align=HorizontalAlignment.RIGHT,
+...     name_h_align=HorizontalAlignment.RIGHT,
+...     column_names_h_align=HorizontalAlignment.RIGHT,
+...     v_align=VerticalAlignment.BOTTOM,
+...     name_v_align=VerticalAlignment.BOTTOM,
+...     column_names_v_align=VerticalAlignment.TOP,
+... )
++------------------------------+
+|                   Table Name |
+|                         Name |
+|                     Naaaaame |
++-------+----------------------+
+|     1 |                col 2 |
+|       |                   c2 |
+|       |                      |
+|       |                      |
+|       |                      |
++-------+----------------------+
+|       |                      |
+|       |                      |
+|       |            123456789 |
+|       |               qwerty |
+|     1 |       asdfghjklzxcvb |
++-------+----------------------+
 >>> table_2 = Table([("qwerty\n123456789\nasdfghjklzxcvb",)])
 >>> table_2.print(max_width=(18,), h_align="^<")
 +--------------------+
