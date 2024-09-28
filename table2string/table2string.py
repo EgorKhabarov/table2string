@@ -132,6 +132,18 @@ def print_table(
             if sum_max_width < min_width:
                 raise ValueError(f"{sum_max_width} >= {min_width}")
 
+            incorrect_max_widths = tuple(
+                max_w
+                for max_w, min_w in zip(max_width, min_row_widths)
+                if max_w < min_w
+            )
+            if incorrect_max_widths:
+                raise ValueError(
+                    f"Values in {max_width} must be greater than or equal "
+                    f"to the corresponding values from {min_row_widths}. "
+                    f"Incorrect values: {incorrect_max_widths}"
+                )
+
     h_align_t = transform_align(column_count, h_align)
     name_h_align_t = transform_align(1, name_h_align)
     column_names_h_align_t = transform_align(column_count, column_names_h_align)

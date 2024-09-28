@@ -118,74 +118,31 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 
 ```
 
-## Custom width and height settings
+## Arguments
 
-| Width                               | Example        | Description                                                                                                                 |
-|-------------------------------------|----------------|-----------------------------------------------------------------------------------------------------------------------------|
-| `<width>`                           | `10`           | Setting `width` (`10`) for the whole table                                                                                  |
-| `(<width>,)`                        | `(10,)`        | Setting `width_1` (`10`) for all column                                                                                     |
-| `(<width_1>, <width_2>)`            | `(10, 20)`     | Setting `width_1` (`10`) for the first column and `width_2` (`20`) for all other columns                                    |
-| `(<width_1>, <width_2>, <width_3>)` | `(10, 20, 30)` | Setting `width_1` (`10`) for the first column and `width_2` (`20`) for the second and `width_3` (`30`) for the third column |
+| Argument                 | Example                         | Description                                                                                                                                           |
+|:-------------------------|:--------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `table`                  | `[("1", "2"), ("3", "4")]`      | A two-dimensional matrix                                                                                                                              |
+| `h_align`                | `HorizontalAlignment.CENTER`    | Allows you to align text in a cell horizontally                                                                                                       |
+| `v_align`                | `VerticalAlignment.CENTER`      | Allows you to align text in a cell vertically                                                                                                         |
+| `name`                   | `"Table Name"`                  | Table name                                                                                                                                            |
+| `name_h_align`           | `HorizontalAlignment.CENTER`    | Allows you to align table name horizontally                                                                                                           |
+| `name_v_align`           | `VerticalAlignment.CENTER`      | Allows you to align table name vertically                                                                                                             |
+| `column_names`           | `("c1", "c2", ...column_count)` | Sets the names for the table columns                                                                                                                  |
+| `column_names_h_align`   | `HorizontalAlignment.CENTER`    | Allows you to align column names horizontally                                                                                                         |
+| `column_names_v_align`   | `VerticalAlignment.CENTER`      | Allows you to align column names vertically                                                                                                           |
+| `max_width`              | `120`                           | Allows you to set the width of the entire table or individually for each column                                                                       |
+| `max_height`             | `10`                            | Specifies the maximum height for rows                                                                                                                 |
+| `maximize_height`        | `True`                          | Force height to be taken from max_height                                                                                                              |
+| `line_break_symbol`      | `"\"`                           | Symbol denoting line break                                                                                                                            |
+| `cell_break_symbol`      | `"…"`                           | Symbol indicating the end of text when there is not enough height                                                                                     |
+| `sep`                    | `(1, 3, 6)`                     | Handles the separators between table rows and can be either a boolean type or possess a `__contains__` method                                         |
+| `end`                    | `"\n"`                          | Behaves the same as `print(end=)`                                                                                                                     |
+| `file`                   | `sys.stdout` or `io.StringIO()` | Behaves the same as `print(file=)`                                                                                                                    |
+| `theme`                  | `Themes.rounded_thick`          | Allows you to set a specific theme for the table. For example, the border style                                                                       |
+| `ignore_width_errors`    | `False`                         |                                                                                                                                                       |
+| `proportion_coefficient` | `0.5`                           | Affects the width distribution of the columns. A value of 0.0 corresponds to proportional distribution, 1.0 averages the values, and 2.0 inverts them |
 
-<details>
-<summary>Example</summary>
-
-```pycon
->>> # Width of the entire table with borders
->>> Table([(1, 12345, "example")]).print(max_width=30)
-+-----+----------+-----------+
-|   1 |    12345 | example   |
-+-----+----------+-----------+
->>> # Width of each column individually
->>> Table([(1, 12345, "example")]).print(max_width=(10,))
-+------------+------------+------------+
-|          1 |      12345 | example    |
-+------------+------------+------------+
->>> Table([(1, 12345, "example")]).print(max_width=(1, 5, 6))
-+---+-------+--------+
-| 1 | 12345 | exampl↩|
-|   |       | e      |
-+---+-------+--------+
->>> Table([(1, 12345, "example")]).print(max_width=(1, 5, 7))
-+---+-------+---------+
-| 1 | 12345 | example |
-+---+-------+---------+
->>> Table([("123456\n\n789000", "example")]).print(max_width=(3, 4), max_height=4)
-+-----+------+
-| 123↩| exam↩|
-| 456 | ple  |
-|     |      |
-| 789…|      |
-+-----+------+
->>> Table([("123456789",)]).print(max_width=(1,), max_height=1)
-+---+
-| 1…|
-+---+
->>> Table([("123\n456\n789",)]).print(
-...     max_width=(3,),
-...     max_height=4,
-...     maximize_height=True,
-... )
-+-----+
-| 123 |
-| 456 |
-| 789 |
-|     |
-+-----+
->>> Table([("123456789",)]).print(
-...     max_width=(3,),
-...     max_height=4,
-...     maximize_height=True,
-... )
-+-----+
-| 123↩|
-| 456↩|
-| 789 |
-|     |
-+-----+
-
-```
-</details>
 
 ## Text alignment
 
@@ -434,6 +391,75 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 ```
 </details>
 
+## Custom width and height settings
+
+| Width                               | Example        | Description                                                                                                                 |
+|-------------------------------------|----------------|-----------------------------------------------------------------------------------------------------------------------------|
+| `<width>`                           | `10`           | Setting `width` (`10`) for the whole table                                                                                  |
+| `(<width>,)`                        | `(10,)`        | Setting `width_1` (`10`) for all column                                                                                     |
+| `(<width_1>, <width_2>)`            | `(10, 20)`     | Setting `width_1` (`10`) for the first column and `width_2` (`20`) for all other columns                                    |
+| `(<width_1>, <width_2>, <width_3>)` | `(10, 20, 30)` | Setting `width_1` (`10`) for the first column and `width_2` (`20`) for the second and `width_3` (`30`) for the third column |
+
+<details>
+<summary>Example</summary>
+
+```pycon
+>>> # Width of the entire table with borders
+>>> Table([(1, 12345, "example")]).print(max_width=30)
++-----+----------+-----------+
+|   1 |    12345 | example   |
++-----+----------+-----------+
+>>> # Width of each column individually
+>>> Table([(1, 12345, "example")]).print(max_width=(10,))
++------------+------------+------------+
+|          1 |      12345 | example    |
++------------+------------+------------+
+>>> Table([(1, 12345, "example")]).print(max_width=(1, 5, 6))
++---+-------+--------+
+| 1 | 12345 | exampl↩|
+|   |       | e      |
++---+-------+--------+
+>>> Table([(1, 12345, "example")]).print(max_width=(1, 5, 7))
++---+-------+---------+
+| 1 | 12345 | example |
++---+-------+---------+
+>>> Table([("123456\n\n789000", "example")]).print(max_width=(3, 4), max_height=4)
++-----+------+
+| 123↩| exam↩|
+| 456 | ple  |
+|     |      |
+| 789…|      |
++-----+------+
+>>> Table([("123456789",)]).print(max_width=(1,), max_height=1)
++---+
+| 1…|
++---+
+>>> Table([("123\n456\n789",)]).print(
+...     max_width=(3,),
+...     max_height=4,
+...     maximize_height=True,
+... )
++-----+
+| 123 |
+| 456 |
+| 789 |
+|     |
++-----+
+>>> Table([("123456789",)]).print(
+...     max_width=(3,),
+...     max_height=4,
+...     maximize_height=True,
+... )
++-----+
+| 123↩|
+| 456↩|
+| 789 |
+|     |
++-----+
+
+```
+</details>
+
 ## Separator settings
 
 | Separator              | Description                                |
@@ -550,7 +576,9 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 ```
 </details>
 
-## Borders
+## Themes
+
+### Borders
 
 <details>
 <summary>Border types</summary>
