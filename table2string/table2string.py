@@ -156,7 +156,7 @@ def print_table(
                 *max_width,
                 *(max_width[-1],) * (column_count - len(max_width)),
             )
-            sum_max_width = sum(max_width) + 3 * column_count + 1
+            sum_max_width = sum(max_width) + 3 * len(max_width) + 1
             if sum_max_width < min_width_:
                 raise ValueError(f"{sum_max_width} >= {min_width_}")
 
