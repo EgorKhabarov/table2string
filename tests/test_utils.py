@@ -6,6 +6,7 @@ from table2string.utils import (
     apply_border_data,
     transform_align,
     transform_width,
+    max_min_widths,
     apply_v_align,
     line_spliter,
     fill_line,
@@ -453,3 +454,14 @@ def test_apply_border_data():
         )
         == "├───┬───┬───┤"
     )
+
+
+def test_max_min_widths():
+    assert max_min_widths(
+        (1, 1, 3, 1),
+        (1, 1, 1, 4),
+    ) == (1, 1, 3, 4)
+    assert max_min_widths(
+        (9, 1, 3, 1),
+        (3, 1, 2, 4),
+    ) == (9, 1, 3, 4)

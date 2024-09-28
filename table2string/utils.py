@@ -2,7 +2,7 @@ import os
 import re
 import unicodedata
 from functools import lru_cache
-from typing import Union, List, Tuple, Optional, Dict
+from typing import Union, List, Tuple, Optional, Dict, Sequence
 
 from table2string.themes import Theme, Themes
 from table2string.aligns import HorizontalAlignment, VerticalAlignment
@@ -638,3 +638,9 @@ def generate_borders(theme: Theme, max_widths: Tuple[int, ...]) -> Tuple[str, ..
         line_separator_plus,
         down_separator,
     )
+
+
+def max_min_widths(
+    min_widths1: Sequence[int], min_widths2: Sequence[int]
+) -> Tuple[int, ...]:
+    return tuple(max(mw1, mw2) for mw1, mw2 in zip(min_widths1, min_widths2))

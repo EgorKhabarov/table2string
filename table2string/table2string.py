@@ -11,6 +11,7 @@ from table2string.utils import (
     generate_borders,
     transform_align,
     transform_width,
+    max_min_widths,
     line_spliter,
     fill_line,
 )
@@ -36,6 +37,7 @@ def print_table(
         Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
     ] = VerticalAlignment.CENTER,
     max_width: Union[int, Tuple[int, ...], None] = None,
+    min_width: Union[int, Tuple[int, ...], None] = None,
     max_height: Optional[int] = None,
     maximize_height: bool = False,
     line_break_symbol: str = "↩",
@@ -60,6 +62,7 @@ def print_table(
     :param column_names_h_align: Horizontal aligns for column names
     :param column_names_v_align: Vertical aligns for column names
     :param max_width: Table width or width of individual columns
+    :param min_width: Table minimum width or minimum width of individual columns
     :param max_height: The maximum number of lines in one line
     :param maximize_height: Make all lines of the same height max_height
     :param line_break_symbol: "\" or "↩" or chr(8617) or "\\U000021a9"
@@ -96,6 +99,19 @@ def print_table(
     if not isinstance(theme, Theme):
         raise TypeError(theme)
 
+    if min_width and max_width:
+        if isinstance(min_width, int) and isinstance(max_width, int):
+            """min_width: int, max_width: int"""
+            if min_width > max_width:
+                raise ValueError(f"{min_width} > {max_width}")
+        elif isinstance(min_width, int):
+            """min_width: int, max_width: tuple"""
+
+        elif isinstance(max_width, int):
+            """min_width: tuple, max_width: int"""
+        else:
+            """min_width: tuple, max_width: tuple"""
+
     column_count = max(map(len, table_))
 
     # If there are column names, we write them at the beginning of the table
@@ -112,11 +128,25 @@ def print_table(
     row_widths = get_row_widths(table_)
     min_row_widths = get_row_widths(table_, minimum=True)
 
+    if min_width is not None:
+        min_widths: Tuple[int, ...]
+        if isinstance(min_width, int):
+            min_widths = transform_width(
+                min_width, column_count, tuple(1 for _ in range(column_count))
+            )
+        else:
+            min_widths = min_width[:column_count]
+            min_widths = (
+                *min_widths,
+                *(min_widths[-1],) * (column_count - len(min_widths)),
+            )
+        min_row_widths = max_min_widths(min_row_widths, min_widths)
+
     if max_width is not None and not ignore_width_errors:
-        min_width = sum(min_row_widths) + 3 * len(min_row_widths) + 1
+        min_width_ = sum(min_row_widths) + 3 * column_count + 1
         if isinstance(max_width, int):
-            if max_width < min_width:
-                raise ValueError(f"{max_width} >= {min_width}")
+            if max_width < min_width_:
+                raise ValueError(f"{max_width} >= {min_width_}")
         else:
             invalid_widths = [mw for mw in max_width if mw < 1]
             if invalid_widths:
@@ -127,8 +157,8 @@ def print_table(
                 *(max_width[-1],) * (column_count - len(max_width)),
             )
             sum_max_width = sum(max_width) + 3 * column_count + 1
-            if sum_max_width < min_width:
-                raise ValueError(f"{sum_max_width} >= {min_width}")
+            if sum_max_width < min_width_:
+                raise ValueError(f"{sum_max_width} >= {min_width_}")
 
     h_align_t = transform_align(column_count, h_align)
     name_h_align_t = transform_align(1, name_h_align)
@@ -353,6 +383,7 @@ def stringify_table(
         Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
     ] = VerticalAlignment.CENTER,
     max_width: Union[int, Tuple[int, ...], None] = None,
+    min_width: Union[int, Tuple[int, ...], None] = None,
     max_height: Optional[int] = None,
     maximize_height: bool = False,
     line_break_symbol: str = "↩",
@@ -375,6 +406,7 @@ def stringify_table(
     :param column_names_h_align: Horizontal aligns for column names
     :param column_names_v_align: Vertical aligns for column names
     :param max_width: Table width or width of individual columns
+    :param min_width: Table minimum width or minimum width of individual columns
     :param max_height: The maximum number of lines in one line
     :param maximize_height: Make all lines of the same height max_height
     :param line_break_symbol: "↩" or chr(8617) or "\\U000021a9"
@@ -398,6 +430,7 @@ def stringify_table(
         column_names_h_align=column_names_h_align,
         column_names_v_align=column_names_v_align,
         max_width=max_width,
+        min_width=min_width,
         max_height=max_height,
         maximize_height=maximize_height,
         line_break_symbol=line_break_symbol,
@@ -485,6 +518,7 @@ class Table:
             Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
         ] = VerticalAlignment.CENTER,
         max_width: Union[int, Tuple[int, ...], None] = None,
+        min_width: Union[int, Tuple[int, ...], None] = None,
         max_height: Optional[int] = None,
         maximize_height: bool = False,
         line_break_symbol: str = "↩",
@@ -504,6 +538,7 @@ class Table:
         :param column_names_h_align: Horizontal aligns for column names
         :param column_names_v_align: Vertical aligns for column names
         :param max_width: Table width or width of individual columns
+        :param min_width: Table minimum width or minimum width of individual columns
         :param max_height: The maximum number of lines in one line
         :param maximize_height: Make all lines of the same height max_height
         :param line_break_symbol: "↩" or chr(8617) or "\\U000021a9"
@@ -528,6 +563,7 @@ class Table:
             column_names_v_align=self.config.get("column_names_v_align")
             or column_names_v_align,
             max_width=max_width,
+            min_width=self.config.get("min_width") or min_width,
             max_height=self.config.get("max_height") or max_height,
             maximize_height=self.config.get("maximize_height") or maximize_height,
             line_break_symbol=self.config.get("line_break_symbol") or line_break_symbol,
@@ -558,6 +594,7 @@ class Table:
             Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
         ] = VerticalAlignment.CENTER,
         max_width: Union[int, Tuple[int, ...], None] = None,
+        min_width: Union[int, Tuple[int, ...], None] = None,
         max_height: Optional[int] = None,
         maximize_height: bool = False,
         line_break_symbol: str = "↩",
@@ -579,6 +616,7 @@ class Table:
         :param column_names_h_align: Horizontal aligns for column names
         :param column_names_v_align: Vertical aligns for column names
         :param max_width: Table width or width of individual columns
+        :param min_width: Table minimum width or minimum width of individual columns
         :param max_height: The maximum number of lines in one line
         :param maximize_height: Make all lines of the same height max_height
         :param line_break_symbol: "↩" or chr(8617) or "\\U000021a9"
@@ -604,6 +642,7 @@ class Table:
             column_names_v_align=self.config.get("column_names_v_align")
             or column_names_v_align,
             max_width=max_width,
+            min_width=self.config.get("min_width") or min_width,
             max_height=self.config.get("max_height") or max_height,
             maximize_height=self.config.get("maximize_height") or maximize_height,
             line_break_symbol=self.config.get("line_break_symbol") or line_break_symbol,
