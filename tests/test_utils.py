@@ -18,36 +18,36 @@ def test_get_text_width_in_console():
 
 
 def test_proportional_change():
-    assert proportional_change([2, 2, 3], 10) == [3, 3, 4]
-    assert proportional_change([2, 2, 3], 11) == [3, 3, 5]
-    assert proportional_change([20, 2, 3], 10) == [5, 2, 3]
-    assert proportional_change([20, 2, 3], 100) == [59, 19, 22]
+    assert proportional_change((2, 2, 3), 10) == (3, 3, 4)
+    assert proportional_change((2, 2, 3), 11) == (3, 3, 5)
+    assert proportional_change((20, 2, 3), 10) == (5, 2, 3)
+    assert proportional_change((20, 2, 3), 100) == (59, 19, 22)
     assert proportional_change(
-        [19, 10, 7, 4, 12, 4, 4, 4, 1, 1168],
+        (19, 10, 7, 4, 12, 4, 4, 4, 1, 1168),
         185,
-    ) == [7, 8, 8, 9, 9, 10, 10, 12, 13, 99]
+    ) == (7, 8, 8, 9, 9, 10, 10, 12, 13, 99)
 
-    assert proportional_change([9, 6], 6, [5, 1]) == [5, 1]
-    assert proportional_change([2, 2, 3], 10, [1, 1, 1]) == [3, 3, 4]
-    assert proportional_change([2, 2, 3], 10, [1, 4, 1]) == [2, 4, 4]
+    assert proportional_change((9, 6), 6, (5, 1)) == (5, 1)
+    assert proportional_change((2, 2, 3), 10, (1, 1, 1)) == (3, 3, 4)
+    assert proportional_change((2, 2, 3), 10, (1, 4, 1)) == (2, 4, 4)
     assert proportional_change(
-        [19, 10, 7, 4, 12, 4, 4, 4, 1, 1168],
+        (19, 10, 7, 4, 12, 4, 4, 4, 1, 1168),
         185,
-    ) == [7, 8, 8, 9, 9, 10, 10, 12, 13, 99]
+    ) == (7, 8, 8, 9, 9, 10, 10, 12, 13, 99)
     assert proportional_change(
-        [19, 10, 7, 4, 12, 4, 4, 4, 1, 1168],
+        (19, 10, 7, 4, 12, 4, 4, 4, 1, 1168),
         185,
-        [1, 1, 1, 1, 1, 1, 1, 1, 20, 1],
-    ) == [6, 7, 7, 8, 8, 9, 10, 11, 21, 98]
-    assert proportional_change([1, 1, 1], 10, [1, 1, 1]) == [4, 3, 3]
-    assert proportional_change([1, 1, 1], 11, [1, 1, 1]) == [3, 4, 4]
-    assert proportional_change([1, 1, 1], 12, [1, 1, 1]) == [4, 4, 4]
-    assert proportional_change([1, 1, 1], 13, [1, 1, 1]) == [5, 4, 4]
-    assert proportional_change([1, 1, 1], 14, [1, 1, 1]) == [4, 5, 5]
-    assert proportional_change([1, 1, 1], 15, [1, 1, 1]) == [5, 5, 5]
-    assert proportional_change([1, 1, 1], 16, [1, 1, 1]) == [5, 5, 6]
-    assert proportional_change([1, 1, 1], 16, [1, 9, 6]) == [1, 9, 6]
-    assert proportional_change([987654, 10000, 999999], 16, [1, 9, 1]) == [3, 9, 4]
+        (1, 1, 1, 1, 1, 1, 1, 1, 20, 1),
+    ) == (6, 7, 7, 8, 8, 9, 10, 11, 21, 98)
+    assert proportional_change((1, 1, 1), 10, (1, 1, 1)) == (4, 3, 3)
+    assert proportional_change((1, 1, 1), 11, (1, 1, 1)) == (3, 4, 4)
+    assert proportional_change((1, 1, 1), 12, (1, 1, 1)) == (4, 4, 4)
+    assert proportional_change((1, 1, 1), 13, (1, 1, 1)) == (5, 4, 4)
+    assert proportional_change((1, 1, 1), 14, (1, 1, 1)) == (4, 5, 5)
+    assert proportional_change((1, 1, 1), 15, (1, 1, 1)) == (5, 5, 5)
+    assert proportional_change((1, 1, 1), 16, (1, 1, 1)) == (5, 5, 6)
+    assert proportional_change((1, 1, 1), 16, (1, 9, 6)) == (1, 9, 6)
+    assert proportional_change((987654, 10000, 999999), 16, (1, 9, 1)) == (3, 9, 4)
 
 
 def test_transform_align():
@@ -69,11 +69,11 @@ def test_transform_align():
 
 
 def test_transform_width():
-    assert transform_width(1, 1, [1]) == [1]
-    assert transform_width(1, 2, [2, 2]) == [1, 1]
-    assert transform_width((1, 2), 1, [1]) == [1]
-    assert transform_width((1, 2), 2, [2, 2]) == [1, 2]
-    assert transform_width((3, 2), 2, [2, 2]) == [3, 2]
+    assert transform_width(1, 1, (1,)) == (1,)
+    assert transform_width(1, 2, (2, 2)) == (1, 1)
+    assert transform_width((1, 2), 1, (1,)) == (1,)
+    assert transform_width((1, 2), 2, (2, 2)) == (1, 2)
+    assert transform_width((3, 2), 2, (2, 2)) == (3, 2)
 
 
 def test_line_spliter():
@@ -137,7 +137,7 @@ def test_fill_line():
             (["↩", "↩", " ", "↩", "↩", " "],),
             (False,),
             ({},),
-            [1],
+            (1,),
             ("<",),
             ("^",),
         )
@@ -156,7 +156,7 @@ def test_fill_line():
             (["↩", "↩", " ", " ", "↩", "↩", " "],),
             (False,),
             ({},),
-            [1],
+            (1,),
             ("<",),
             ("^",),
         )
@@ -176,7 +176,7 @@ def test_fill_line():
             (["↩", " ", "↩", " "],),
             (False,),
             ({},),
-            [2],
+            (2,),
             ("<",),
             ("^",),
         )
@@ -193,7 +193,7 @@ def test_fill_line():
             (["↩", " ", "↩", " "],),
             (False,),
             ({},),
-            [2],
+            (2,),
             (">",),
             ("^",),
         )
@@ -210,7 +210,7 @@ def test_fill_line():
             ([" ", " "],),
             (False, False),
             ({}, {}),
-            [3],
+            (3,),
             ("<",),
             ("^",),
         )
@@ -225,7 +225,7 @@ def test_fill_line():
             ([" "], [" "]),
             (False, False),
             ({}, {}),
-            [3, 3],
+            (3, 3),
             ("<", "<"),
             (
                 "^",
@@ -240,7 +240,7 @@ def test_fill_line():
             ([" ", " ", " "],),
             (False,),
             ({},),
-            [11],
+            (11,),
             ("^<",),
             ("^",),
         )
@@ -256,7 +256,7 @@ def test_fill_line():
             ([" ", " ", " "],),
             (False,),
             ({},),
-            [12],
+            (12,),
             ("^<",),
             ("^",),
         )
@@ -272,7 +272,7 @@ def test_fill_line():
             ([" ", " ", " "],),
             (False,),
             ({},),
-            [13],
+            (13,),
             ("^<",),
             ("^",),
         )
@@ -288,7 +288,7 @@ def test_fill_line():
             ([" ", " ", " "],),
             (False,),
             ({},),
-            [11],
+            (11,),
             ("^>",),
             ("^",),
         )
@@ -304,7 +304,7 @@ def test_fill_line():
             ([" ", " ", " "],),
             (False,),
             ({},),
-            [12],
+            (12,),
             ("^>",),
             ("^",),
         )
@@ -320,7 +320,7 @@ def test_fill_line():
             ([" ", " ", " "],),
             (False,),
             ({},),
-            [11],
+            (11,),
             ("^<",),
             ("^",),
         )
@@ -336,7 +336,7 @@ def test_fill_line():
             ([" ", " ", " "],),
             (False,),
             ({},),
-            [12],
+            (12,),
             ("^<",),
             ("^",),
         )
@@ -352,7 +352,7 @@ def test_fill_line():
             ([" ", " ", " "],),
             (False,),
             ({},),
-            [11],
+            (11,),
             ("^>",),
             ("^",),
         )
@@ -368,7 +368,7 @@ def test_fill_line():
             ([" ", " ", " "],),
             (False,),
             ({},),
-            [12],
+            (12,),
             ("^>",),
             ("^",),
         )
@@ -381,25 +381,25 @@ def test_fill_line():
 
 
 def test_get_row_widths():
-    assert get_row_widths([["123"]]) == [3]
-    assert get_row_widths([["123"], ["q"]]) == [3]
-    assert get_row_widths([["123"], ["qqqq"]]) == [4]
-    assert get_row_widths([["123", "q"]]) == [3, 1]
-    assert get_row_widths([["123", "qqqq"]]) == [3, 4]
-    assert get_row_widths([["123", "qqqq"]], minimum=True) == [1, 1]
+    assert get_row_widths([["123"]]) == (3,)
+    assert get_row_widths([["123"], ["q"]]) == (3,)
+    assert get_row_widths([["123"], ["qqqq"]]) == (4,)
+    assert get_row_widths([["123", "q"]]) == (3, 1)
+    assert get_row_widths([["123", "qqqq"]]) == (3, 4)
+    assert get_row_widths([["123", "qqqq"]], minimum=True) == (1, 1)
     assert get_row_widths(
         [
             ("123", "123"),
             (Table([("111", "222"), ("333", "444")]), "123"),
         ]
-    ) == [9, 3]
+    ) == (9, 3)
     assert get_row_widths(
         [
             ("123", "123"),
             (Table([("111", "222"), ("333", "444")]), "123"),
         ],
         minimum=True,
-    ) == [5, 1]
+    ) == (5, 1)
     assert get_row_widths(
         [
             ("123", "123"),
@@ -410,7 +410,7 @@ def test_get_row_widths():
                 "123",
             ),
         ]
-    ) == [15, 3]
+    ) == (15, 3)
     assert get_row_widths(
         [
             ("123", "123"),
@@ -422,7 +422,7 @@ def test_get_row_widths():
             ),
         ],
         minimum=True,
-    ) == [9, 1]
+    ) == (9, 1)
 
 
 def test_apply_v_align():
@@ -439,7 +439,7 @@ def test_apply_border_data():
             "border_top",
             Themes.ascii_thin,
             ({"border_top": ("-", "+", "+", "-", "+")},),
-            [3],
+            (3,),
         )
         == "+--++-+-+"
     )
@@ -449,7 +449,7 @@ def test_apply_border_data():
             "border_top",
             Themes.thin_thick,
             ({"border_top": ("─", "─", "┬", "─", "─", "─", "┬", "─", "─")},),
-            [3],
+            (3,),
         )
         == "├───┬───┬───┤"
     )

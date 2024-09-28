@@ -126,7 +126,7 @@ def print_table(
                 *max_width,
                 *(max_width[-1],) * (column_count - len(max_width)),
             )
-            sum_max_width = sum(max_width) + 3 * len(max_width) + 1
+            sum_max_width = sum(max_width) + 3 * column_count + 1
             if sum_max_width < min_width:
                 raise ValueError(f"{sum_max_width} >= {min_width}")
 
@@ -189,7 +189,7 @@ def print_table(
                 symbols=symbols,
                 subtable_columns=subtable_columns,
                 border_data_list=border_data_list,
-                widths=[max_name_width],
+                widths=(max_name_width,),
                 h_align=name_h_align_t,
                 v_align=name_v_align_t,
                 theme=theme,
@@ -630,7 +630,7 @@ class Table:
         )
 
 
-def get_row_widths(table: Sequence[Sequence], minimum: bool = False) -> List[int]:
+def get_row_widths(table: Sequence[Sequence], minimum: bool = False) -> Tuple[int, ...]:
     """
     Calculates and returns a list of column widths.
     If the matrix cell is an instance of Table recursion is used
@@ -639,7 +639,7 @@ def get_row_widths(table: Sequence[Sequence], minimum: bool = False) -> List[int
     :param table: Two-dimensional matrix
     :param minimum: Forces the function to return the minimum width for each column, which is 1
     """
-    row_widths = [
+    row_widths = tuple(
         max(
             (
                 (
@@ -665,5 +665,5 @@ def get_row_widths(table: Sequence[Sequence], minimum: bool = False) -> List[int
             for cell in column
         )
         for ci, column in enumerate(zip(*table))
-    ]
+    )
     return row_widths
