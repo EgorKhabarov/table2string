@@ -72,17 +72,19 @@ def print_table(
     :param proportion_coefficient: Proportion coefficient
     :return: None
     """
-    table_: List[List[Union[str, Table, Any]]] = list(list(row) for row in table)
-    column_names_: List[Union[str, Table, Any]] = (
+    list_table: List[List[Union[str, Table, Any]]] = list(list(row) for row in table)
+    column_names_list: List[Union[str, Table, Any]] = (
         list(column_names) if column_names else []
     )
 
     # Raise errors
-    if not any(table_) or not sum(hasattr(row, "__getitem__") for row in table_):
-        raise ValueError(table_)
+    if not any(list_table) or not sum(
+        hasattr(row, "__getitem__") for row in list_table
+    ):
+        raise ValueError(list_table)
 
-    if column_names_ != [] and not (column_names_ and column_names_[0]):
-        raise ValueError(column_names_)
+    if column_names_list != [] and not (column_names_list and column_names_list[0]):
+        raise ValueError(column_names_list)
 
     if not (max_height >= 1 if max_height else True):
         raise ValueError(max_height)
@@ -96,24 +98,24 @@ def print_table(
     if not isinstance(theme, Theme):
         raise TypeError(theme)
 
-    column_count = max(map(len, table_))
+    column_count = max(map(len, list_table))
 
     # If there are column names, we write them at the beginning of the table
-    if column_names_:
-        column_names_len = len(column_names_)
+    if column_names_list:
+        column_names_len = len(column_names_list)
 
         if column_names_len > column_count:
-            column_names_ = column_names_[: column_names_len - 1]
+            column_names_list = column_names_list[: column_names_len - 1]
         else:
-            column_names_.extend((" ",) * (column_count - column_names_len))
+            column_names_list.extend((" ",) * (column_count - column_names_len))
 
-        table_.insert(0, column_names_)
+        list_table.insert(0, column_names_list)
 
-    row_widths = get_row_widths(table_)
-    min_row_widths = get_row_widths(table_, minimum=True)
+    row_widths = get_row_widths(list_table)
+    min_row_widths = get_row_widths(list_table, minimum=True)
 
     if max_width is not None and not ignore_width_errors:
-        min_width = sum(min_row_widths) + 3 * len(min_row_widths) + 1
+        min_width = sum(min_row_widths) + 3 * column_count + 1
         if isinstance(max_width, int):
             if max_width < min_width:
                 raise ValueError(f"{max_width} >= {min_width}")
@@ -197,12 +199,11 @@ def print_table(
             file=file,
         )
 
-    border_data_stack: List[Tuple[Dict[str, Tuple[str, ...]], ...]] = []
-    result_table: List[Tuple[Optional[str], ...]] = []
+    previous_border_data: Tuple[Dict[str, Tuple[str, ...]], ...] = ({"": ("",)},)
 
-    for ri, row in enumerate(table_):
+    for ri, row in enumerate(list_table):
         if ri != 0:
-            result_table.append(("", "\n"))
+            print("", file=file, end="\n")
 
         splitted_row: List[
             Tuple[List[str], List[str], bool, Dict[str, Tuple[str, ...]]]
@@ -266,17 +267,17 @@ def print_table(
 
         if (
             (sep is True or ri == 0)  # under table name
-            or (column_names_ and ri == 1)  # under column names
+            or (column_names_list and ri == 1)  # under column names
             or (
                 isinstance(sep, (range, tuple))
-                and (ri - 1 in sep if column_names_ else ri in sep)
+                and (ri - 1 in sep if column_names_list else ri in sep)
             )  # if sep allows
         ):
             if ri == 0:
                 # separator under table name
                 s = under_name_separator if name else up_noname_separator
-                ha = column_names_h_align_t if column_names_ else h_align_t
-                va = column_names_v_align_t if column_names_ else v_align_t
+                ha = column_names_h_align_t if column_names_list else h_align_t
+                va = column_names_v_align_t if column_names_list else v_align_t
             elif ri == 1:
                 # separator under column names (if theme supports)
                 s = line_separator_plus
@@ -294,43 +295,36 @@ def print_table(
                 # if possible, connect the borders from below.
                 if ri > 0:
                     s = apply_border_data(
-                        s, "border_bottom", theme, border_data_stack.pop(), max_widths
+                        s, "border_bottom", theme, previous_border_data, max_widths
                     )
-                result_table.append((s, "\n"))
+                print(s, file=file, end="\n")
         else:
             ha, va = h_align_t, v_align_t
 
-        result_table.append(
-            (
-                fill_line(
-                    rows=rows,
-                    symbols=symbols,
-                    subtable_columns=subtable_columns,
-                    border_data_list=border_data_list,
-                    widths=max_widths,
-                    h_align=ha,
-                    v_align=va,
-                    theme=theme,
-                ),
-                "",
-            )
+        line = fill_line(
+            rows=rows,
+            symbols=symbols,
+            subtable_columns=subtable_columns,
+            border_data_list=border_data_list,
+            widths=max_widths,
+            h_align=ha,
+            v_align=va,
+            theme=theme,
         )
-        border_data_stack.append(border_data_list)
+        print(line, file=file, end="")
+        previous_border_data = border_data_list
 
     if down_separator.strip():
         s = apply_border_data(
             down_separator.rstrip("\n"),
             "border_bottom",
             theme,
-            border_data_stack.pop(),
+            previous_border_data,
             max_widths,
         )
-        result_table.append(("\n" + s, end))
+        print("\n" + s, file=file, end=end)
     elif end:
-        result_table.append(("", end))
-
-    for content, end in result_table:
-        print(content, file=file, end=end)
+        print("", file=file, end=end)
 
 
 def stringify_table(
