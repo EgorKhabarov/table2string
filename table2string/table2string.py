@@ -91,7 +91,7 @@ def print_table(
         raise ValueError(max_height)
 
     if len(line_break_symbol) != 1 or not line_break_symbol.isprintable():
-        raise ValueError(f"{line_break_symbol=}")
+        raise ValueError(f"line_break_symbol={line_break_symbol!r}")
 
     if len(cell_break_symbol) != 1 or not cell_break_symbol.isprintable():
         raise ValueError(f"{cell_break_symbol=}")
