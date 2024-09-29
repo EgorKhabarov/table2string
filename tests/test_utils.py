@@ -1,4 +1,4 @@
-from table2string.table2string import Table, get_row_widths
+from table2string.table2string import Table, get_column_widths
 from table2string.themes import Themes
 from table2string.utils import (
     get_text_width_in_console,
@@ -7,7 +7,7 @@ from table2string.utils import (
     transform_align,
     transform_width,
     apply_v_align,
-    line_spliter,
+    split_text,
     fill_line,
 )
 
@@ -76,53 +76,53 @@ def test_transform_width():
     assert transform_width((3, 2), 2, (2, 2)) == (3, 2)
 
 
-def test_line_spliter():
-    assert line_spliter("", 1) == ([""], [" "], False, {})
-    assert line_spliter("1", 1) == (["1"], [" "], False, {})
-    assert line_spliter("123\n456", 1) == (
+def test_split_text():
+    assert split_text("", 1) == ([""], [" "], False, {})
+    assert split_text("1", 1) == (["1"], [" "], False, {})
+    assert split_text("123\n456", 1) == (
         ["1", "2", "3", "4", "5", "6"],
         ["↩", "↩", " ", "↩", "↩", " "],
         False,
         {},
     )
-    assert line_spliter("123\n\n456", 1) == (
+    assert split_text("123\n\n456", 1) == (
         ["1", "2", "3", "", "4", "5", "6"],
         ["↩", "↩", " ", " ", "↩", "↩", " "],
         False,
         {},
     )
-    assert line_spliter("123\n456", 2) == (
+    assert split_text("123\n456", 2) == (
         ["12", "3", "45", "6"],
         ["↩", " ", "↩", " "],
         False,
         {},
     )
-    assert line_spliter("123\n456", 3) == (["123", "456"], [" ", " "], False, {})
-    assert line_spliter("123\n\n456", 3) == (
+    assert split_text("123\n456", 3) == (["123", "456"], [" ", " "], False, {})
+    assert split_text("123\n\n456", 3) == (
         ["123", "", "456"],
         [" ", " ", " "],
         False,
         {},
     )
 
-    assert line_spliter(
+    assert split_text(
         text="123\n456\n789",
         width=3,
         height=2,
     ) == (["123", "456"], [" ", "…"], False, {})
 
-    assert line_spliter(
+    assert split_text(
         text="123\n456\n789",
         width=3,
         height=3,
     ) == (["123", "456", "789"], [" ", " ", " "], False, {})
 
-    assert line_spliter(
+    assert split_text(
         text="123\n456",
         width=3,
         height=3,
     ) == (["123", "456"], [" ", " "], False, {})
-    assert line_spliter(text="12345\n123456\n1") == (
+    assert split_text(text="12345\n123456\n1") == (
         ["12345", "123456", "1"],
         [" ", " ", " "],
         False,
@@ -380,27 +380,27 @@ def test_fill_line():
     )
 
 
-def test_get_row_widths():
-    assert get_row_widths([["123"]]) == (3,)
-    assert get_row_widths([["123"], ["q"]]) == (3,)
-    assert get_row_widths([["123"], ["qqqq"]]) == (4,)
-    assert get_row_widths([["123", "q"]]) == (3, 1)
-    assert get_row_widths([["123", "qqqq"]]) == (3, 4)
-    assert get_row_widths([["123", "qqqq"]], minimum=True) == (1, 1)
-    assert get_row_widths(
+def test_get_column_widths():
+    assert get_column_widths([["123"]]) == (3,)
+    assert get_column_widths([["123"], ["q"]]) == (3,)
+    assert get_column_widths([["123"], ["qqqq"]]) == (4,)
+    assert get_column_widths([["123", "q"]]) == (3, 1)
+    assert get_column_widths([["123", "qqqq"]]) == (3, 4)
+    assert get_column_widths([["123", "qqqq"]], minimum=True) == (1, 1)
+    assert get_column_widths(
         [
             ("123", "123"),
             (Table([("111", "222"), ("333", "444")]), "123"),
         ]
     ) == (9, 3)
-    assert get_row_widths(
+    assert get_column_widths(
         [
             ("123", "123"),
             (Table([("111", "222"), ("333", "444")]), "123"),
         ],
         minimum=True,
     ) == (5, 1)
-    assert get_row_widths(
+    assert get_column_widths(
         [
             ("123", "123"),
             (
@@ -411,7 +411,7 @@ def test_get_row_widths():
             ),
         ]
     ) == (15, 3)
-    assert get_row_widths(
+    assert get_column_widths(
         [
             ("123", "123"),
             (

@@ -5,14 +5,14 @@ from typing import Union, Tuple, Any, Sequence, List, Dict, Optional, Iterable, 
 from table2string.themes import Theme, Themes
 from table2string.aligns import HorizontalAlignment, VerticalAlignment
 from table2string.utils import (
-    line_spliter_for_sub_table,
     get_text_width_in_console,
+    split_text_for_sub_table,
     proportional_change,
     apply_border_data,
     generate_borders,
     transform_align,
     transform_width,
-    line_spliter,
+    split_text,
     fill_line,
 )
 
@@ -112,8 +112,8 @@ def print_table(
 
         list_table.insert(0, column_names_list)
 
-    row_widths = get_row_widths(list_table)
-    min_row_widths = get_row_widths(list_table, minimum=True)
+    row_widths = get_column_widths(list_table)
+    min_row_widths = get_column_widths(list_table, minimum=True)
 
     if max_width is not None:
         min_width = sum(min_row_widths) + 3 * column_count + 1
@@ -212,7 +212,7 @@ def print_table(
                 Tuple[Dict[str, Tuple[str, ...]], ...],
             ],
             zip(
-                line_spliter(
+                split_text(
                     name,
                     max_name_width,
                     max_height,
@@ -223,8 +223,8 @@ def print_table(
         )
         print(
             fill_line(
-                rows=rows,
-                symbols=symbols,
+                columns_lines=rows,
+                columns_symbols=symbols,
                 subtable_columns=subtable_columns,
                 border_data_list=border_data_list,
                 widths=(max_name_width,),
@@ -262,9 +262,9 @@ def print_table(
                     ignore_width_errors=True,
                     proportion_coefficient=proportion_coefficient,
                 )
-                column_lines = line_spliter_for_sub_table(string_sub_table, max_height)
+                column_lines = split_text_for_sub_table(string_sub_table, max_height)
             else:
-                column_lines = line_spliter(
+                column_lines = split_text(
                     str(column),
                     max_widths[ci],
                     max_height,
@@ -338,8 +338,8 @@ def print_table(
             ha, va = h_align_t, v_align_t
 
         line = fill_line(
-            rows=rows,
-            symbols=symbols,
+            columns_lines=rows,
+            columns_symbols=symbols,
             subtable_columns=subtable_columns,
             border_data_list=border_data_list,
             widths=max_widths,
@@ -661,7 +661,9 @@ class Table:
         )
 
 
-def get_row_widths(table: Sequence[Sequence], minimum: bool = False) -> Tuple[int, ...]:
+def get_column_widths(
+    table: Sequence[Sequence], minimum: bool = False
+) -> Tuple[int, ...]:
     """
     Calculates and returns a list of column widths.
     If the matrix cell is an instance of Table recursion is used
@@ -680,7 +682,7 @@ def get_row_widths(table: Sequence[Sequence], minimum: bool = False) -> Tuple[in
                         sum(subtable_row_widths) + 3 * len(subtable_row_widths) + 1
                     )
                     - 4
-                )(get_row_widths(cell.table, minimum=minimum))
+                )(get_column_widths(cell.table, minimum=minimum))
                 if isinstance(cell, Table)
                 else (
                     1

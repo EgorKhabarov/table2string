@@ -268,7 +268,7 @@ def transform_width(
     return max_widths
 
 
-def line_spliter(
+def split_text(
     text: str,
     width: Optional[int] = None,
     height: Optional[int] = None,
@@ -320,7 +320,7 @@ def line_spliter(
     return result_lines, result_symbol, False, {}
 
 
-def line_spliter_for_sub_table(
+def split_text_for_sub_table(
     string_sub_table: str, max_height: Optional[int]
 ) -> Tuple[List[str], List[str], bool, Dict[str, Tuple[str, ...]]]:
     sub_table_lines = string_sub_table.splitlines()
@@ -343,8 +343,8 @@ def line_spliter_for_sub_table(
 
 
 def fill_line(
-    rows: Tuple[List[str], ...],
-    symbols: Tuple[List[str], ...],
+    columns_lines: Tuple[List[str], ...],
+    columns_symbols: Tuple[List[str], ...],
     subtable_columns: Tuple[bool, ...],
     border_data_list: Tuple[Dict[str, Tuple[str, ...]], ...],
     widths: Tuple[int, ...],
@@ -355,34 +355,39 @@ def fill_line(
     """
     Fills the line
 
-    :param rows: List of rows
-    :param symbols: Line break or line ending characters
+    :param columns_lines: Tuple of a list of lines
+    :param columns_symbols: Line break or line ending characters
     :param subtable_columns: A list indicating whether the column should be formatted as subtable
-    :param border_data_list: Tuple of dictionaries to join boundaries
+    :param border_data_list: Tuple of dictionaries for joining boundaries
     :param widths: List of widths
     :param h_align: Tuple of horizontal alignments
     :param v_align: Tuple of vertical alignments
     :param theme: Theme
     :return: Filled line
     """
-    border = theme.border
-
     h_align_left, h_align_right = [], []
+
     for a in h_align:
         al, ar = [*a * 2] if len(a) == 1 else [*a]
         h_align_left.append(al)
         h_align_right.append(ar)
 
     # Make each element the same width according to the maximum element
-    for n, row in enumerate(rows):
-        if h_align_left[n] == "^" and h_align_right[n] in ("<", ">") and len(row) > 1:
-            max_width = len(max(row, key=len))
-            row[:] = [f"{r:{h_align_right[n]}{max_width}}" for _n, r in enumerate(row)]
+    for n, raw_lines in enumerate(columns_lines):
+        if (
+            h_align_left[n] == "^"
+            and h_align_right[n] in ("<", ">")
+            and len(raw_lines) > 1
+        ):
+            max_width = len(max(raw_lines, key=len))
+            raw_lines[:] = [
+                f"{r:{h_align_right[n]}{max_width}}" for _n, r in enumerate(raw_lines)
+            ]
             h_align_right[n] = "^"
 
         if h_align_left[n] == "*" or h_align_right[n] == "*":
             try:
-                float("\n".join(row))
+                float("\n".join(raw_lines))
                 h_align_left[n] = ">"
                 h_align_right[n] = ">"
             except ValueError:
@@ -390,30 +395,31 @@ def fill_line(
                 h_align_right[n] = "<"
 
         if not subtable_columns[n]:
-            row[:] = apply_v_align(row, v_align[n])
+            raw_lines[:] = apply_v_align(raw_lines, v_align[n])
 
-    lines = []
-    symbol = list(zip(*symbols))
-    vertical = border.vertical
+    result_lines: List[str] = []
+    symbols: List[Tuple[str]] = list(zip(*columns_symbols))
+    vertical = theme.border.vertical
     tags = [False for _ in subtable_columns]
-    line: Tuple[str, ...]
+    lines: Tuple[str, ...]
 
-    for ri, line in enumerate(zip(*rows)):  # ri - row index
+    for ci, lines in enumerate(zip(*columns_lines)):  # ci - column index
+        # Selects alignment individually for each column and each row
         current_h_align: List[str] = []
-        for ci, column in enumerate(line):
-            if tags[ci]:
-                current_h_align.append(h_align_right[ci])
+        for ri, line in enumerate(lines):
+            if tags[ri]:
+                current_h_align.append(h_align_right[ri])
             else:
-                current_h_align.append(h_align_left[ci])
-            if not column.isspace():
-                tags[ci] = True
+                current_h_align.append(h_align_left[ri])
+            if not line.isspace():
+                tags[ri] = True
 
-        template_list = []
-        row_length = len(line)
-        for ci in range(row_length):  # ci - column index
-            if subtable_columns[ci]:
-                border_data: Dict[str, Tuple[str, ...]] = border_data_list[ci]
-                if ci == 0:
+        template_list: List[str] = []
+        row_length = len(lines)
+        for ri, line in enumerate(lines):  # ri - row index
+            if subtable_columns[ri]:
+                border_data: Dict[str, Tuple[str, ...]] = border_data_list[ri]
+                if ri == 0:
                     template_list.append(
                         translate_theme_border(
                             "border_left",
@@ -422,7 +428,7 @@ def fill_line(
                             border_data["border_left"][0],
                         )
                     )
-                elif ci == row_length - 1:
+                elif ri == row_length - 1:
                     template_list[-1] = translate_theme_border(
                         "border_right",
                         theme,
@@ -431,8 +437,8 @@ def fill_line(
                     )
 
                 try:
-                    border_left_ri = border_data["border_left"][ri]
-                    border_right_ri = border_data["border_right"][ri]
+                    border_left_ri = border_data["border_left"][ci]
+                    border_right_ri = border_data["border_right"][ci]
                 except IndexError:
                     border_left_ri = " "
                     border_right_ri = " "
@@ -448,61 +454,59 @@ def fill_line(
                         or template_list[-1]
                     )
 
-                template_list.append(f"{{:<{widths[ci] + 2}}}")
+                template_list.append(f"{{:<{widths[ri] + 2}}}")
 
                 border_right = translate_theme_border(
                     "border_right", theme, vertical, border_right_ri
                 )
                 template_list.append(border_right)
             else:
-                if ci == 0:
+                if ri == 0:
                     template_list.append(vertical)
 
-                width = widths[ci] - (
-                    get_text_width_in_console(line[ci]) - len(line[ci])
-                )
+                width = widths[ri] - (get_text_width_in_console(line) - len(line))
                 template_list.append(
-                    f" {{:{current_h_align[ci]}{width}}}{symbol[ri][ci]}"
+                    f" {{:{current_h_align[ri]}{width}}}{symbols[ci][ri]}"
                 )
                 template_list.append(vertical)
 
-        template = "".join(template_list)
-        lines.append(template.format(*line))
+        template: str = "".join(template_list)
+        result_lines.append(template.format(*lines))
 
-    return "\n".join(lines)
+    return "\n".join(result_lines)
 
 
-def apply_v_align(cell: List[str], v_align: str) -> List[str]:
+def apply_v_align(cell_rows: List[str], v_align: str) -> List[str]:
     """
     Apply v_align
 
-    :param cell: List of strings in a cell
+    :param cell_rows: List of strings in a cell
     :param v_align: Vertical alignment
     :return: Applied vertical alignments
     """
-    rows_count = len(cell)
+    rows_count = len(cell_rows)
 
     if v_align == "_":
-        while cell[-1].isspace():
-            cell.insert(0, cell.pop())
+        while cell_rows[-1].isspace():
+            cell_rows.insert(0, cell_rows.pop())
 
     elif v_align == "-" and rows_count > 1:
-        while cell[0].isspace():
-            cell.pop(0)
-        while cell[-1].isspace():
-            cell.pop()
+        while cell_rows and cell_rows[0].isspace():
+            cell_rows.pop(0)
+        while cell_rows and cell_rows[-1].isspace():
+            cell_rows.pop()
 
-        not_empty_rows_count = len(cell)
+        not_empty_rows_count = len(cell_rows)
         difference = rows_count - not_empty_rows_count
         top = difference // 2
         bottom = difference - top
 
         for _ in range(top):
-            cell.insert(0, " ")
+            cell_rows.insert(0, " ")
         for _ in range(bottom):
-            cell.append(" ")
+            cell_rows.append(" ")
 
-    return [s if s else " " for s in cell]
+    return [s if s else " " for s in cell_rows]
 
 
 def apply_border_data(
