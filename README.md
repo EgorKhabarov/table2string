@@ -44,15 +44,17 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 
 ```pycon
 >>> from table2string import Table, Themes, HorizontalAlignment, VerticalAlignment
->>> Table([("1", "2", "3"), ("qwe", "rty\nuio", "")], name="Table Name").print()
-+---------------+
-|  Table Name   |
-+-----+-----+---+
-|   1 |   2 | 3 |
-+-----+-----+---+
-| qwe | rty |   |
-|     | uio |   |
-+-----+-----+---+
+>>> Table([("1", "2", "3"), ("qwe", "rty\nuio", "")], name="Table Name", column_names=("c1", "c2", "c3")).print()
++----------------+
+|   Table Name   |
++-----+-----+----+
+| c1  | c2  | c3 |
++-----+-----+----+
+|   1 |   2 |  3 |
++-----+-----+----+
+| qwe | rty |    |
+|     | uio |    |
++-----+-----+----+
 >>> from io import StringIO
 >>> Table.from_csv(StringIO('c1,c2,c3\n1,2,3\nqwe,"rty\nuio",'), name="Table Name").print()
 +----------------+
@@ -65,15 +67,6 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 | qwe | rty |    |
 |     | uio |    |
 +-----+-----+----+
->>> Table.from_csv(StringIO('c1,c2,c3\n1,2,3\nqwe,"rty\nuio",'), name="Table Name", column_names=False).print()
-+---------------+
-|  Table Name   |
-+-----+-----+---+
-|   1 |   2 | 3 |
-+-----+-----+---+
-| qwe | rty |   |
-|     | uio |   |
-+-----+-----+---+
 >>> import sqlite3
 >>> cursor = sqlite3.connect(":memory:").cursor().execute(
 ...     "CREATE TABLE data (c1 TEXT, c2 TEXT, c3 TEXT);"
@@ -83,17 +76,8 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 ... ).execute(
 ...     "SELECT c1, c2, c3 FROM data;"
 ... )
->>> Table.from_db_cursor(cursor, name="Table Name").print()
-+---------------+
-|  Table Name   |
-+-----+-----+---+
-|   1 |   2 | 3 |
-+-----+-----+---+
-| qwe | rty |   |
-|     | uio |   |
-+-----+-----+---+
 >>> Table.from_db_cursor(
-...     cursor.execute("SELECT c1, c2, c3 FROM data;"),
+...     cursor,
 ...     name="Table Name",
 ...     column_names=True,
 ... ).print()
@@ -107,16 +91,124 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 | qwe | rty |    |
 |     | uio |    |
 +-----+-----+----+
->>> Table([("c1", Table([("1", "2"), ("3", "4")]),)], name="Table Name").print(v_align=("-",))
-+------------+
-| Table Name |
-+----+---+---+
-|    | 1 | 2 |
-| c1 +---+---+
-|    | 3 | 4 |
-+----+---+---+
+>>> Table(
+...     [("c1", Table([("1", "2"), ("3", "4")], name="SubTable"))],
+...     name="Table Name",
+... ).print(v_align=("-",), max_width=(2, 8))
++---------------+
+|  Table Name   |
++----+----------+
+|    | SubTable |
+|    +-----+----+
+| c1 |   1 |  2 |
+|    +-----+----+
+|    |   3 |  4 |
++----+-----+----+
 
 ```
+
+## Arguments
+
+| Argument                 | Type                                                                               | Example                         | Description                                                                                                                                                 |
+|:-------------------------|:-----------------------------------------------------------------------------------|:--------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `table`                  | `Sequence[Sequence[Any]]`                                                          | `[("1", "2"), ("3", "4")]`      | A two-dimensional matrix                                                                                                                                    |
+| `h_align`                | `tuple[HorizontalAlignment &#x7c; str, ...] &#x7c; HorizontalAlignment &#x7c; str` | `HorizontalAlignment.CENTER`    | Allows you to align text in a cell horizontally                                                                                                             |
+| `v_align`                | `tuple[VerticalAlignment &#x7c; str, ...] &#x7c; VerticalAlignment &#x7c; str`     | `VerticalAlignment.MIDDLE`      | Allows you to align text in a cell vertically                                                                                                               |
+| `name`                   | `str &#x7c; None`                                                                  | `"Table Name"`                  | Table name                                                                                                                                                  |
+| `name_h_align`           | `HorizontalAlignment &#x7c; str`                                                   | `HorizontalAlignment.CENTER`    | Allows you to align table name horizontally                                                                                                                 |
+| `name_v_align`           | `VerticalAlignment &#x7c; str`                                                     | `VerticalAlignment.MIDDLE`      | Allows you to align table name vertically                                                                                                                   |
+| `column_names`           | `Sequence[str] &#x7c; None`                                                        | `("c1", "c2", ...column_count)` | Sets the names for the table columns                                                                                                                        |
+| `column_names_h_align`   | `tuple[HorizontalAlignment &#x7c; str, ...] &#x7c; HorizontalAlignment &#x7c; str` | `HorizontalAlignment.CENTER`    | Allows you to align column names horizontally                                                                                                               |
+| `column_names_v_align`   | `tuple[VerticalAlignment &#x7c; str, ...] &#x7c; VerticalAlignment &#x7c; str`     | `VerticalAlignment.MIDDLE`      | Allows you to align column names vertically                                                                                                                 |
+| `max_width`              | `int &#x7c; Tuple[int, ...] &#x7c; None`                                           | `120`                           | Allows you to set the width of the entire table or individually for each column                                                                             |
+| `max_height`             | `int &#x7c; None`                                                                  | `10`                            | Specifies the maximum height for rows                                                                                                                       |
+| `maximize_height`        | `bool`                                                                             | `True`                          | Force height to be taken from max_height                                                                                                                    |
+| `line_break_symbol`      | `str`                                                                              | `"\"`                           | Line break symbol                                                                                                                                           |
+| `cell_break_symbol`      | `str`                                                                              | `"…"`                           | Symbol indicating the end of text when there is not enough height                                                                                           |
+| `sep`                    | `bool &#x7c; range &#x7c; tuple`                                                   | `(1, 3, 6)`                     | Handles the separators between table rows and can be either a boolean type or possess a `__contains__` method                                               |
+| `end`                    | `str &#x7c; None`                                                                  | `"\n"`                          | Behaves the same as `print(end=)`                                                                                                                           |
+| `file`                   | `TextIOWrapper &#x7c; None`                                                        | `sys.stdout` or `io.StringIO()` | Behaves the same as `print(file=)`                                                                                                                          |
+| `theme`                  | `Theme`                                                                            | `Themes.rounded_thick`          | Allows you to set a specific theme for the table. For example, the border style                                                                             |
+| `ignore_width_errors`    | `bool`                                                                             | `False`                         | Will fix errors in max_width if they exist                                                                                                                  |
+| `proportion_coefficient` | `float`                                                                            | `0.5`                           | Affects the width distribution of the columns. A value of `0.0` corresponds to proportional distribution, `1.0` averages the values, and `2.0` inverts them |
+
+
+## Text alignment
+
+| Align                                     | Example           | Description                                                                                                                    |
+|:------------------------------------------|:------------------|:-------------------------------------------------------------------------------------------------------------------------------|
+| `"<align>"` or `("<align>",)`             | `"^"` or `("^",)` | Setting `align` (`"^"`) for all columns                                                                                        |
+| `("<align_1>", "<align_2>")`              | `("^", "<")`      | Setting `align_1` (`"^"`) for the first column and `align_2` (`"<"`) for all other columns                                     |
+| `("<align_1>", "<align_2>", "<align_3>")` | `("^", "<", ">")` | Setting `align_1` (`"^"`) for the first column and `align_2` (`"<"`) for the second and `align_3` (`">"`) for the third column |
+
+You can also use the corresponding `HorizontalAlignment` or `VerticalAlignment` type
+
+For `name_h_align` and `name_v_align` only the `str` type or the corresponding `HorizontalAlignment` or `VerticalAlignment` type is valid
+
+### HorizontalAlignment
+
+| Align                                      | Description                                                                                                                                          |
+|:-------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `AUTO` or `AUTO_AUTO` or `*` or `**`       | Alignment depends on the type. If this is a number and there are no line breaks in this cell, then align to the right; otherwise, align to the left. |
+| `LEFT` or `LEFT_LEFT` or `<` or `<<`       | All lines are left aligned                                                                                                                           |
+| `CENTER` or `CENTER_CENTER` or `^` or `^^` | All lines are center aligned                                                                                                                         |
+| `RIGHT` or `RIGHT_RIGHT` or `>` or `>>`    | All lines are right aligned                                                                                                                          |
+| `LEFT_CENTER` or `<^`                      | The first line is left aligned and the remaining lines are centered                                                                                  |
+| `LEFT_RIGHT` or `<>`                       | The first line is left aligned and the remaining lines are right aligned                                                                             |
+| `CENTER_LEFT` or `^<`                      | The first line is aligned to the center, and the remaining lines are aligned to the left of the first line.                                          |
+| `CENTER_RIGHT` or `^>`                     | The first line is aligned to the center, and the remaining lines are aligned to the right of the first line.                                         |
+| `RIGHT_LEFT` or `><`                       | The first line is right aligned and the remaining lines are left aligned                                                                             |
+| `RIGHT_CENTER` or `>^`                     | The first line is right aligned and the remaining lines are centered                                                                                 |
+
+### VerticalAlignment
+
+| Align           | Description             |
+|:----------------|:------------------------|
+| `TOP` or `^`    | Text are top aligned    |
+| `MIDDLE` or `-` | Text are centered       |
+| `BOTTOM` or `_` | Text are bottom aligned |
+
+
+<details>
+<summary>Example</summary>
+
+```pycon
+>>> from functools import partial
+>>> sub_table_auto_func = partial(Table, [("123", "text",)], max_height=4, maximize_height=True)
+>>> sub_table_func = partial(Table, [("first line\ntext",)], max_height=4, maximize_height=True)
+>>> Table(
+...     [
+...         *(
+...             [v_align, sub_table_auto_func(h_align="*", v_align=v_align)] + [
+...                 sub_table_func(h_align=h_align, v_align=v_align)
+...                 for h_align in ("<", ">", "^", "^<", "^>")
+...             ]
+...             for v_align in ("^", "-", "_")
+...         )
+...     ],
+...     column_names=(" ", "*", "<", ">", "^", "^<", "^>"),
+... ).print(max_width=(1, len("first line")+4), v_align=("-",))
++---+----------------+----------------+----------------+----------------+----------------+----------------+
+|   |       *        |       <        |       >        |       ^        |       ^<       |       ^>       |
++---+-------+--------+----------------+----------------+----------------+----------------+----------------+
+|   |   123 | text   | first line     |     first line |   first line   |   first line   |   first line   |
+| ^ |       |        | text           |           text |      text      |   text         |         text   |
+|   |       |        |                |                |                |                |                |
+|   |       |        |                |                |                |                |                |
++---+-------+--------+----------------+----------------+----------------+----------------+----------------+
+|   |       |        |                |                |                |                |                |
+| - |   123 | text   | first line     |     first line |   first line   |   first line   |   first line   |
+|   |       |        | text           |           text |      text      |   text         |         text   |
+|   |       |        |                |                |                |                |                |
++---+-------+--------+----------------+----------------+----------------+----------------+----------------+
+|   |       |        |                |                |                |                |                |
+| _ |       |        |                |                |                |                |                |
+|   |       |        | first line     |     first line |   first line   |   first line   |   first line   |
+|   |   123 | text   | text           |           text |      text      |   text         |         text   |
++---+-------+--------+----------------+----------------+----------------+----------------+----------------+
+
+```
+</details>
 
 ## Custom width and height settings
 
@@ -141,18 +233,18 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 +------------+------------+------------+
 |          1 |      12345 | example    |
 +------------+------------+------------+
->>> Table([(1, 12345, "example")]).print(max_width=(1, 5, 6))
-+---+-------+--------+
-| 1 | 12345 | exampl↩|
-|   |       | e      |
-+---+-------+--------+
+>>> Table([(1, 12345, "example")]).print(max_width=(1, 8, 6))
++---+----------+--------+
+| 1 |    12345 | exampl\|
+|   |          | e      |
++---+----------+--------+
 >>> Table([(1, 12345, "example")]).print(max_width=(1, 5, 7))
 +---+-------+---------+
 | 1 | 12345 | example |
 +---+-------+---------+
 >>> Table([("123456\n\n789000", "example")]).print(max_width=(3, 4), max_height=4)
 +-----+------+
-| 123↩| exam↩|
+| 123\| exam\|
 | 456 | ple  |
 |     |      |
 | 789…|      |
@@ -178,258 +270,11 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 ...     maximize_height=True,
 ... )
 +-----+
-| 123↩|
-| 456↩|
+| 123\|
+| 456\|
 | 789 |
 |     |
 +-----+
-
-```
-</details>
-
-## Text alignment
-
-| Align                                     | Example           | Description                                                                                                                    |
-|:------------------------------------------|:------------------|:-------------------------------------------------------------------------------------------------------------------------------|
-| `"<align>"` or `("<align>",)`             | `"^"` or `("^",)` | Setting `align` (`"^"`) for all columns                                                                                        |
-| `("<align_1>", "<align_2>")`              | `("^", "<")`      | Setting `align_1` (`"^"`) for the first column and `align_2` (`"<"`) for all other columns                                     |
-| `("<align_1>", "<align_2>", "<align_3>")` | `("^", "<", ">")` | Setting `align_1` (`"^"`) for the first column and `align_2` (`"<"`) for the second and `align_3` (`">"`) for the third column |
-
-### HorizontalAlignment
-
-| Align                                      | Description                                                                                                                                          |
-|:-------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| `AUTO` or `AUTO_AUTO` or `*` or `**`       | Alignment depends on the type. If this is a number and there are no line breaks in this cell, then align to the right; otherwise, align to the left. |
-| `LEFT` or `LEFT_LEFT` or `<` or `<<`       | All lines are left aligned                                                                                                                           |
-| `CENTER` or `CENTER_CENTER` or `^` or `^^` | All lines are center aligned                                                                                                                         |
-| `RIGHT` or `RIGHT_RIGHT` or `>` or `>>`    | All lines are right aligned                                                                                                                          |
-| `LEFT_CENTER` or `<^`                      | The first line is left aligned and the remaining lines are centered                                                                                  |
-| `LEFT_RIGHT` or `<>`                       | The first line is left aligned and the remaining lines are right aligned                                                                             |
-| `CENTER_LEFT` or `^<`                      | The first line is aligned to the center, and the remaining lines are aligned to the left of the first line.                                          |
-| `CENTER_RIGHT` or `^>`                     | The first line is aligned to the center, and the remaining lines are aligned to the right of the first line.                                         |
-| `RIGHT_LEFT` or `><`                       | The first line is right aligned and the remaining lines are left aligned                                                                             |
-| `RIGHT_CENTER` or `>^`                     | The first line is right aligned and the remaining lines are centered                                                                                 |
-
-### VerticalAlignment
-
-| Align           | Description             |
-|:----------------|:------------------------|
-| `TOP` or `^`    | Text are top aligned    |
-| `CENTER` or `-` | Text are centered       |
-| `BOTTOM` or `_` | Text are bottom aligned |
-
-
-<details>
-<summary>Example</summary>
-
-```pycon
->>> table_1 = Table(
-...     [("1", "123456789\nqwerty\nasdfghjklzxcvb")],
-...     name="Table Name\nName\nNaaaaame",
-...     column_names=("1", "col 2\nc2"),
-... )
->>> # h_align="*", name_h_align="*", column_names_h_align="*"
->>> # h_align=HorizontalAlignment.AUTO, name_h_align=HorizontalAlignment.CENTER, column_names_h_align=HorizontalAlignment.CENTER
->>> table_1.print(max_width=(5, 15))
-+-------------------------+
-|       Table Name        |
-|          Name           |
-|        Naaaaame         |
-+-------+-----------------+
-|   1   |      col 2      |
-|       |       c2        |
-+-------+-----------------+
-|     1 | 123456789       |
-|       | qwerty          |
-|       | asdfghjklzxcvb  |
-+-------+-----------------+
->>> # h_align="*", name_h_align="*", column_names_h_align="*"
->>> # h_align="**", name_h_align="**", column_names_h_align="**"
->>> table_1.print(
-...     max_width=(5, 15),
-...     h_align=HorizontalAlignment.AUTO,
-...     name_h_align=HorizontalAlignment.AUTO,
-...     column_names_h_align=HorizontalAlignment.AUTO,
-... )
-+-------------------------+
-| Table Name              |
-| Name                    |
-| Naaaaame                |
-+-------+-----------------+
-|     1 | col 2           |
-|       | c2              |
-+-------+-----------------+
-|     1 | 123456789       |
-|       | qwerty          |
-|       | asdfghjklzxcvb  |
-+-------+-----------------+
->>> # h_align="<", name_h_align="<", column_names_h_align="<"
->>> # h_align="<<", name_h_align="<<", column_names_h_align="<<"
->>> table_1.print(
-...     max_width=(5, 15),
-...     h_align=HorizontalAlignment.LEFT,
-...     name_h_align=HorizontalAlignment.LEFT,
-...     column_names_h_align=HorizontalAlignment.LEFT,
-... )
-+-------------------------+
-| Table Name              |
-| Name                    |
-| Naaaaame                |
-+-------+-----------------+
-| 1     | col 2           |
-|       | c2              |
-+-------+-----------------+
-| 1     | 123456789       |
-|       | qwerty          |
-|       | asdfghjklzxcvb  |
-+-------+-----------------+
->>> # h_align=">", name_h_align=">", column_names_h_align=">"
->>> # h_align=">>", name_h_align=">>", column_names_h_align=">>"
->>> table_1.print(
-...     max_width=(5, 15),
-...     h_align=HorizontalAlignment.RIGHT,
-...     name_h_align=HorizontalAlignment.RIGHT,
-...     column_names_h_align=HorizontalAlignment.RIGHT,
-... )
-+-------------------------+
-|              Table Name |
-|                    Name |
-|                Naaaaame |
-+-------+-----------------+
-|     1 |           col 2 |
-|       |              c2 |
-+-------+-----------------+
-|     1 |       123456789 |
-|       |          qwerty |
-|       |  asdfghjklzxcvb |
-+-------+-----------------+
->>> # h_align="^", name_h_align="^", column_names_h_align="^"
->>> # h_align="^^", name_h_align="^^", column_names_h_align="^^"
->>> table_1.print(
-...     max_width=(5, 15),
-...     h_align=HorizontalAlignment.CENTER,
-...     name_h_align=HorizontalAlignment.CENTER,
-...     column_names_h_align=HorizontalAlignment.CENTER,
-... )
-+-------------------------+
-|       Table Name        |
-|          Name           |
-|        Naaaaame         |
-+-------+-----------------+
-|   1   |      col 2      |
-|       |       c2        |
-+-------+-----------------+
-|   1   |    123456789    |
-|       |     qwerty      |
-|       | asdfghjklzxcvb  |
-+-------+-----------------+
->>> # h_align="^<", name_h_align="^<", column_names_h_align="^<"
->>> table_1.print(
-...     max_width=(5, 15),
-...     h_align=HorizontalAlignment.CENTER_LEFT,
-...     name_h_align=HorizontalAlignment.CENTER_LEFT,
-...     column_names_h_align=HorizontalAlignment.CENTER_LEFT,
-... )
-+-------------------------+
-|       Table Name        |
-|       Name              |
-|       Naaaaame          |
-+-------+-----------------+
-|   1   |      col 2      |
-|       |      c2         |
-+-------+-----------------+
-|   1   | 123456789       |
-|       | qwerty          |
-|       | asdfghjklzxcvb  |
-+-------+-----------------+
->>> # h_align="^>", name_h_align="^>", column_names_h_align="^>"
->>> table_1.print(
-...     max_width=(5, 15),
-...     h_align=HorizontalAlignment.CENTER_RIGHT,
-...     name_h_align=HorizontalAlignment.CENTER_RIGHT,
-...     column_names_h_align=HorizontalAlignment.CENTER_RIGHT,
-... )
-+-------------------------+
-|       Table Name        |
-|             Name        |
-|         Naaaaame        |
-+-------+-----------------+
-|   1   |      col 2      |
-|       |         c2      |
-+-------+-----------------+
-|   1   |      123456789  |
-|       |         qwerty  |
-|       | asdfghjklzxcvb  |
-+-------+-----------------+
->>> table_1.print(
-...     max_width=(5, 20),
-...     max_height=5,
-...     maximize_height=True,
-...     h_align=HorizontalAlignment.CENTER,
-...     name_h_align=HorizontalAlignment.CENTER,
-...     column_names_h_align=HorizontalAlignment.CENTER,
-...     v_align=VerticalAlignment.CENTER,
-...     name_v_align=VerticalAlignment.CENTER,
-...     column_names_v_align=VerticalAlignment.CENTER,
-... )
-+------------------------------+
-|          Table Name          |
-|             Name             |
-|           Naaaaame           |
-+-------+----------------------+
-|       |                      |
-|       |        col 2         |
-|   1   |          c2          |
-|       |                      |
-|       |                      |
-+-------+----------------------+
-|       |                      |
-|       |      123456789       |
-|   1   |        qwerty        |
-|       |    asdfghjklzxcvb    |
-|       |                      |
-+-------+----------------------+
->>> table_1.print(
-...     max_width=(5, 20),
-...     max_height=5,
-...     maximize_height=True,
-...     h_align=HorizontalAlignment.RIGHT,
-...     name_h_align=HorizontalAlignment.RIGHT,
-...     column_names_h_align=HorizontalAlignment.RIGHT,
-...     v_align=VerticalAlignment.BOTTOM,
-...     name_v_align=VerticalAlignment.BOTTOM,
-...     column_names_v_align=VerticalAlignment.TOP,
-... )
-+------------------------------+
-|                   Table Name |
-|                         Name |
-|                     Naaaaame |
-+-------+----------------------+
-|     1 |                col 2 |
-|       |                   c2 |
-|       |                      |
-|       |                      |
-|       |                      |
-+-------+----------------------+
-|       |                      |
-|       |                      |
-|       |            123456789 |
-|       |               qwerty |
-|     1 |       asdfghjklzxcvb |
-+-------+----------------------+
->>> table_2 = Table([("qwerty\n123456789\nasdfghjklzxcvb",)])
->>> table_2.print(max_width=(18,), h_align="^<")
-+--------------------+
-|   qwerty           |
-|   123456789        |
-|   asdfghjklzxcvb   |
-+--------------------+
->>> table_2.print(max_width=(18,), h_align="^>")
-+--------------------+
-|           qwerty   |
-|        123456789   |
-|   asdfghjklzxcvb   |
-+--------------------+
 
 ```
 </details>
@@ -458,7 +303,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 | qwe | rty  |
 |     | uio  |
 +-----+------+
-| 123↩| exam↩|
+| 123\| exam\|
 | 456 | ple  |
 |     |      |
 | 789…|      |
@@ -467,7 +312,7 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 +-----+------+
 | qwe | rty  |
 |     | uio  |
-| 123↩| exam↩|
+| 123\| exam\|
 | 456 | ple  |
 |     |      |
 | 789…|      |
@@ -550,7 +395,9 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 ```
 </details>
 
-## Borders
+## Themes
+
+### Borders
 
 <details>
 <summary>Border types</summary>
@@ -1493,19 +1340,18 @@ t.print(h_align="^", sep=(1,))
 <summary>Example</summary>
 
 ```pycon
->>> table = Table(
+>>> Table(
 ...     [
 ...         ("1",),
 ...         (Table([("2", "3")]),),
 ...     ]
-... )
->>> table.print()
+... ).print()
 +-------+
 |     1 |
 +---+---+
 | 2 | 3 |
 +---+---+
->>> table1 = Table([(
+>>> Table([(
 ...     Table([(
 ...         Table([(
 ...             Table([(
@@ -1524,56 +1370,13 @@ t.print(h_align="^", sep=(1,))
 ...             )]),
 ...         )]),
 ...     )]),
-... )])
->>> table1.print()
+... )]).print()
 +-------+
 |     1 |
 +---+---+
 | 2 | 3 |
 +---+---+
->>> table2 = Table([(
-...     Table([(
-...         Table([(
-...             Table([(
-...                 Table([(
-...                     Table([(
-...                         Table([(
-...                             Table(
-...                                 [
-...                                     ("1",),
-...                                     (Table([("2", "3")]).stringify(),),
-...                                 ]
-...                             ).stringify(),
-...                         )]).stringify(),
-...                     )]).stringify(),
-...                 )]).stringify(),
-...             )]).stringify(),
-...         )]).stringify(),
-...     )]).stringify(),
-... )])
->>> table2.print()
-+---------------------------------------+
-| +-----------------------------------+ |
-| | +-------------------------------+ | |
-| | | +---------------------------+ | | |
-| | | | +-----------------------+ | | | |
-| | | | | +-------------------+ | | | | |
-| | | | | | +---------------+ | | | | | |
-| | | | | | | +-----------+ | | | | | | |
-| | | | | | | |         1 | | | | | | | |
-| | | | | | | +-----------+ | | | | | | |
-| | | | | | | | +---+---+ | | | | | | | |
-| | | | | | | | | 2 | 3 | | | | | | | | |
-| | | | | | | | +---+---+ | | | | | | | |
-| | | | | | | +-----------+ | | | | | | |
-| | | | | | +---------------+ | | | | | |
-| | | | | +-------------------+ | | | | |
-| | | | +-----------------------+ | | | |
-| | | +---------------------------+ | | |
-| | +-------------------------------+ | |
-| +-----------------------------------+ |
-+---------------------------------------+
->>> table3 = Table(
+>>> Table(
 ...     [
 ...         (
 ...             "123",
@@ -1585,8 +1388,7 @@ t.print(h_align="^", sep=(1,))
 ...             ),
 ...         ),
 ...     ]
-... )
->>> table3.print()
+... ).print()
 +-----+-----------+
 | 123 |       456 |
 |     +-----+-----+

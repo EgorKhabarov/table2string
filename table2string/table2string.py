@@ -1,18 +1,19 @@
 import csv
 from io import TextIOWrapper, StringIO
-from typing import Union, Tuple, Any, Sequence, List, Dict, Optional, cast
+from typing import Union, Tuple, Any, Sequence, List, Dict, Optional, Iterable, cast
 
 from table2string.themes import Theme, Themes
 from table2string.aligns import HorizontalAlignment, VerticalAlignment
 from table2string.utils import (
-    line_spliter_for_sub_table,
     get_text_width_in_console,
+    split_text_for_sub_table,
+    proportional_change,
     apply_border_data,
     generate_borders,
     transform_align,
     transform_width,
     max_min_widths,
-    line_spliter,
+    split_text,
     fill_line,
 )
 
@@ -28,19 +29,19 @@ def print_table(
     ] = VerticalAlignment.TOP,
     name: Optional[str] = None,
     name_h_align: Union[HorizontalAlignment, str] = HorizontalAlignment.CENTER,
-    name_v_align: Union[VerticalAlignment, str] = VerticalAlignment.CENTER,
+    name_v_align: Union[VerticalAlignment, str] = VerticalAlignment.MIDDLE,
     column_names: Optional[Sequence[str]] = None,
     column_names_h_align: Union[
         Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]
     ] = HorizontalAlignment.CENTER,
     column_names_v_align: Union[
         Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
-    ] = VerticalAlignment.CENTER,
+    ] = VerticalAlignment.MIDDLE,
     max_width: Union[int, Tuple[int, ...], None] = None,
     min_width: Union[int, Tuple[int, ...], None] = None,
     max_height: Optional[int] = None,
     maximize_height: bool = False,
-    line_break_symbol: str = "↩",
+    line_break_symbol: str = "\\",
     cell_break_symbol: str = "…",
     sep: Union[bool, range, tuple] = True,
     end: Optional[str] = "\n",
@@ -75,26 +76,28 @@ def print_table(
     :param proportion_coefficient: Proportion coefficient
     :return: None
     """
-    table_: List[List[Union[str, Table, Any]]] = list(list(row) for row in table)
-    column_names_: List[Union[str, Table, Any]] = (
+    list_table: List[List[Union[str, Table, Any]]] = list(list(row) for row in table)
+    column_names_list: List[Union[str, Table, Any]] = (
         list(column_names) if column_names else []
     )
 
     # Raise errors
-    if not any(table_) or not sum(hasattr(row, "__getitem__") for row in table_):
-        raise ValueError(table_)
+    if not any(list_table) or not sum(
+        hasattr(row, "__getitem__") for row in list_table
+    ):
+        raise ValueError(list_table)
 
-    if column_names_ != [] and not (column_names_ and column_names_[0]):
-        raise ValueError(column_names_)
+    if column_names_list != [] and not (column_names_list and column_names_list[0]):
+        raise ValueError(column_names_list)
 
     if not (max_height >= 1 if max_height else True):
         raise ValueError(max_height)
 
-    if len(line_break_symbol) != 1:
-        raise ValueError(line_break_symbol)
+    if len(line_break_symbol) != 1 or not line_break_symbol.isprintable():
+        raise ValueError(f"line_break_symbol={line_break_symbol!r}")
 
-    if len(cell_break_symbol) != 1:
-        raise ValueError(cell_break_symbol)
+    if len(cell_break_symbol) != 1 or not cell_break_symbol.isprintable():
+        raise ValueError(f"cell_break_symbol={cell_break_symbol!r}")
 
     if not isinstance(theme, Theme):
         raise TypeError(theme)
@@ -112,21 +115,21 @@ def print_table(
         else:
             """min_width: tuple, max_width: tuple"""
 
-    column_count = max(map(len, table_))
+    column_count = max(map(len, list_table))
 
     # If there are column names, we write them at the beginning of the table
-    if column_names_:
-        column_names_len = len(column_names_)
+    if column_names_list:
+        column_names_len = len(column_names_list)
 
         if column_names_len > column_count:
-            column_names_ = column_names_[: column_names_len - 1]
+            column_names_list = column_names_list[: column_names_len - 1]
         else:
-            column_names_.extend((" ",) * (column_count - column_names_len))
+            column_names_list.extend((" ",) * (column_count - column_names_len))
 
-        table_.insert(0, column_names_)
+        list_table.insert(0, column_names_list)
 
-    row_widths = get_row_widths(table_)
-    min_row_widths = get_row_widths(table_, minimum=True)
+    row_widths = get_column_widths(list_table)
+    min_row_widths = get_column_widths(list_table, minimum=True)
 
     if min_width is not None:
         min_widths: Tuple[int, ...]
@@ -142,23 +145,58 @@ def print_table(
             )
         min_row_widths = max_min_widths(min_row_widths, min_widths)
 
-    if max_width is not None and not ignore_width_errors:
+    if max_width is not None:
         min_width_ = sum(min_row_widths) + 3 * column_count + 1
         if isinstance(max_width, int):
             if max_width < min_width_:
-                raise ValueError(f"{max_width} >= {min_width_}")
+                if ignore_width_errors:
+                    max_width = min_width_
+                else:
+                    raise ValueError(f"{max_width} >= {min_width_}")
         else:
             invalid_widths = [mw for mw in max_width if mw < 1]
             if invalid_widths:
-                raise ValueError(invalid_widths)
+                if ignore_width_errors:
+                    max_width = tuple(1 if mw < 1 else mw for mw in max_width)
+                else:
+                    raise ValueError(
+                        f"Values in {invalid_widths} from max_width are less than one"
+                    )
             max_width = max_width[:column_count]
             max_width = (
                 *max_width,
                 *(max_width[-1],) * (column_count - len(max_width)),
             )
-            sum_max_width = sum(max_width) + 3 * len(max_width) + 1
+            sum_max_width = sum(max_width) + 3 * column_count + 1
             if sum_max_width < min_width_:
-                raise ValueError(f"{sum_max_width} >= {min_width_}")
+                if ignore_width_errors:
+                    max_width = proportional_change(
+                        row_widths,
+                        sum(max_width) + (min_width_ - sum_max_width),
+                    )
+                else:
+                    raise ValueError(
+                        f"{sum_max_width} >= {min_width_}: "
+                        f"Increase the sum of max_width by {min_width_ - sum_max_width}"
+                    )
+
+            incorrect_max_widths = tuple(
+                max_w
+                for max_w, min_w in zip(max_width, min_row_widths)
+                if max_w < min_w
+            )
+            if incorrect_max_widths:
+                if ignore_width_errors:
+                    max_width = tuple(
+                        max(max_w, min_w)
+                        for max_w, min_w in zip(max_width, min_row_widths)
+                    )
+                else:
+                    raise ValueError(
+                        f"Values in {max_width} must be greater than or equal "
+                        f"to the corresponding values from {min_row_widths}. "
+                        f"Incorrect values: {incorrect_max_widths}"
+                    )
 
     h_align_t = transform_align(column_count, h_align)
     name_h_align_t = transform_align(1, name_h_align)
@@ -204,7 +242,7 @@ def print_table(
                 Tuple[Dict[str, Tuple[str, ...]], ...],
             ],
             zip(
-                line_spliter(
+                split_text(
                     name,
                     max_name_width,
                     max_height,
@@ -215,8 +253,8 @@ def print_table(
         )
         print(
             fill_line(
-                rows=rows,
-                symbols=symbols,
+                columns_lines=rows,
+                columns_symbols=symbols,
                 subtable_columns=subtable_columns,
                 border_data_list=border_data_list,
                 widths=(max_name_width,),
@@ -227,12 +265,11 @@ def print_table(
             file=file,
         )
 
-    border_data_stack: List[Tuple[Dict[str, Tuple[str, ...]], ...]] = []
-    result_table: List[Tuple[Optional[str], ...]] = []
+    previous_border_data: Tuple[Dict[str, Tuple[str, ...]], ...] = ({"": ("",)},)
 
-    for ri, row in enumerate(table_):
+    for ri, row in enumerate(list_table):
         if ri != 0:
-            result_table.append(("", "\n"))
+            print("", file=file, end="\n")
 
         splitted_row: List[
             Tuple[List[str], List[str], bool, Dict[str, Tuple[str, ...]]]
@@ -255,9 +292,9 @@ def print_table(
                     ignore_width_errors=True,
                     proportion_coefficient=proportion_coefficient,
                 )
-                column_lines = line_spliter_for_sub_table(string_sub_table, max_height)
+                column_lines = split_text_for_sub_table(string_sub_table, max_height)
             else:
-                column_lines = line_spliter(
+                column_lines = split_text(
                     str(column),
                     max_widths[ci],
                     max_height,
@@ -296,17 +333,17 @@ def print_table(
 
         if (
             (sep is True or ri == 0)  # under table name
-            or (column_names_ and ri == 1)  # under column names
+            or (column_names_list and ri == 1)  # under column names
             or (
                 isinstance(sep, (range, tuple))
-                and (ri - 1 in sep if column_names_ else ri in sep)
+                and (ri - 1 in sep if column_names_list else ri in sep)
             )  # if sep allows
         ):
             if ri == 0:
                 # separator under table name
                 s = under_name_separator if name else up_noname_separator
-                ha = column_names_h_align_t if column_names_ else h_align_t
-                va = column_names_v_align_t if column_names_ else v_align_t
+                ha = column_names_h_align_t if column_names_list else h_align_t
+                va = column_names_v_align_t if column_names_list else v_align_t
             elif ri == 1:
                 # separator under column names (if theme supports)
                 s = line_separator_plus
@@ -324,43 +361,36 @@ def print_table(
                 # if possible, connect the borders from below.
                 if ri > 0:
                     s = apply_border_data(
-                        s, "border_bottom", theme, border_data_stack.pop(), max_widths
+                        s, "border_bottom", theme, previous_border_data, max_widths
                     )
-                result_table.append((s, "\n"))
+                print(s, file=file, end="\n")
         else:
             ha, va = h_align_t, v_align_t
 
-        result_table.append(
-            (
-                fill_line(
-                    rows=rows,
-                    symbols=symbols,
-                    subtable_columns=subtable_columns,
-                    border_data_list=border_data_list,
-                    widths=max_widths,
-                    h_align=ha,
-                    v_align=va,
-                    theme=theme,
-                ),
-                "",
-            )
+        line = fill_line(
+            columns_lines=rows,
+            columns_symbols=symbols,
+            subtable_columns=subtable_columns,
+            border_data_list=border_data_list,
+            widths=max_widths,
+            h_align=ha,
+            v_align=va,
+            theme=theme,
         )
-        border_data_stack.append(border_data_list)
+        print(line, file=file, end="")
+        previous_border_data = border_data_list
 
     if down_separator.strip():
         s = apply_border_data(
             down_separator.rstrip("\n"),
             "border_bottom",
             theme,
-            border_data_stack.pop(),
+            previous_border_data,
             max_widths,
         )
-        result_table.append(("\n" + s, end))
+        print("\n" + s, file=file, end=end)
     elif end:
-        result_table.append(("", end))
-
-    for content, end in result_table:
-        print(content, file=file, end=end)
+        print("", file=file, end=end)
 
 
 def stringify_table(
@@ -374,19 +404,19 @@ def stringify_table(
     ] = VerticalAlignment.TOP,
     name: Optional[str] = None,
     name_h_align: Union[HorizontalAlignment, str] = HorizontalAlignment.CENTER,
-    name_v_align: Union[VerticalAlignment, str] = VerticalAlignment.CENTER,
+    name_v_align: Union[VerticalAlignment, str] = VerticalAlignment.MIDDLE,
     column_names: Optional[Sequence[str]] = None,
     column_names_h_align: Union[
         Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]
     ] = HorizontalAlignment.CENTER,
     column_names_v_align: Union[
         Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
-    ] = VerticalAlignment.CENTER,
+    ] = VerticalAlignment.MIDDLE,
     max_width: Union[int, Tuple[int, ...], None] = None,
     min_width: Union[int, Tuple[int, ...], None] = None,
     max_height: Optional[int] = None,
     maximize_height: bool = False,
-    line_break_symbol: str = "↩",
+    line_break_symbol: str = "\\",
     cell_break_symbol: str = "…",
     sep: Union[bool, range, tuple] = True,
     end: Optional[str] = "",
@@ -489,7 +519,7 @@ class Table:
     @classmethod
     def from_csv(
         cls,
-        file: TextIOWrapper,
+        file: Iterable[str],
         name: Optional[str] = None,
         column_names: bool = True,
         reader_kwargs: Optional[Dict[str, Any]] = None,
@@ -510,18 +540,18 @@ class Table:
             Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
         ] = VerticalAlignment.TOP,
         name_h_align: Union[HorizontalAlignment, str] = HorizontalAlignment.CENTER,
-        name_v_align: Union[VerticalAlignment, str] = VerticalAlignment.CENTER,
+        name_v_align: Union[VerticalAlignment, str] = VerticalAlignment.MIDDLE,
         column_names_h_align: Union[
             Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]
         ] = HorizontalAlignment.CENTER,
         column_names_v_align: Union[
             Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
-        ] = VerticalAlignment.CENTER,
+        ] = VerticalAlignment.MIDDLE,
         max_width: Union[int, Tuple[int, ...], None] = None,
         min_width: Union[int, Tuple[int, ...], None] = None,
         max_height: Optional[int] = None,
         maximize_height: bool = False,
-        line_break_symbol: str = "↩",
+        line_break_symbol: str = "\\",
         cell_break_symbol: str = "…",
         sep: Union[bool, range, tuple] = True,
         end: Optional[str] = "",
@@ -586,18 +616,18 @@ class Table:
             Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
         ] = VerticalAlignment.TOP,
         name_h_align: Union[HorizontalAlignment, str] = HorizontalAlignment.CENTER,
-        name_v_align: Union[VerticalAlignment, str] = VerticalAlignment.CENTER,
+        name_v_align: Union[VerticalAlignment, str] = VerticalAlignment.MIDDLE,
         column_names_h_align: Union[
             Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]
         ] = HorizontalAlignment.CENTER,
         column_names_v_align: Union[
             Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
-        ] = VerticalAlignment.CENTER,
+        ] = VerticalAlignment.MIDDLE,
         max_width: Union[int, Tuple[int, ...], None] = None,
         min_width: Union[int, Tuple[int, ...], None] = None,
         max_height: Optional[int] = None,
         maximize_height: bool = False,
-        line_break_symbol: str = "↩",
+        line_break_symbol: str = "\\",
         cell_break_symbol: str = "…",
         sep: Union[bool, range, tuple] = True,
         end: Optional[str] = "\n",
@@ -660,21 +690,26 @@ class Table:
         return self.stringify()
 
     def __repr__(self):
-        return "Table({table}{name}{column_names})".format(
+        return "Table({table}{name}{column_names}{kwargs})".format(
             table=f"{self.table!r}",
             name=f", name={self.name!r}" if self.name else "",
             column_names=(
                 f", column_names={self.column_names!r}" if self.column_names else ""
             ),
+            kwargs=f", **{self.config!r}" if self.config else "",
         )
 
 
-def get_row_widths(table: Sequence[Sequence], minimum: bool = False) -> Tuple[int, ...]:
+def get_column_widths(
+    table: Sequence[Sequence], minimum: bool = False
+) -> Tuple[int, ...]:
     """
     Calculates and returns a list of column widths.
     If the matrix cell is an instance of Table recursion is used
 
     Not in utils.py due to recursive import
+    Uses table2string.Table
+
     :param table: Two-dimensional matrix
     :param minimum: Forces the function to return the minimum width for each column, which is 1
     """
@@ -686,7 +721,7 @@ def get_row_widths(table: Sequence[Sequence], minimum: bool = False) -> Tuple[in
                         sum(subtable_row_widths) + 3 * len(subtable_row_widths) + 1
                     )
                     - 4
-                )(get_row_widths(cell.table, minimum=minimum))
+                )(get_column_widths(cell.table, minimum=minimum))
                 if isinstance(cell, Table)
                 else (
                     1
