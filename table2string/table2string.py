@@ -94,7 +94,7 @@ def print_table(
         raise ValueError(f"line_break_symbol={line_break_symbol!r}")
 
     if len(cell_break_symbol) != 1 or not cell_break_symbol.isprintable():
-        raise ValueError(f"{cell_break_symbol=}")
+        raise ValueError(f"cell_break_symbol={cell_break_symbol!r}")
 
     if not isinstance(theme, Theme):
         raise TypeError(theme)
