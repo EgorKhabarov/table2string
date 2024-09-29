@@ -398,7 +398,7 @@ def fill_line(
             raw_lines[:] = apply_v_align(raw_lines, v_align[n])
 
     result_lines: List[str] = []
-    symbols: List[Tuple[str]] = list(zip(*columns_symbols))
+    symbols = list(zip(*columns_symbols))
     vertical = theme.border.vertical
     tags = [False for _ in subtable_columns]
     lines: Tuple[str, ...]

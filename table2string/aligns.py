@@ -43,5 +43,5 @@ class HorizontalAlignment(Enum):
 
 class VerticalAlignment(Enum):
     TOP = "^"
-    CENTER = "-"
+    MIDDLE = "-"
     BOTTOM = "_"
