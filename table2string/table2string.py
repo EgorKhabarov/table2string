@@ -7,6 +7,7 @@ from table2string.aligns import HorizontalAlignment, VerticalAlignment
 from table2string.utils import (
     line_spliter_for_sub_table,
     get_text_width_in_console,
+    proportional_change,
     apply_border_data,
     generate_borders,
     transform_align,
@@ -89,11 +90,11 @@ def print_table(
     if not (max_height >= 1 if max_height else True):
         raise ValueError(max_height)
 
-    if len(line_break_symbol) != 1:
-        raise ValueError(line_break_symbol)
+    if len(line_break_symbol) != 1 or not line_break_symbol.isprintable():
+        raise ValueError(f"{line_break_symbol=}")
 
-    if len(cell_break_symbol) != 1:
-        raise ValueError(cell_break_symbol)
+    if len(cell_break_symbol) != 1 or not cell_break_symbol.isprintable():
+        raise ValueError(f"{cell_break_symbol=}")
 
     if not isinstance(theme, Theme):
         raise TypeError(theme)
@@ -114,15 +115,23 @@ def print_table(
     row_widths = get_row_widths(list_table)
     min_row_widths = get_row_widths(list_table, minimum=True)
 
-    if max_width is not None and not ignore_width_errors:
+    if max_width is not None:
         min_width = sum(min_row_widths) + 3 * column_count + 1
         if isinstance(max_width, int):
             if max_width < min_width:
-                raise ValueError(f"{max_width} >= {min_width}")
+                if ignore_width_errors:
+                    max_width = min_width
+                else:
+                    raise ValueError(f"{max_width} >= {min_width}")
         else:
             invalid_widths = [mw for mw in max_width if mw < 1]
             if invalid_widths:
-                raise ValueError(invalid_widths)
+                if ignore_width_errors:
+                    max_width = tuple(1 if mw < 1 else mw for mw in max_width)
+                else:
+                    raise ValueError(
+                        f"Values in {invalid_widths} from max_width are less than one"
+                    )
             max_width = max_width[:column_count]
             max_width = (
                 *max_width,
@@ -130,7 +139,16 @@ def print_table(
             )
             sum_max_width = sum(max_width) + 3 * column_count + 1
             if sum_max_width < min_width:
-                raise ValueError(f"{sum_max_width} >= {min_width}")
+                if ignore_width_errors:
+                    max_width = proportional_change(
+                        row_widths,
+                        sum(max_width) + (min_width - sum_max_width),
+                    )
+                else:
+                    raise ValueError(
+                        f"{sum_max_width} >= {min_width}: "
+                        f"Increase the sum of max_width by {min_width - sum_max_width}"
+                    )
 
             incorrect_max_widths = tuple(
                 max_w
@@ -138,11 +156,17 @@ def print_table(
                 if max_w < min_w
             )
             if incorrect_max_widths:
-                raise ValueError(
-                    f"Values in {max_width} must be greater than or equal "
-                    f"to the corresponding values from {min_row_widths}. "
-                    f"Incorrect values: {incorrect_max_widths}"
-                )
+                if ignore_width_errors:
+                    max_width = tuple(
+                        max(max_w, min_w)
+                        for max_w, min_w in zip(max_width, min_row_widths)
+                    )
+                else:
+                    raise ValueError(
+                        f"Values in {max_width} must be greater than or equal "
+                        f"to the corresponding values from {min_row_widths}. "
+                        f"Incorrect values: {incorrect_max_widths}"
+                    )
 
     h_align_t = transform_align(column_count, h_align)
     name_h_align_t = transform_align(1, name_h_align)
@@ -627,12 +651,13 @@ class Table:
         return self.stringify()
 
     def __repr__(self):
-        return "Table({table}{name}{column_names})".format(
+        return "Table({table}{name}{column_names}{kwargs})".format(
             table=f"{self.table!r}",
             name=f", name={self.name!r}" if self.name else "",
             column_names=(
                 f", column_names={self.column_names!r}" if self.column_names else ""
             ),
+            kwargs=f", **{self.config!r}" if self.config else "",
         )
 
 

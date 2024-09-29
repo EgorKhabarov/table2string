@@ -480,12 +480,13 @@ def apply_v_align(cell: List[str], v_align: str) -> List[str]:
     :param v_align: Vertical alignment
     :return: Applied vertical alignments
     """
+    rows_count = len(cell)
+
     if v_align == "_":
         while cell[-1].isspace():
             cell.insert(0, cell.pop())
 
-    elif v_align == "-":
-        rows_count = len(cell)
+    elif v_align == "-" and rows_count > 1:
         while cell[0].isspace():
             cell.pop(0)
         while cell[-1].isspace():
