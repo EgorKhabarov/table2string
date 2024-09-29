@@ -235,7 +235,7 @@ For `name_h_align` and `name_v_align` only the `str` type or the corresponding `
 +------------+------------+------------+
 >>> Table([(1, 12345, "example")]).print(max_width=(1, 8, 6))
 +---+----------+--------+
-| 1 |    12345 | exampl↩|
+| 1 |    12345 | exampl\|
 |   |          | e      |
 +---+----------+--------+
 >>> Table([(1, 12345, "example")]).print(max_width=(1, 5, 7))
@@ -244,7 +244,7 @@ For `name_h_align` and `name_v_align` only the `str` type or the corresponding `
 +---+-------+---------+
 >>> Table([("123456\n\n789000", "example")]).print(max_width=(3, 4), max_height=4)
 +-----+------+
-| 123↩| exam↩|
+| 123\| exam\|
 | 456 | ple  |
 |     |      |
 | 789…|      |
@@ -270,8 +270,8 @@ For `name_h_align` and `name_v_align` only the `str` type or the corresponding `
 ...     maximize_height=True,
 ... )
 +-----+
-| 123↩|
-| 456↩|
+| 123\|
+| 456\|
 | 789 |
 |     |
 +-----+
@@ -303,7 +303,7 @@ For `name_h_align` and `name_v_align` only the `str` type or the corresponding `
 | qwe | rty  |
 |     | uio  |
 +-----+------+
-| 123↩| exam↩|
+| 123\| exam\|
 | 456 | ple  |
 |     |      |
 | 789…|      |
@@ -312,7 +312,7 @@ For `name_h_align` and `name_v_align` only the `str` type or the corresponding `
 +-----+------+
 | qwe | rty  |
 |     | uio  |
-| 123↩| exam↩|
+| 123\| exam\|
 | 456 | ple  |
 |     |      |
 | 789…|      |

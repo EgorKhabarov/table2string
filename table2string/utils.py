@@ -272,7 +272,7 @@ def split_text(
     text: str,
     width: Optional[int] = None,
     height: Optional[int] = None,
-    line_break_symbol: str = "↩",
+    line_break_symbol: str = "\\",
     cell_break_symbol: str = "…",
 ) -> Tuple[List[str], List[str], bool, Dict[str, Tuple[str, ...]]]:
     """
