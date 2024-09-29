@@ -1,6 +1,6 @@
 import csv
 from io import TextIOWrapper, StringIO
-from typing import Union, Tuple, Any, Sequence, List, Dict, Optional, cast
+from typing import Union, Tuple, Any, Sequence, List, Dict, Optional, Iterable, cast
 
 from table2string.themes import Theme, Themes
 from table2string.aligns import HorizontalAlignment, VerticalAlignment
@@ -486,7 +486,7 @@ class Table:
     @classmethod
     def from_csv(
         cls,
-        file: TextIOWrapper,
+        file: Iterable[str],
         name: Optional[str] = None,
         column_names: bool = True,
         reader_kwargs: Optional[Dict[str, Any]] = None,
@@ -667,6 +667,8 @@ def get_row_widths(table: Sequence[Sequence], minimum: bool = False) -> Tuple[in
     If the matrix cell is an instance of Table recursion is used
 
     Not in utils.py due to recursive import
+    Uses table2string.Table
+
     :param table: Two-dimensional matrix
     :param minimum: Forces the function to return the minimum width for each column, which is 1
     """
