@@ -404,26 +404,67 @@ def test_subtable():
 +---+---+---+---+---+
 """.strip()
     )
-    assert (Table([(
-        Table([(
-            Table([(
-                Table([(
-                    Table([(
-                        Table([(
-                            Table([(
+    assert (
+        Table(
+            [
+                (
+                    Table(
+                        [
+                            (
                                 Table(
                                     [
-                                        ("1",),
-                                        (Table([("2", "3")]).stringify(),),
+                                        (
+                                            Table(
+                                                [
+                                                    (
+                                                        Table(
+                                                            [
+                                                                (
+                                                                    Table(
+                                                                        [
+                                                                            (
+                                                                                Table(
+                                                                                    [
+                                                                                        (
+                                                                                            Table(
+                                                                                                [
+                                                                                                    (
+                                                                                                        "1",
+                                                                                                    ),
+                                                                                                    (
+                                                                                                        Table(
+                                                                                                            [
+                                                                                                                (
+                                                                                                                    "2",
+                                                                                                                    "3",
+                                                                                                                )
+                                                                                                            ]
+                                                                                                        ).stringify(),
+                                                                                                    ),
+                                                                                                ]
+                                                                                            ).stringify(),
+                                                                                        )
+                                                                                    ]
+                                                                                ).stringify(),
+                                                                            )
+                                                                        ]
+                                                                    ).stringify(),
+                                                                )
+                                                            ]
+                                                        ).stringify(),
+                                                    )
+                                                ]
+                                            ).stringify(),
+                                        )
                                     ]
                                 ).stringify(),
-                            )]).stringify(),
-                        )]).stringify(),
-                    )]).stringify(),
-                )]).stringify(),
-            )]).stringify(),
-        )]).stringify(),
-    )]).stringify() == """
+                            )
+                        ]
+                    ).stringify(),
+                )
+            ]
+        ).stringify()
+        == """
 +---------------------------------------+
 | +-----------------------------------+ |
 | | +-------------------------------+ | |
@@ -445,4 +486,73 @@ def test_subtable():
 | | +-------------------------------+ | |
 | +-----------------------------------+ |
 +---------------------------------------+
-""".strip())
+""".strip()
+    )
+    assert (
+        Table(
+            [
+                (
+                    Table(
+                        [
+                            (
+                                Table(
+                                    [
+                                        (
+                                            Table(
+                                                [
+                                                    (
+                                                        Table(
+                                                            [
+                                                                (
+                                                                    Table(
+                                                                        [
+                                                                            (
+                                                                                Table(
+                                                                                    [
+                                                                                        (
+                                                                                            Table(
+                                                                                                [
+                                                                                                    (
+                                                                                                        "1",
+                                                                                                    ),
+                                                                                                    (
+                                                                                                        Table(
+                                                                                                            [
+                                                                                                                (
+                                                                                                                    "2",
+                                                                                                                    "3",
+                                                                                                                )
+                                                                                                            ]
+                                                                                                        ),
+                                                                                                    ),
+                                                                                                ]
+                                                                                            ),
+                                                                                        )
+                                                                                    ]
+                                                                                ),
+                                                                            )
+                                                                        ]
+                                                                    ),
+                                                                )
+                                                            ]
+                                                        ),
+                                                    )
+                                                ]
+                                            ),
+                                        )
+                                    ]
+                                ),
+                            )
+                        ]
+                    ),
+                )
+            ]
+        ).stringify()
+        == """
++-------+
+|     1 |
++---+---+
+| 2 | 3 |
++---+---+
+""".strip()
+    )
