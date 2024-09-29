@@ -69,8 +69,8 @@ def print_table(
     :param end: Configure the last symbol of the table. \\n or nothing
     :param file: File where you can record the table by .write method.
     :param theme: Theme
-    :param ignore_width_errors: Raise error when width is not enough
-    :param proportion_coefficient: Proportion coefficient
+    :param ignore_width_errors: Fixes errors in max_width if they exist
+    :param proportion_coefficient: Reduction coefficient for too large numbers
     :return: None
     """
     list_table: List[List[Union[str, Table, Any]]] = list(list(row) for row in table)
@@ -407,13 +407,13 @@ def stringify_table(
     :param max_width: Table width or width of individual columns
     :param max_height: The maximum number of lines in one line
     :param maximize_height: Make all lines of the same height max_height
-    :param line_break_symbol: "↩" or chr(8617) or "\\U000021a9"
+    :param line_break_symbol: "\" or "↩" or chr(8617) or "\\U000021a9"
     :param cell_break_symbol: "…" or chr(8230) or "\\U00002026"
     :param sep: Settings of dividers. You can specify specific lines with dividers.
     :param end: Configure the last symbol of the table. \\n or nothing
     :param theme: Theme
-    :param ignore_width_errors: Raise error when width is not enough
-    :param proportion_coefficient: Proportion coefficient
+    :param ignore_width_errors: Fixes errors in max_width if they exist
+    :param proportion_coefficient: Reduction coefficient for too large numbers
     :return: String table
     """
     file = StringIO()
@@ -536,13 +536,13 @@ class Table:
         :param max_width: Table width or width of individual columns
         :param max_height: The maximum number of lines in one line
         :param maximize_height: Make all lines of the same height max_height
-        :param line_break_symbol: "↩" or chr(8617) or "\\U000021a9"
+        :param line_break_symbol: "\" or "↩" or chr(8617) or "\\U000021a9"
         :param cell_break_symbol: "…" or chr(8230) or "\\U00002026"
         :param sep: Settings of dividers. You can specify specific lines with dividers.
         :param end: Configure the last symbol of the table. \\n or nothing
         :param theme: Theme
-        :param ignore_width_errors: Raise error when width is not enough
-        :param proportion_coefficient: Proportion coefficient
+        :param ignore_width_errors: Fixes errors in max_width if they exist
+        :param proportion_coefficient: Reduction coefficient for too large numbers
         :return: String table
         """
         return stringify_table(
@@ -611,14 +611,14 @@ class Table:
         :param max_width: Table width or width of individual columns
         :param max_height: The maximum number of lines in one line
         :param maximize_height: Make all lines of the same height max_height
-        :param line_break_symbol: "↩" or chr(8617) or "\\U000021a9"
+        :param line_break_symbol: "\" or "↩" or chr(8617) or "\\U000021a9"
         :param cell_break_symbol: "…" or chr(8230) or "\\U00002026"
         :param sep: Settings of dividers. You can specify specific lines with dividers.
         :param end: Configure the last symbol of the table. \\n or nothing
         :param file: File where you can record the table by .write method.
         :param theme: Theme
-        :param ignore_width_errors: Raise error when width is not enough
-        :param proportion_coefficient: Proportion coefficient
+        :param ignore_width_errors: Fixes errors in max_width if they exist
+        :param proportion_coefficient: Reduction coefficient for too large numbers
         :return: None
         """
         print_table(
