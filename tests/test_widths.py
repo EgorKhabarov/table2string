@@ -94,6 +94,7 @@ def test_widths():
     assert (
         table1.stringify(max_width=1, ignore_width_errors=True)
         == table1.stringify(max_width=(1, 1, 1), ignore_width_errors=True)
+        == table1.stringify(max_width=(1, -1, 1), ignore_width_errors=True)
         == r"""
 +---+-------+---+
 | 1 |     2 | 3 |

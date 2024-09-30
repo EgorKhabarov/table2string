@@ -81,6 +81,11 @@ def test_width_errors():
         pass
 
     try:
+        table.stringify(max_width=(1, -1, 1))
+    except ValueError:
+        pass
+
+    try:
         table.stringify(max_width=(10, 3, 10))
     except ValueError:
         pass

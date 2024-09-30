@@ -459,6 +459,16 @@ def test_apply_border_data():
         )
         == "├───┬───┬───┤"
     )
+    assert (
+        apply_border_data(
+            "├─         ─┤",
+            "border_top",
+            Themes.thin_thick,
+            ({"border_top": ("─", "─", "┬", "─", "─", "─", "┬", "─", "─")},),
+            (3,),
+        )
+        == "├───┬───┬───┤"
+    )
 
 
 def test_split_text_for_sub_table():

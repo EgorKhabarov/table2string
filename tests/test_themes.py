@@ -1,4 +1,4 @@
-from table2string import Table, Themes
+from table2string import Table, Themes, Theme
 
 
 def test_themes():
@@ -446,3 +446,36 @@ def test_themes():
 """.lstrip()
     )
     assert repr(Themes.thin) == "Themes.thin"
+    custom_theme = Theme("custom_theme", Themes.rounded.border, Themes.thin)
+    assert (
+            table.stringify(theme=custom_theme)
+            == """
+╭───────┬───────────┬───────╮
+│     1 │         2 │     3 │
+├───────┼─────┬─────┼───────┤
+│     3 │ 4.1 │ 4.2 │     5 │
+│       ├─────┼─────┤       │
+│       │ 4.3 │ 4.4 │       │
+├───────┼─────┴─────┼───────┤
+│     6 │         7 │     8 │
+├───────┼───────────┼───────┤
+│     9 │        10 │    11 │
+├───────┼─────┬─────┼───────┤
+│     1 │   2 │   3 │    14 │
+├───┬───┼─────┴─────┤       │
+│ 2 │ 3 │         1 │       │
+├───┴───┼─────┬─────┼───┬───┤
+│    15 │   1 │   2 │ 2 │ 1 │
+│       │     ├─────┼───┤   │
+│       │     │   3 │ 3 │   │
+╰───────┴─────┴─────┴───┴───╯
+""".strip()
+    )
+    assert repr(custom_theme) == """
+Theme('custom_theme', Border(horizontal='─', vertical='│', top_left='╭', 
+top_right='╮', bottom_left='╰', bottom_right='╯', vertical_left='├', 
+vertical_right='┤', top_horizontal='┬', bottom_horizontal='┴', central='┼', 
+vertical_left_plus='├', horizontal_plus='─', central_plus='┼', 
+vertical_right_plus='┤', top_horizontal_plus='┬', 
+bottom_horizontal_plus='┴'), Themes.thin)
+""".strip().replace("\n", "")

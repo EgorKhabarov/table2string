@@ -1,5 +1,5 @@
-import os
 import re
+import shutil
 import unicodedata
 from typing import Union, List, Tuple, Optional, Dict
 
@@ -502,11 +502,7 @@ def terminal_size(default: Tuple[int, int] = (120, 30)) -> Tuple[int, int]:
     :param default: Will be returned if it is not possible to get the console size
     :return: columns, lines
     """
-    try:
-        size = os.get_terminal_size()
-    except OSError:
-        return default
-
+    size = shutil.get_terminal_size(default)
     return size.columns, size.lines
 
 
