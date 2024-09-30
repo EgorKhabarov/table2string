@@ -448,8 +448,8 @@ def test_themes():
     assert repr(Themes.thin) == "Themes.thin"
     custom_theme = Theme("custom_theme", Themes.rounded.border, Themes.thin)
     assert (
-            table.stringify(theme=custom_theme)
-            == """
+        table.stringify(theme=custom_theme)
+        == """
 ╭───────┬───────────┬───────╮
 │     1 │         2 │     3 │
 ├───────┼─────┬─────┼───────┤
@@ -471,11 +471,16 @@ def test_themes():
 ╰───────┴─────┴─────┴───┴───╯
 """.strip()
     )
-    assert repr(custom_theme) == """
+    assert (
+        repr(custom_theme)
+        == """
 Theme('custom_theme', Border(horizontal='─', vertical='│', top_left='╭', 
 top_right='╮', bottom_left='╰', bottom_right='╯', vertical_left='├', 
 vertical_right='┤', top_horizontal='┬', bottom_horizontal='┴', central='┼', 
 vertical_left_plus='├', horizontal_plus='─', central_plus='┼', 
 vertical_right_plus='┤', top_horizontal_plus='┬', 
 bottom_horizontal_plus='┴'), Themes.thin)
-""".strip().replace("\n", "")
+""".strip().replace(
+            "\n", ""
+        )
+    )
