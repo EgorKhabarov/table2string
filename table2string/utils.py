@@ -281,7 +281,7 @@ def split_text(
     :param text: Text
     :param width: Width
     :param height: Height
-    :param line_break_symbol: "\" or "↩" or chr(8617) or "\\U000021a9"
+    :param line_break_symbol: "\\" or "↩" or chr(8617) or "\\U000021a9"
     :param cell_break_symbol: "…" or chr(8230) or "\\U00002026"
     :return: Split text by width and height
     """

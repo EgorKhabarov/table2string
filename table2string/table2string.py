@@ -63,7 +63,7 @@ def print_table(
     :param max_width: Table width or width of individual columns
     :param max_height: The maximum number of lines in one line
     :param maximize_height: Make all lines of the same height max_height
-    :param line_break_symbol: "\" or "↩" or chr(8617) or "\\U000021a9"
+    :param line_break_symbol: "\\" or "↩" or chr(8617) or "\\U000021a9"
     :param cell_break_symbol: "…" or chr(8230) or "\\U00002026"
     :param sep: Settings of dividers. You can specify specific lines with dividers.
     :param end: Configure the last symbol of the table. \\n or nothing
@@ -407,7 +407,7 @@ def stringify_table(
     :param max_width: Table width or width of individual columns
     :param max_height: The maximum number of lines in one line
     :param maximize_height: Make all lines of the same height max_height
-    :param line_break_symbol: "\" or "↩" or chr(8617) or "\\U000021a9"
+    :param line_break_symbol: "\\" or "↩" or chr(8617) or "\\U000021a9"
     :param cell_break_symbol: "…" or chr(8230) or "\\U00002026"
     :param sep: Settings of dividers. You can specify specific lines with dividers.
     :param end: Configure the last symbol of the table. \\n or nothing
@@ -451,6 +451,23 @@ class Table:
         column_names: Optional[Sequence[str]] = None,
         **kwargs: Any,
     ):
+        """
+        :param table: Two-dimensional matrix
+        :param name: Table name
+        :param column_names: Column names
+        :param kwargs: Works only with these keys:
+            `h_align`,
+            `v_align`,
+            `name_h_align`,
+            `name_v_align`,
+            `column_names_h_align`,
+            `column_names_v_align`,
+            `max_height`,
+            `maximize_height`,
+            `line_break_symbol`,
+            `cell_break_symbol`,
+            `proportion_coefficient`,
+        """
         self.table = table
         self.name = name
         self.column_names = column_names
@@ -536,7 +553,7 @@ class Table:
         :param max_width: Table width or width of individual columns
         :param max_height: The maximum number of lines in one line
         :param maximize_height: Make all lines of the same height max_height
-        :param line_break_symbol: "\" or "↩" or chr(8617) or "\\U000021a9"
+        :param line_break_symbol: "\\" or "↩" or chr(8617) or "\\U000021a9"
         :param cell_break_symbol: "…" or chr(8230) or "\\U00002026"
         :param sep: Settings of dividers. You can specify specific lines with dividers.
         :param end: Configure the last symbol of the table. \\n or nothing
@@ -611,7 +628,7 @@ class Table:
         :param max_width: Table width or width of individual columns
         :param max_height: The maximum number of lines in one line
         :param maximize_height: Make all lines of the same height max_height
-        :param line_break_symbol: "\" or "↩" or chr(8617) or "\\U000021a9"
+        :param line_break_symbol: "\\" or "↩" or chr(8617) or "\\U000021a9"
         :param cell_break_symbol: "…" or chr(8230) or "\\U00002026"
         :param sep: Settings of dividers. You can specify specific lines with dividers.
         :param end: Configure the last symbol of the table. \\n or nothing
