@@ -143,6 +143,7 @@ def print_table(
                     max_width = proportional_change(
                         row_widths,
                         sum(max_width) + (min_width - sum_max_width),
+                        min_row_widths,
                     )
                 else:
                     raise ValueError(

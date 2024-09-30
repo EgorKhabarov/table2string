@@ -59,3 +59,28 @@ def test_proportional_change_errors():
         proportional_change((1, 1, 1), 16, (1, 1, 1), proportion_coefficient=2.1)
     except ValueError:
         pass
+
+
+def test_width_errors():
+    table = Table(
+        [
+            ("1", "2", "3"),
+            ("3", "4", "5"),
+            ("6", Table([("1", "2"), ("3", "4")]), "8"),
+            ("9", "10", "11"),
+        ],
+    )
+    try:
+        table.stringify(max_width=1)
+    except ValueError:
+        pass
+
+    try:
+        table.stringify(max_width=(1, 1, 1))
+    except ValueError:
+        pass
+
+    try:
+        table.stringify(max_width=(10, 3, 10))
+    except ValueError:
+        pass
