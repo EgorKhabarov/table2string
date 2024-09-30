@@ -313,12 +313,9 @@ def test_subtable():
     table = Table.from_db_cursor(cursor, column_names=True)
     table.table = list(list(row) for row in table.table)
     for i, row in enumerate(table.table):
-        try:
-            json_data = json.loads(row[1])
-            row[1] = Table(json_data)
-            table.table[i] = row
-        except json.JSONDecodeError:
-            pass
+        json_data = json.loads(row[1])  # remember json.JSONDecodeError
+        row[1] = Table(json_data)
+        table.table[i] = row
     assert (
         table.stringify(theme=Themes.thin_thick)
         == """

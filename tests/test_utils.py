@@ -2,6 +2,7 @@ from table2string.table2string import Table, get_column_widths
 from table2string.themes import Themes
 from table2string.utils import (
     get_text_width_in_console,
+    split_text_for_sub_table,
     proportional_change,
     apply_border_data,
     transform_align,
@@ -67,6 +68,8 @@ def test_transform_align():
     assert transform_align(3, ("_",), default="^") == ("_", "^", "^")
     assert transform_align(3, ("^", "-", "_"), default="^") == ("^", "-", "_")
 
+    assert transform_align(2, None) == ("*", "*")
+
 
 def test_transform_width():
     assert transform_width(1, 1, (1,)) == (1,)
@@ -74,6 +77,8 @@ def test_transform_width():
     assert transform_width((1, 2), 1, (1,)) == (1,)
     assert transform_width((1, 2), 2, (2, 2)) == (1, 2)
     assert transform_width((3, 2), 2, (2, 2)) == (3, 2)
+
+    assert transform_width((3,), 2, (2, 2)) == (3, 3)
 
 
 def test_split_text():
@@ -452,4 +457,143 @@ def test_apply_border_data():
             (3,),
         )
         == "├───┬───┬───┤"
+    )
+
+
+def test_split_text_for_sub_table():
+    assert (
+        split_text_for_sub_table(
+            """
+┌────────────────────┐
+│   987qwertyuiop    │
+┝━━━━━┯━━━━━┯━━━━━━━━┥
+│ bbb │ mmm │  ,,,   │
+├─────┴─────┼────────┤
+│  123456   │ 789123 │
+└───────────┴────────┘
+""".strip()
+        )
+        == (
+            [
+                "   987qwertyuiop    ",
+                "━━━━━┯━━━━━┯━━━━━━━━",
+                " bbb │ mmm │  ,,,   ",
+                "─────┴─────┼────────",
+                "  123456   │ 789123 ",
+            ],
+            ["", "", "", "", "", "", ""],
+            True,
+            {
+                "border_bottom": (
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "┴",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                ),
+                "border_left": ("│", "┝", "│", "├", "│"),
+                "border_right": ("│", "┥", "│", "┤", "│"),
+                "border_top": (
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                ),
+            },
+        )
+    )
+    assert (
+        split_text_for_sub_table(
+            """
+┌────────────────────┐
+│   987qwertyuiop    │
+┝━━━━━┯━━━━━┯━━━━━━━━┥
+│ bbb │ mmm │  ,,,   │
+├─────┴─────┼────────┤
+│  123456   │ 789123 │
+└───────────┴────────┘
+""".strip(),
+            4,
+        )
+        == (
+            [
+                "   987qwertyuiop    ",
+                "━━━━━┯━━━━━┯━━━━━━━━",
+                " bbb │ mmm │  ,,,   ",
+                "─────┴─────┼────────",
+            ],
+            ["", "", "", "", "", ""],
+            True,
+            {
+                "border_bottom": (
+                    " ",
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6",
+                    " ",
+                    " ",
+                    " ",
+                    "│",
+                    " ",
+                    "7",
+                    "8",
+                    "9",
+                    "1",
+                    "2",
+                    "3",
+                ),
+                "border_left": ("│", "┝", "│", "├"),
+                "border_right": ("│", "┥", "│", "┤"),
+                "border_top": (
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                    "─",
+                ),
+            },
+        )
     )

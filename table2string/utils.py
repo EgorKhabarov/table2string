@@ -321,8 +321,13 @@ def split_text(
 
 
 def split_text_for_sub_table(
-    string_sub_table: str, max_height: Optional[int]
+    string_sub_table: str, max_height: Optional[int] = None
 ) -> Tuple[List[str], List[str], bool, Dict[str, Tuple[str, ...]]]:
+    """
+
+    :param string_sub_table:
+    :param max_height:
+    """
     sub_table_lines = string_sub_table.splitlines()
 
     if max_height:
