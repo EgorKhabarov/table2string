@@ -1,70 +1,13 @@
 import os
 import re
 import unicodedata
-from functools import lru_cache
 from typing import Union, List, Tuple, Optional, Dict
 
-from table2string.themes import Theme, Themes
+from table2string.themes import Theme, Themes, translate_theme_border
 from table2string.aligns import HorizontalAlignment, VerticalAlignment
 
 
 ANSI_REGEX = re.compile(r"\x1b\[[0-9;]*[a-zA-Z]")
-translate_border_dict: Dict[str, Dict[Tuple[str, str], str]] = {
-    "border_left": {
-        ("vertical", "vertical_left"): "vertical_left",
-        ("vertical", "vertical_left_plus"): "vertical_left_plus",
-        ("vertical_right", "vertical_left"): "central",
-        ("vertical_right", "vertical_left_plus"): "central_plus",
-        ("vertical", "central"): "vertical_left",
-    },
-    "border_right": {
-        ("vertical", "vertical_right"): "vertical_right",
-        ("vertical", "vertical_right_plus"): "vertical_right_plus",
-        ("vertical_left", "vertical_right"): "central",
-        ("vertical_left", "vertical_right_plus"): "central_plus",
-        ("vertical", "central"): "vertical_right",
-    },
-    "border_top": {
-        ("horizontal", "top_horizontal"): "top_horizontal",
-        ("top_horizontal", "bottom_horizontal"): "central",
-        ("bottom_horizontal", "top_horizontal"): "central",
-        ("horizontal_plus", "top_horizontal"): "top_horizontal_plus",
-        ("horizontal", "central"): "central",
-        ("horizontal_plus", "central"): "central",
-    },
-    "border_bottom": {
-        ("horizontal", "bottom_horizontal"): "bottom_horizontal",
-        ("top_horizontal", "bottom_horizontal"): "central",
-        ("bottom_horizontal", "top_horizontal"): "central",
-        ("horizontal_plus", "bottom_horizontal"): "bottom_horizontal_plus",
-        ("horizontal", "central"): "central",
-        ("horizontal_plus", "central"): "central",
-    },
-}
-
-
-@lru_cache(maxsize=100)
-def translate_theme_border(
-    side: str, theme: Theme, border_from: str, border_to: str
-) -> str:
-    """
-    Used to connect table boundaries to a subtable
-
-    :param side: "border_left" or "border_right" or "border_top" or "border_bottom"
-    :param theme: Theme
-    :param border_from: The border to be connected to border_to
-    :param border_to: The border to be attached
-    :return: Connected borders (if possible)
-    """
-    border_from_name: str = theme.border.get_border_name(border_from) or ""
-    border_to_name: str = theme.border.get_border_name(border_to) or ""
-    border_result: Optional[str] = translate_border_dict[side].get(
-        (border_from_name, border_to_name)
-    )
-
-    if border_result:
-        return getattr(theme.border, border_result)
-    return border_from
 
 
 def get_text_width_in_console(text: str) -> int:
@@ -248,20 +191,18 @@ def transform_width(
         if len(width_l) == column_count:
             return tuple(width_l)
 
-        if len(width_l) < column_count:
-            width_l.extend((width_l[-1] for _ in range(column_count - len(width_l))))
-            return tuple(width_l)
+        width_l.extend((width_l[-1] for _ in range(column_count - len(width_l))))
+        return tuple(width_l)
 
-        width_t = tuple((*width_l, *(width_l[-1],) * (column_count - len(width_l))))
-        width_i = sum(width_t) + (3 * len(width_t)) + 1
-    else:
-        width_i = width
+    width_int: int = width
 
-    if width_i < column_count * 4 + 1:
-        width_i = sum(1 if rl > 1 else 0 for rl in row_widths) + (3 * column_count) + 1
+    if width_int < column_count * 4 + 1:
+        width_int = (
+            sum(1 if rl > 1 else 0 for rl in row_widths) + (3 * column_count) + 1
+        )
 
     # Calculate the width of each column
-    sum_column_width = (width_i - column_count * 3 - 1) or 1
+    sum_column_width = (width_int - column_count * 3 - 1) or 1
     max_widths = proportional_change(
         row_widths, sum_column_width, min_row_widths, proportion_coefficient
     )

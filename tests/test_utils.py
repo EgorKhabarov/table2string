@@ -7,6 +7,7 @@ from table2string.utils import (
     apply_border_data,
     transform_align,
     transform_width,
+    terminal_size,
     apply_v_align,
     split_text,
     fill_line,
@@ -597,3 +598,7 @@ def test_split_text_for_sub_table():
             },
         )
     )
+
+
+def test_terminal_size():
+    assert terminal_size() == (120, 30)

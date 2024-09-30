@@ -1,3 +1,4 @@
+from functools import lru_cache
 from dataclasses import dataclass
 from typing import Optional, Dict, Tuple
 
@@ -130,14 +131,14 @@ class Border:
             return "vertical"
         elif border == self.central:
             return "central"
-        elif border == self.top_left:
-            return "top_left"
-        elif border == self.top_right:
-            return "top_right"
-        elif border == self.bottom_left:
-            return "bottom_left"
-        elif border == self.bottom_right:
-            return "bottom_right"
+        # elif border == self.top_left:
+        #     return "top_left"
+        # elif border == self.top_right:
+        #     return "top_right"
+        # elif border == self.bottom_left:
+        #     return "bottom_left"
+        # elif border == self.bottom_right:
+        #     return "bottom_right"
         elif border == self.vertical_left:
             return "vertical_left"
         elif border == self.vertical_right:
@@ -146,18 +147,18 @@ class Border:
             return "top_horizontal"
         elif border == self.bottom_horizontal:
             return "bottom_horizontal"
-        elif border == self.vertical_left_plus:
-            return "vertical_left_plus"
+        # elif border == self.vertical_left_plus:
+        #     return "vertical_left_plus"
         elif border == self.horizontal_plus:
             return "horizontal_plus"
-        elif border == self.central_plus:
-            return "central_plus"
-        elif border == self.vertical_right_plus:
-            return "vertical_right_plus"
-        elif border == self.top_horizontal_plus:
-            return "top_horizontal_plus"
-        elif border == self.bottom_horizontal_plus:
-            return "bottom_horizontal_plus"
+        # elif border == self.central_plus:
+        #     return "central_plus"
+        # elif border == self.vertical_right_plus:
+        #     return "vertical_right_plus"
+        # elif border == self.top_horizontal_plus:
+        #     return "top_horizontal_plus"
+        # elif border == self.bottom_horizontal_plus:
+        #     return "bottom_horizontal_plus"
 
         return None
 
@@ -174,7 +175,28 @@ class Theme:
         self.custom_sub_table_theme = custom_sub_table_theme or self
 
     def __repr__(self):
-        return f"Themes.{self.name}"
+        if self.name in (
+            "ascii_thin",
+            "ascii_thin_double",
+            "ascii_double",
+            "ascii_double_thin",
+            "thin",
+            "thin_thick",
+            "thin_double",
+            "rounded_double",
+            "rounded",
+            "rounded_thick",
+            "thick",
+            "thick_thin",
+            "double",
+            "double_thin",
+            "booktabs",
+            "ascii_booktabs",
+            "markdown",
+        ):
+            return f"Themes.{self.name}"
+        else:
+            return f"Theme({self.name!r}, {self.border!r}, {self.custom_sub_table_theme!r})"
 
 
 class Themes:
@@ -561,3 +583,61 @@ class Themes:
         ),
         custom_sub_table_theme=ascii_thin,
     )
+
+
+translate_border_dict: Dict[str, Dict[Tuple[str, str], str]] = {
+    "border_left": {
+        ("vertical", "vertical_left"): "vertical_left",
+        ("vertical", "vertical_left_plus"): "vertical_left_plus",
+        ("vertical_right", "vertical_left"): "central",
+        ("vertical_right", "vertical_left_plus"): "central_plus",
+        ("vertical", "central"): "vertical_left",
+    },
+    "border_right": {
+        ("vertical", "vertical_right"): "vertical_right",
+        ("vertical", "vertical_right_plus"): "vertical_right_plus",
+        ("vertical_left", "vertical_right"): "central",
+        ("vertical_left", "vertical_right_plus"): "central_plus",
+        ("vertical", "central"): "vertical_right",
+    },
+    "border_top": {
+        ("horizontal", "top_horizontal"): "top_horizontal",
+        ("top_horizontal", "bottom_horizontal"): "central",
+        ("bottom_horizontal", "top_horizontal"): "central",
+        ("horizontal_plus", "top_horizontal"): "top_horizontal_plus",
+        ("horizontal", "central"): "central",
+        ("horizontal_plus", "central"): "central",
+    },
+    "border_bottom": {
+        ("horizontal", "bottom_horizontal"): "bottom_horizontal",
+        ("top_horizontal", "bottom_horizontal"): "central",
+        ("bottom_horizontal", "top_horizontal"): "central",
+        ("horizontal_plus", "bottom_horizontal"): "bottom_horizontal_plus",
+        ("horizontal", "central"): "central",
+        ("horizontal_plus", "central"): "central",
+    },
+}
+
+
+@lru_cache(maxsize=100)
+def translate_theme_border(
+    side: str, theme: Theme, border_from: str, border_to: str
+) -> str:
+    """
+    Used to connect table boundaries to a subtable
+
+    :param side: "border_left" or "border_right" or "border_top" or "border_bottom"
+    :param theme: Theme
+    :param border_from: The border to be connected to border_to
+    :param border_to: The border to be attached
+    :return: Connected borders (if possible)
+    """
+    border_from_name: str = theme.border.get_border_name(border_from) or ""
+    border_to_name: str = theme.border.get_border_name(border_to) or ""
+    border_result: Optional[str] = translate_border_dict[side].get(
+        (border_from_name, border_to_name)
+    )
+
+    if border_result:
+        return getattr(theme.border, border_result)
+    return border_from
