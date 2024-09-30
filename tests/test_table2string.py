@@ -7,21 +7,22 @@ from functools import wraps
 from table2string import print_table, stringify_table, Table, Themes
 
 
+def get_output(func: Callable):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        sys.stdout = StringIO()
+        func(*args, **kwargs)
+        pos = sys.stdout.tell()
+        sys.stdout.seek(0)
+        output = sys.stdout.read(pos)
+        sys.stdout = sys.__stdout__
+        return output
+
+    return wrapper
+
+
 def test_print_table():
-    def decorator(func: Callable):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            sys.stdout = StringIO()
-            func(*args, **kwargs)
-            pos = sys.stdout.tell()
-            sys.stdout.seek(0)
-            output = sys.stdout.read(pos)
-            sys.stdout = sys.__stdout__
-            return output
-
-        return wrapper
-
-    print_table_d = decorator(print_table)
+    print_table_d = get_output(print_table)
 
     table_1 = [("1", "2", "3"), ("123", "456\n567", "")]
     assert (
@@ -1272,6 +1273,32 @@ uio",
 |     | uio |    |
 +-----+-----+----+
 """.strip()
+    )
+    assert (
+        str(Table([("1", "2"), ("3", "4")]))
+        == """
++---+---+
+| 1 | 2 |
++---+---+
+| 3 | 4 |
++---+---+
+""".strip()
+    )
+    assert (
+        repr(Table([("1", "2"), ("3", "4")]))
+        == """
+Table([('1', '2'), ('3', '4')])
+""".strip()
+    )
+    assert (
+        get_output(Table([("1", "2"), ("3", "4")]).print)()
+        == """
++---+---+
+| 1 | 2 |
++---+---+
+| 3 | 4 |
++---+---+
+""".lstrip()
     )
 
 

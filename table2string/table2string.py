@@ -84,10 +84,10 @@ def print_table(
     ):
         raise ValueError(list_table)
 
-    if column_names_list != [] and not (column_names_list and column_names_list[0]):
+    if column_names_list and not (column_names_list and column_names_list[0]):
         raise ValueError(column_names_list)
 
-    if not (max_height >= 1 if max_height else True):
+    if max_height < 1 if max_height is not None else False:
         raise ValueError(max_height)
 
     if len(line_break_symbol) != 1 or not line_break_symbol.isprintable():
@@ -199,10 +199,7 @@ def print_table(
         if up_separator.strip():
             print(up_separator, file=file)
 
-        if not max_widths:
-            max_name_width = sum(row_widths) + (3 * column_count) + 1 - 4
-        else:
-            max_name_width = sum(max_widths) + (3 * column_count) + 1 - 4
+        max_name_width = sum(max_widths) + (3 * column_count) + 1 - 4
 
         rows, symbols, subtable_columns, border_data_list = cast(
             Tuple[
