@@ -98,14 +98,14 @@
 # Custom Markup & Row
 
 ```pycon
-from table2string import Table, Themes, CutomAlign, CutomRow
+from table2string import Table, Themes, CustomAlign, CustomRow
 table = [
     ("11111", "22222"),
-    (CutomAlign("33", h_align="<", v_align="_"), "44444"),
-    CutomRow(
+    (CustomAlign("33", h_align="<", v_align="_"), "44444"),
+    CustomRow(
         (
             "55555",
-            CutomAlign(  # maybe max_width: Tuple[int, ...]
+            CustomAlign(  # maybe max_width: Tuple[int, ...]
                 "66666",
                 h_align=">",
                 v_align="-",
@@ -114,7 +114,7 @@ table = [
         max_height=6,
         maximize_height=True, 
     ),
-    CutomRow(("77777", "88888"), max_height=1),
+    CustomRow(("77777", "88888"), max_height=1),
 ]
 kwargs = {
     "h_align": "^",
@@ -124,6 +124,56 @@ kwargs = {
     "maximize_height": True,
 }
 Table(table).print(**kwargs)
+┌───────────┬───────────┐
+│   11111   │   22222   │
+│           │           │
+│           │           │
+├───────────┼───────────┤
+│           │   44444   │
+│           │           │
+│ 33        │           │
+├───────────┼───────────┤
+│   55555   │           │
+│           │           │
+│           │     66666 │
+│           │           │
+│           │           │
+│           │           │
+├───────────┼───────────┤
+│   77777   │   88888   │
+└───────────┴───────────┘
+```
+
+```pycon
+from table2string import Table, Themes, CustomCell, CustomRow
+table = [
+    ("1", "11111", "22222", "3"),
+    ("s", CustomCell("44444", collcount=2), "4"),
+    ("j", "55555", "66666", "t"),
+    ("c", "77777", "88888", "y"),
+]
+kwargs = {
+    "theme": Themes.thin,
+}
+Table(table).print(**kwargs)
+┌───┬───────┬───────┬───┐
+│ 1 │ 11111 │ 22222 │ 3 │
+├───┼───────┴───────┼───┤
+│ s │ 44444         │ 4 │
+├───┼───────┬───────┼───┤
+│ j │ 55555 │ 66666 │ t │
+├───┼───────┼───────┼───┤
+│ c │ 77777 │ 88888 │ y │
+└───┴───────┴───────┴───┘
+┌───────┬───────┐
+│ 11111 │ 22222 │
+├───────┴───────┤
+│ 44444         │
+├───────┬───────┤
+│ 55555 │ 66666 │
+├───────┼───────┤
+│ 77777 │ 88888 │
+└───────┴───────┘
 ┌───────────┬───────────┐
 │   11111   │   22222   │
 │           │           │

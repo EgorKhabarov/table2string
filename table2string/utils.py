@@ -21,10 +21,12 @@ def get_text_width_in_console(text: str) -> int:
     text = ANSI_REGEX.sub("", text)
     width = 0
     for char in text:
-        if unicodedata.east_asian_width(char) in ("W", "F"):
-            width += 2  # Wide characters
+        if unicodedata.east_asian_width(char) in "WF":
+            width += 2
+        elif unicodedata.combining(char):
+            width += 0
         else:
-            width += 1  # Narrow characters
+            width += 1
     return width
 
 
