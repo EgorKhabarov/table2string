@@ -1,9 +1,9 @@
+from typing import Self
 from functools import lru_cache
 from dataclasses import dataclass
-from typing import Optional, Dict, Tuple
 
 
-BORDER_EXAMPLE_SYMBOLS: Dict[str, Tuple[str, ...]] = {
+BORDER_EXAMPLE_SYMBOLS: dict[str, tuple[str, ...]] = {
     "horizontal": (
         "─",
         "━",
@@ -124,7 +124,7 @@ class Border:
     top_horizontal_plus: str
     bottom_horizontal_plus: str
 
-    def get_border_name(self, border: str) -> Optional[str]:
+    def get_border_name(self, border: str) -> str | None:
         if border == self.horizontal:
             return "horizontal"
         elif border == self.vertical:
@@ -168,7 +168,7 @@ class Theme:
         self,
         name: str,
         border: Border,
-        custom_sub_table_theme: Optional["Theme"] = None,
+        custom_sub_table_theme: Self | None = None,
     ):
         self.name = name
         self.border = border
@@ -585,7 +585,7 @@ class Themes:
     )
 
 
-translate_border_dict: Dict[str, Dict[Tuple[str, str], str]] = {
+translate_border_dict: dict[str, dict[tuple[str, str], str]] = {
     "border_left": {
         ("vertical", "vertical_left"): "vertical_left",
         ("vertical", "vertical_left_plus"): "vertical_left_plus",
@@ -634,7 +634,7 @@ def translate_theme_border(
     """
     border_from_name: str = theme.border.get_border_name(border_from) or ""
     border_to_name: str = theme.border.get_border_name(border_to) or ""
-    border_result: Optional[str] = translate_border_dict[side].get(
+    border_result: str | None = translate_border_dict[side].get(
         (border_from_name, border_to_name)
     )
 

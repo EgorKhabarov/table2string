@@ -1,7 +1,6 @@
 import re
 import shutil
 import unicodedata
-from typing import Union, List, Tuple, Optional, Dict
 
 from table2string.themes import Theme, Themes, translate_theme_border
 from table2string.aligns import HorizontalAlignment, VerticalAlignment
@@ -31,11 +30,11 @@ def get_text_width_in_console(text: str) -> int:
 
 
 def proportional_change(
-    row_widths: Tuple[int, ...],
+    row_widths: tuple[int, ...],
     max_width: int = 120,
-    min_row_widths: Optional[Tuple[int, ...]] = None,
+    min_row_widths: tuple[int, ...] | None = None,
     proportion_coefficient: float = 0.5,
-) -> Tuple[int, ...]:
+) -> tuple[int, ...]:
     """
     The function changes the values in `row_widths` proportionally,
     so that the sum of the numbers remains equal to `max_width`
@@ -127,14 +126,15 @@ def proportional_change(
 
 def transform_align(
     column_count: int,
-    align: Optional[
-        Union[
-            Tuple[Union[HorizontalAlignment, VerticalAlignment, str], ...],
-            Union[HorizontalAlignment, VerticalAlignment, str],
-        ]
-    ] = None,
+    align: (
+        tuple[HorizontalAlignment | VerticalAlignment | str, ...]
+        | HorizontalAlignment
+        | VerticalAlignment
+        | str
+        | None
+    ) = None,
     default: str = "*",
-) -> Tuple[str, ...]:
+) -> tuple[str, ...]:
     """
     Convert align to a suitable view
 
@@ -168,12 +168,12 @@ def transform_align(
 
 
 def transform_width(
-    width: Union[int, Tuple[int, ...], None],
+    width: int | tuple[int, ...] | None,
     column_count: int,
-    row_widths: Tuple[int, ...],
-    min_row_widths: Optional[Tuple[int, ...]] = None,
+    row_widths: tuple[int, ...],
+    min_row_widths: tuple[int, ...] | None = None,
     proportion_coefficient: float = 0.5,
-) -> Tuple[int, ...]:
+) -> tuple[int, ...]:
     """
     Convert width to a suitable view
 
@@ -213,11 +213,11 @@ def transform_width(
 
 def split_text(
     text: str,
-    width: Optional[int] = None,
-    height: Optional[int] = None,
+    width: int | None = None,
+    height: int | None = None,
     line_break_symbol: str = "\\",
     cell_break_symbol: str = "…",
-) -> Tuple[List[str], List[str], bool, Dict[str, Tuple[str, ...]]]:
+) -> tuple[list[str], list[str], bool, dict[str, tuple[str, ...]]]:
     """
     Splits text to the desired width and height
 
@@ -233,8 +233,8 @@ def split_text(
     if width is None:
         width = len(max(lines))
 
-    result_lines: List[str] = []
-    result_symbol: List[str] = []
+    result_lines: list[str] = []
+    result_symbol: list[str] = []
 
     for line in lines:
         if get_text_width_in_console(line) == 0:
@@ -264,8 +264,8 @@ def split_text(
 
 
 def split_text_for_sub_table(
-    string_sub_table: str, max_height: Optional[int] = None
-) -> Tuple[List[str], List[str], bool, Dict[str, Tuple[str, ...]]]:
+    string_sub_table: str, max_height: int | None = None
+) -> tuple[list[str], list[str], bool, dict[str, tuple[str, ...]]]:
     """
 
     :param string_sub_table:
@@ -291,13 +291,13 @@ def split_text_for_sub_table(
 
 
 def fill_line(
-    columns_lines: Tuple[List[str], ...],
-    columns_symbols: Tuple[List[str], ...],
-    subtable_columns: Tuple[bool, ...],
-    border_data_list: Tuple[Dict[str, Tuple[str, ...]], ...],
-    widths: Tuple[int, ...],
-    h_align: Tuple[str, ...],
-    v_align: Tuple[str, ...],
+    columns_lines: tuple[list[str], ...],
+    columns_symbols: tuple[list[str], ...],
+    subtable_columns: tuple[bool, ...],
+    border_data_list: tuple[dict[str, tuple[str, ...]], ...],
+    widths: tuple[int, ...],
+    h_align: tuple[str, ...],
+    v_align: tuple[str, ...],
     theme: Theme = Themes.ascii_thin,
 ) -> str:
     """
@@ -345,15 +345,15 @@ def fill_line(
         if not subtable_columns[n]:
             raw_lines[:] = apply_v_align(raw_lines, v_align[n])
 
-    result_lines: List[str] = []
+    result_lines: list[str] = []
     symbols = list(zip(*columns_symbols))
     vertical = theme.border.vertical
     tags = [False for _ in subtable_columns]
-    lines: Tuple[str, ...]
+    lines: tuple[str, ...]
 
     for ci, lines in enumerate(zip(*columns_lines)):  # ci - column index
         # Selects alignment individually for each column and each row
-        current_h_align: List[str] = []
+        current_h_align: list[str] = []
         for ri, line in enumerate(lines):
             if tags[ri]:
                 current_h_align.append(h_align_right[ri])
@@ -362,11 +362,11 @@ def fill_line(
             if not line.isspace():
                 tags[ri] = True
 
-        template_list: List[str] = []
+        template_list: list[str] = []
         row_length = len(lines)
         for ri, line in enumerate(lines):  # ri - row index
             if subtable_columns[ri]:
-                border_data: Dict[str, Tuple[str, ...]] = border_data_list[ri]
+                border_data: dict[str, tuple[str, ...]] = border_data_list[ri]
                 if ri == 0:
                     template_list.append(
                         translate_theme_border(
@@ -424,7 +424,7 @@ def fill_line(
     return "\n".join(result_lines)
 
 
-def apply_v_align(cell_rows: List[str], v_align: str) -> List[str]:
+def apply_v_align(cell_rows: list[str], v_align: str) -> list[str]:
     """
     Apply v_align
 
@@ -461,8 +461,8 @@ def apply_border_data(
     string_border: str,
     side: str,
     theme: Theme,
-    border_data_list: Tuple[Dict[str, Tuple[str, ...]], ...],
-    max_widths: Tuple[int, ...],
+    border_data_list: tuple[dict[str, tuple[str, ...]], ...],
+    max_widths: tuple[int, ...],
 ) -> str:
     """
     Connects table and subtable boundaries
@@ -499,7 +499,7 @@ def apply_border_data(
     return "".join(string_border_list)
 
 
-def terminal_size(default: Tuple[int, int] = (120, 30)) -> Tuple[int, int]:
+def terminal_size(default: tuple[int, int] = (120, 30)) -> tuple[int, int]:
     """
     :param default: Will be returned if it is not possible to get the console size
     :return: columns, lines
@@ -508,7 +508,7 @@ def terminal_size(default: Tuple[int, int] = (120, 30)) -> Tuple[int, int]:
     return size.columns, size.lines
 
 
-def generate_borders(theme: Theme, max_widths: Tuple[int, ...]) -> Tuple[str, ...]:
+def generate_borders(theme: Theme, max_widths: tuple[int, ...]) -> tuple[str, ...]:
     """
     EXAMPLE
 

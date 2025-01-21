@@ -1,6 +1,6 @@
 import csv
 from io import TextIOWrapper, StringIO
-from typing import Union, Tuple, Any, Sequence, List, Dict, Optional, Iterable, cast
+from typing import Any, Sequence, Iterable, cast
 
 from table2string.themes import Theme, Themes
 from table2string.aligns import HorizontalAlignment, VerticalAlignment
@@ -20,30 +20,30 @@ from table2string.utils import (
 def print_table(
     table: Sequence[Sequence[Any]],
     *,
-    h_align: Union[
-        Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]
-    ] = HorizontalAlignment.AUTO,
-    v_align: Union[
-        Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
-    ] = VerticalAlignment.TOP,
-    name: Optional[str] = None,
-    name_h_align: Union[HorizontalAlignment, str] = HorizontalAlignment.CENTER,
-    name_v_align: Union[VerticalAlignment, str] = VerticalAlignment.MIDDLE,
-    column_names: Optional[Sequence[str]] = None,
-    column_names_h_align: Union[
-        Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]
-    ] = HorizontalAlignment.CENTER,
-    column_names_v_align: Union[
-        Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
-    ] = VerticalAlignment.MIDDLE,
-    max_width: Union[int, Tuple[int, ...], None] = None,
-    max_height: Optional[int] = None,
+    h_align: (
+        tuple[HorizontalAlignment | str, ...] | HorizontalAlignment | str
+    ) = HorizontalAlignment.AUTO,
+    v_align: (
+        tuple[VerticalAlignment | str, ...] | VerticalAlignment | str
+    ) = VerticalAlignment.TOP,
+    name: str | None = None,
+    name_h_align: HorizontalAlignment | str = HorizontalAlignment.CENTER,
+    name_v_align: VerticalAlignment | str = VerticalAlignment.MIDDLE,
+    column_names: Sequence[str] | None = None,
+    column_names_h_align: (
+        tuple[HorizontalAlignment | str, ...] | HorizontalAlignment | str
+    ) = HorizontalAlignment.CENTER,
+    column_names_v_align: (
+        tuple[VerticalAlignment | str, ...] | VerticalAlignment | str
+    ) = VerticalAlignment.MIDDLE,
+    max_width: int | tuple[int, ...] | None = None,
+    max_height: int | None = None,
     maximize_height: bool = False,
     line_break_symbol: str = "\\",
     cell_break_symbol: str = "…",
-    sep: Union[bool, range, tuple] = True,
-    end: Optional[str] = "\n",
-    file: Optional[TextIOWrapper | StringIO] = None,
+    sep: bool | range | tuple = True,
+    end: str | None = "\n",
+    file: TextIOWrapper | StringIO | None = None,
     theme: Theme = Themes.ascii_thin,
     ignore_width_errors: bool = False,
     proportion_coefficient: float = 0.5,
@@ -73,8 +73,8 @@ def print_table(
     :param proportion_coefficient: Reduction coefficient for too large numbers
     :return: None
     """
-    list_table: List[List[Union[str, Table, Any]]] = list(list(row) for row in table)
-    column_names_list: List[Union[str, Table, Any]] = (
+    list_table: list[list[str | Table | Any]] = list(list(row) for row in table)
+    column_names_list: list[str | Table | Any] = (
         list(column_names) if column_names else []
     )
 
@@ -191,10 +191,10 @@ def print_table(
         down_separator,
     ) = generate_borders(theme, max_widths)
 
-    rows: Tuple[List[str], ...]
-    symbols: Tuple[List[str], ...]
-    subtable_columns: Tuple[bool, ...]
-    border_data_list: Tuple[Dict[str, Tuple[str, ...]], ...]
+    rows: tuple[list[str], ...]
+    symbols: tuple[list[str], ...]
+    subtable_columns: tuple[bool, ...]
+    border_data_list: tuple[dict[str, tuple[str, ...]], ...]
 
     if name:
         if up_separator.strip():
@@ -203,11 +203,11 @@ def print_table(
         max_name_width = sum(max_widths) + (3 * column_count) + 1 - 4
 
         rows, symbols, subtable_columns, border_data_list = cast(
-            Tuple[
-                Tuple[List[str], ...],
-                Tuple[List[str], ...],
-                Tuple[bool, ...],
-                Tuple[Dict[str, Tuple[str, ...]], ...],
+            tuple[
+                tuple[list[str], ...],
+                tuple[list[str], ...],
+                tuple[bool, ...],
+                tuple[dict[str, tuple[str, ...]], ...],
             ],
             zip(
                 split_text(
@@ -233,14 +233,14 @@ def print_table(
             file=file,
         )
 
-    previous_border_data: Tuple[Dict[str, Tuple[str, ...]], ...] = ({"": ("",)},)
+    previous_border_data: tuple[dict[str, tuple[str, ...]], ...] = ({"": ("",)},)
 
     for ri, row in enumerate(list_table):
         if ri != 0:
             print("", file=file, end="\n")
 
-        splitted_row: List[
-            Tuple[List[str], List[str], bool, Dict[str, Tuple[str, ...]]]
+        splitted_row: list[
+            tuple[list[str], list[str], bool, dict[str, tuple[str, ...]]]
         ] = []
 
         # Trimming long lines
@@ -364,29 +364,29 @@ def print_table(
 def stringify_table(
     table: Sequence[Sequence[Any]],
     *,
-    h_align: Union[
-        Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]
-    ] = HorizontalAlignment.AUTO,
-    v_align: Union[
-        Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
-    ] = VerticalAlignment.TOP,
-    name: Optional[str] = None,
-    name_h_align: Union[HorizontalAlignment, str] = HorizontalAlignment.CENTER,
-    name_v_align: Union[VerticalAlignment, str] = VerticalAlignment.MIDDLE,
-    column_names: Optional[Sequence[str]] = None,
-    column_names_h_align: Union[
-        Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]
-    ] = HorizontalAlignment.CENTER,
-    column_names_v_align: Union[
-        Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
-    ] = VerticalAlignment.MIDDLE,
-    max_width: Union[int, Tuple[int, ...], None] = None,
-    max_height: Optional[int] = None,
+    h_align: (
+        tuple[HorizontalAlignment | str, ...] | HorizontalAlignment | str
+    ) = HorizontalAlignment.AUTO,
+    v_align: (
+        tuple[VerticalAlignment | str, ...] | VerticalAlignment | str
+    ) = VerticalAlignment.TOP,
+    name: str | None = None,
+    name_h_align: HorizontalAlignment | str = HorizontalAlignment.CENTER,
+    name_v_align: VerticalAlignment | str = VerticalAlignment.MIDDLE,
+    column_names: Sequence[str] | None = None,
+    column_names_h_align: (
+        tuple[HorizontalAlignment | str, ...] | HorizontalAlignment | str
+    ) = HorizontalAlignment.CENTER,
+    column_names_v_align: (
+        tuple[VerticalAlignment | str, ...] | VerticalAlignment | str
+    ) = VerticalAlignment.MIDDLE,
+    max_width: int | tuple[int, ...] | None = None,
+    max_height: int | None = None,
     maximize_height: bool = False,
     line_break_symbol: str = "\\",
     cell_break_symbol: str = "…",
-    sep: Union[bool, range, tuple] = True,
-    end: Optional[str] = "",
+    sep: bool | range | tuple = True,
+    end: str | None = "",
     theme: Theme = Themes.ascii_thin,
     ignore_width_errors: bool = False,
     proportion_coefficient: float = 0.5,
@@ -445,8 +445,8 @@ class Table:
     def __init__(
         self,
         table: Sequence[Sequence[Any]],
-        name: Optional[str] = None,
-        column_names: Optional[Sequence[str]] = None,
+        name: str | None = None,
+        column_names: Sequence[str] | None = None,
         **kwargs: Any,
     ):
         """
@@ -475,8 +475,8 @@ class Table:
     def from_table(
         cls,
         table: Sequence[Sequence[Any]],
-        name: Optional[str] = None,
-        column_names: Optional[Sequence[str]] = None,
+        name: str | None = None,
+        column_names: Sequence[str] | None = None,
         **kwargs: Any,
     ) -> "Table":
         return cls(table=table, name=name, column_names=column_names, **kwargs)
@@ -485,7 +485,7 @@ class Table:
     def from_db_cursor(
         cls,
         cursor,
-        name: Optional[str] = None,
+        name: str | None = None,
         column_names: bool = False,
         **kwargs: Any,
     ) -> "Table":
@@ -502,9 +502,9 @@ class Table:
     def from_csv(
         cls,
         file: Iterable[str],
-        name: Optional[str] = None,
+        name: str | None = None,
         column_names: bool = True,
-        reader_kwargs: Optional[Dict[str, Any]] = None,
+        reader_kwargs: dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> "Table":
         csv_table = list(csv.reader(file, **reader_kwargs or {}))
@@ -515,27 +515,27 @@ class Table:
     def stringify(
         self,
         *,
-        h_align: Union[
-            Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]
-        ] = HorizontalAlignment.AUTO,
-        v_align: Union[
-            Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
-        ] = VerticalAlignment.TOP,
-        name_h_align: Union[HorizontalAlignment, str] = HorizontalAlignment.CENTER,
-        name_v_align: Union[VerticalAlignment, str] = VerticalAlignment.MIDDLE,
-        column_names_h_align: Union[
-            Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]
-        ] = HorizontalAlignment.CENTER,
-        column_names_v_align: Union[
-            Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
-        ] = VerticalAlignment.MIDDLE,
-        max_width: Union[int, Tuple[int, ...], None] = None,
-        max_height: Optional[int] = None,
+        h_align: (
+            tuple[HorizontalAlignment | str, ...] | HorizontalAlignment | str
+        ) = HorizontalAlignment.AUTO,
+        v_align: (
+            tuple[VerticalAlignment | str, ...] | VerticalAlignment | str
+        ) = VerticalAlignment.TOP,
+        name_h_align: HorizontalAlignment | str = HorizontalAlignment.CENTER,
+        name_v_align: VerticalAlignment | str = VerticalAlignment.MIDDLE,
+        column_names_h_align: (
+            tuple[HorizontalAlignment | str, ...] | HorizontalAlignment | str
+        ) = HorizontalAlignment.CENTER,
+        column_names_v_align: (
+            tuple[VerticalAlignment | str, ...] | VerticalAlignment | str
+        ) = VerticalAlignment.MIDDLE,
+        max_width: int | tuple[int, ...] | None = None,
+        max_height: int | None = None,
         maximize_height: bool = False,
         line_break_symbol: str = "\\",
         cell_break_symbol: str = "…",
-        sep: Union[bool, range, tuple] = True,
-        end: Optional[str] = "",
+        sep: bool | range | tuple = True,
+        end: str | None = "",
         theme: Theme = Themes.ascii_thin,
         ignore_width_errors: bool = False,
         proportion_coefficient: float = 0.5,
@@ -588,28 +588,28 @@ class Table:
     def print(
         self,
         *,
-        h_align: Union[
-            Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]
-        ] = HorizontalAlignment.AUTO,
-        v_align: Union[
-            Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
-        ] = VerticalAlignment.TOP,
-        name_h_align: Union[HorizontalAlignment, str] = HorizontalAlignment.CENTER,
-        name_v_align: Union[VerticalAlignment, str] = VerticalAlignment.MIDDLE,
-        column_names_h_align: Union[
-            Tuple[Union[HorizontalAlignment, str], ...], Union[HorizontalAlignment, str]
-        ] = HorizontalAlignment.CENTER,
-        column_names_v_align: Union[
-            Tuple[Union[VerticalAlignment, str], ...], Union[VerticalAlignment, str]
-        ] = VerticalAlignment.MIDDLE,
-        max_width: Union[int, Tuple[int, ...], None] = None,
-        max_height: Optional[int] = None,
+        h_align: (
+            tuple[HorizontalAlignment | str, ...] | HorizontalAlignment | str
+        ) = HorizontalAlignment.AUTO,
+        v_align: (
+            tuple[VerticalAlignment | str, ...] | VerticalAlignment | str
+        ) = VerticalAlignment.TOP,
+        name_h_align: HorizontalAlignment | str = HorizontalAlignment.CENTER,
+        name_v_align: VerticalAlignment | str = VerticalAlignment.MIDDLE,
+        column_names_h_align: (
+            tuple[HorizontalAlignment | str, ...] | HorizontalAlignment | str
+        ) = HorizontalAlignment.CENTER,
+        column_names_v_align: (
+            tuple[VerticalAlignment | str, ...] | VerticalAlignment | str
+        ) = VerticalAlignment.MIDDLE,
+        max_width: int | tuple[int, ...] | None = None,
+        max_height: int | None = None,
         maximize_height: bool = False,
         line_break_symbol: str = "\\",
         cell_break_symbol: str = "…",
-        sep: Union[bool, range, tuple] = True,
-        end: Optional[str] = "\n",
-        file: Optional[TextIOWrapper | StringIO] = None,
+        sep: bool | range | tuple = True,
+        end: str | None = "\n",
+        file: TextIOWrapper | StringIO | None = None,
         theme: Theme = Themes.ascii_thin,
         ignore_width_errors: bool = False,
         proportion_coefficient: float = 0.5,
@@ -678,7 +678,7 @@ class Table:
 
 def get_column_widths(
     table: Sequence[Sequence], minimum: bool = False
-) -> Tuple[int, ...]:
+) -> tuple[int, ...]:
     """
     Calculates and returns a list of column widths.
     If the matrix cell is an instance of Table recursion is used
