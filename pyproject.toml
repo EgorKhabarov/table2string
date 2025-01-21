@@ -9,12 +9,11 @@ description = "A library to convert tables to string with full support for line 
 authors = [{name = "EgorKhabarov", email = "not.a.fan.of.broccoli@gmail.com"}]
 license = {text = "GPL2"}
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 keywords = ["table", "string", "tools"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
