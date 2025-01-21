@@ -1,4 +1,4 @@
-from typing import Self
+from typing import Optional
 from functools import lru_cache
 from dataclasses import dataclass
 
@@ -168,7 +168,7 @@ class Theme:
         self,
         name: str,
         border: Border,
-        custom_sub_table_theme: Self | None = None,
+        custom_sub_table_theme: Optional["Theme"] = None,
     ):
         self.name = name
         self.border = border
