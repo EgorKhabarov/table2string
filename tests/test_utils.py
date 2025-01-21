@@ -17,6 +17,7 @@ from table2string.utils import (
 def test_get_text_width_in_console():
     assert get_text_width_in_console("123") == 3
     assert get_text_width_in_console("\U0001f34f\U0001f34e") == 4
+    assert get_text_width_in_console("\u0308") == 0
 
 
 def test_proportional_change():
