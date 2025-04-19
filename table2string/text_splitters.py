@@ -56,7 +56,7 @@ class BaseTextSplitter:
             result_symbols[-1] = cell_break_symbol
 
         is_subtable = False
-        borders = {}
+        borders: dict[str, tuple[str, ...]] = {}
         return result_lines, result_symbols, is_subtable, borders
 
 
@@ -66,8 +66,7 @@ class AnsiTextSplitter(BaseTextSplitter):
     CENTER_COLOR_REGEX = re.compile(rf"({COLOR_REGEX.pattern})*\x1b\[0m(?!$)")
 
     OSC_LINK_REGEX = re.compile(
-        r"(\x1b]8;;(?P<url>[^\x1b]+)\x1b\\)(?P<text>.*?)(\x1b]8;;\x1b\\)",
-        re.DOTALL
+        r"(?s)(\x1b]8;;(?P<url>[^\x1b]+)\x1b\\)(?P<text>.*?)(\x1b]8;;\x1b\\)"
     )
     OSC_LINK_OPEN = "\x1b]8;;{url}\x1b\\"
     OSC_LINK_CLOSE = "\x1b]8;;\x1b\\"
@@ -97,11 +96,24 @@ class AnsiTextSplitter(BaseTextSplitter):
             if mo:
                 tok = mo.group(0)
                 url = mo.group("url")
-                events.append({"type": "link_open", "plain_pos": plain_idx, "token": tok, "url": url})
+                events.append(
+                    {
+                        "type": "link_open",
+                        "plain_pos": plain_idx,
+                        "token": tok,
+                        "url": url,
+                    }
+                )
                 i += len(tok)
                 continue
             if text.startswith(self.OSC_LINK_CLOSE, i):
-                events.append({"type": "link_close", "plain_pos": plain_idx, "token": self.OSC_LINK_CLOSE})
+                events.append(
+                    {
+                        "type": "link_close",
+                        "plain_pos": plain_idx,
+                        "token": self.OSC_LINK_CLOSE,
+                    }
+                )
                 i += len(self.OSC_LINK_CLOSE)
                 continue
             mc = self.COLOR_REGEX.match(text, i)
@@ -134,7 +146,11 @@ class AnsiTextSplitter(BaseTextSplitter):
         opens = [e for e in events if e["type"] == "link_open"]
         closes = [e for e in events if e["type"] == "link_close"]
         links = [
-            {"url": op["url"], "plain_start": op["plain_pos"], "plain_end": cl["plain_pos"]}
+            {
+                "url": op["url"],
+                "plain_start": op["plain_pos"],
+                "plain_end": cl["plain_pos"],
+            }
             for op, cl in zip(opens, closes)
         ]
 
@@ -146,8 +162,14 @@ class AnsiTextSplitter(BaseTextSplitter):
         inherited_color = ""
         for (start, end), ln in zip(boundaries, lines):
             # Ссылки, остающиеся открытыми через границу сверху
-            active = [l for l in links if l["plain_start"] < start < l["plain_end"]]
-            prefix = inherited_color + "".join(f"\x1b]8;;{l['url']}\x1b\\" for l in active)
+            active = [
+                link
+                for link in links
+                if link["plain_start"] < start < link["plain_end"]
+            ]
+            prefix = inherited_color + "".join(
+                f"\x1b]8;;{link['url']}\x1b\\" for link in active
+            )
             out = [prefix]
             last = 0
 
@@ -156,20 +178,24 @@ class AnsiTextSplitter(BaseTextSplitter):
             for e in events:
                 if e["type"] == "color" and start <= e["plain_pos"] < end:
                     evs.append(e)
-            for l in links:
-                if start <= l["plain_start"] < end:
-                    evs.append({
-                        "type": "link_open",
-                        "plain_pos": l["plain_start"],
-                        "token": f"\x1b]8;;{l['url']}\x1b\\"
-                    })
+            for link in links:
+                if start <= link["plain_start"] < end:
+                    evs.append(
+                        {
+                            "type": "link_open",
+                            "plain_pos": link["plain_start"],
+                            "token": f"\x1b]8;;{link['url']}\x1b\\",
+                        }
+                    )
                 # <-- здесь правка: ставим '<' слева, чтобы не захватывать границу start
-                if start < l["plain_end"] <= end:
-                    evs.append({
-                        "type": "link_close",
-                        "plain_pos": l["plain_end"],
-                        "token": self.OSC_LINK_CLOSE
-                    })
+                if start < link["plain_end"] <= end:
+                    evs.append(
+                        {
+                            "type": "link_close",
+                            "plain_pos": link["plain_end"],
+                            "token": self.OSC_LINK_CLOSE,
+                        }
+                    )
 
             # Сортируем и вставляем
             evs.sort(key=lambda e: (e["plain_pos"], priority[e["type"]]))
@@ -180,13 +206,15 @@ class AnsiTextSplitter(BaseTextSplitter):
                     out.append(ln[last:rel])
                 out.append(e["token"])
                 if e["type"] == "color":
-                    curr_color = "" if e["token"] == "\x1b[0m" else curr_color + e["token"]
+                    curr_color = (
+                        "" if e["token"] == "\x1b[0m" else curr_color + e["token"]
+                    )
                 last = rel
             out.append(ln[last:])
 
             # Закрываем ссылки, выходящие за конец строки
-            for l in links:
-                if l["plain_start"] < end < l["plain_end"]:
+            for link in links:
+                if link["plain_start"] < end < link["plain_end"]:
                     out.append(self.OSC_LINK_CLOSE)
 
             # Закрываем цвет, если он активен

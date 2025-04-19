@@ -67,7 +67,10 @@ def test_split_text():
 
 
 def test_color_escape_sequence():
-    assert split_text("\x1b[34mbl\nue\x1b[0m text")[0] == ["\x1b[34mbl\x1b[0m", "\x1b[34mue\x1b[0m text"]
+    assert split_text("\x1b[34mbl\nue\x1b[0m text")[0] == [
+        "\x1b[34mbl\x1b[0m",
+        "\x1b[34mue\x1b[0m text",
+    ]
     assert split_text("t\x1b[31mex\x1b[0mt")[0] == ["t\x1b[31mex\x1b[0mt"]
     assert split_text("t\x1b[31me\x1b[1mx\x1b[0mt", width=1)[0] == [
         "t",
@@ -77,7 +80,7 @@ def test_color_escape_sequence():
     ]
     assert split_text("\x1b[32m\x1b[40;1m\x1b[1mtext\n\x1b[0mtext1")[0] == [
         "\x1b[32m\x1b[40;1m\x1b[1mtext\x1b[0m",
-        f"text1",
+        "text1",
     ]
     assert split_text("\x1b[32m\x1b[40;1m\x1b[1mtext\x1b[0m\ntex\nt2")[0] == [
         "\x1b[32m\x1b[40;1m\x1b[1mtext\x1b[0m",
@@ -133,30 +136,36 @@ def test_color_escape_sequence():
             ),
         ]
     )
-    assert table.stringify(max_width=(4,), line_break_symbol="-") == """
+    assert (
+        table.stringify(max_width=(4,), line_break_symbol="-")
+        == """
 +------+------+------+------+------+------+------+
 | \x1b[31m1234\x1b[0m |    5 | 67\x1b[31m89\x1b[0m-| abc\x1b[31mX\x1b[0m-| \x1b[32mgree\x1b[0m-| \x1b[34mbl\x1b[0m   | 123\x1b[32m1\x1b[0m-|
 |      |      | \x1b[31m0\x1b[0m    | \x1b[31mYZ\x1b[0mde-| \x1b[32mn\x1b[0m    | \x1b[34mue\x1b[0m t-| \x1b[32m23\x1b[0mqp-|
 |      |      | \x1b[31m1112\x1b[0m | f    |      | ext  | ow   |
 +------+------+------+------+------+------+------+
 """.strip()
+    )
     table = Table(
         [
-            (
-                "\x1b[31mq\x1b[33mw\x1b[34me\x1b[35mr\x1b[0mt\x1b[46my",
-            ),
+            ("\x1b[31mq\x1b[33mw\x1b[34me\x1b[35mr\x1b[0mt\x1b[46my",),
         ]
     )
-    assert table.stringify(max_width=(4,), line_break_symbol="-") == """
+    assert (
+        table.stringify(max_width=(4,), line_break_symbol="-")
+        == """
 +------+
 | \x1b[31mq\x1b[33mw\x1b[34me\x1b[35mr\x1b[0m-|
 | t\x1b[46my\x1b[0m   |
 +------+
 """.strip()
+    )
 
 
 def test_osc_link_escape_sequence():
-    assert split_text("#0nk: \x1b]8;;https://example.com\x1b\\Example\x1b]8;;\x1b\\ end", width=3)[0] == [
+    assert split_text(
+        "#0nk: \x1b]8;;https://example.com\x1b\\Example\x1b]8;;\x1b\\ end", width=3
+    )[0] == [
         "#0n",
         "k: ",
         "\x1b]8;;https://example.com\x1b\\Exa\x1b]8;;\x1b\\",
@@ -165,15 +174,18 @@ def test_osc_link_escape_sequence():
         "nd",
     ]
 
-    assert split_text("#1nk: \x1b]8;;https://example.com\x1b\\Example\x1b]8;;\x1b\\ end")[0] == [
+    assert split_text(
         "#1nk: \x1b]8;;https://example.com\x1b\\Example\x1b]8;;\x1b\\ end"
-    ]
+    )[0] == ["#1nk: \x1b]8;;https://example.com\x1b\\Example\x1b]8;;\x1b\\ end"]
     assert split_text(
         "#2nk: \x1b]8;;https://example.com\x1b\\Ex\x1b[31mam\x1b[0mple\x1b]8;;\x1b\\ end"
     )[0] == [
         "#2nk: \x1b]8;;https://example.com\x1b\\Ex\x1b[31mam\x1b[0mple\x1b]8;;\x1b\\ end"
     ]
-    assert split_text("#3nk: \x1b]8;;https://example.com\x1b\\Ex\x1b[31mam\x1b[0mple\x1b]8;;\x1b\\ end", width=3)[0] == [
+    assert split_text(
+        "#3nk: \x1b]8;;https://example.com\x1b\\Ex\x1b[31mam\x1b[0mple\x1b]8;;\x1b\\ end",
+        width=3,
+    )[0] == [
         "#3n",
         "k: ",
         "\x1b]8;;https://example.com\x1b\\Ex\x1b[31ma\x1b]8;;\x1b\\\x1b[0m",
@@ -182,8 +194,10 @@ def test_osc_link_escape_sequence():
         "nd",
     ]
 
-    assert split_text("link: \x1b]8;;https://example.com\x1b\\Example\x1b]8;;\x1b\\")[0] == [
-        "link: \x1b]8;;https://example.com\x1b\\Example\x1b]8;;\x1b\\"
+    assert split_text(
+        "link: \x1b]8;;https://example.com\x1b\\Example\x1b]8;;\x1b\\",
+    )[0] == [
+        "link: \x1b]8;;https://example.com\x1b\\Example\x1b]8;;\x1b\\",
     ]
     table = Table(
         [
@@ -212,7 +226,9 @@ def test_osc_link_escape_sequence():
             ),
         ]
     )
-    assert table.stringify() == """
+    assert (
+        table.stringify()
+        == """
 +---------------+-----------+----------------------------------------+
 |          1234 |         5 | 67890                                  |
 |               |           | 1112                                   |
@@ -225,14 +241,15 @@ def test_osc_link_escape_sequence():
 | \x1b[34mue\x1b[0m text       | xt        |                                        |
 +---------------+-----------+----------------------------------------+
 """.strip()
+    )
     table = Table(
         [
-            (
-                "link: \x1b]8;;https://example.com\x1b\\Example\x1b]8;;\x1b\\end",
-            ),
+            ("link: \x1b]8;;https://example.com\x1b\\Example\x1b]8;;\x1b\\end",),
         ],
     )
-    assert table.stringify(max_width=(3,), line_break_symbol="↩") == """
+    assert (
+        table.stringify(max_width=(3,), line_break_symbol="↩")
+        == """
 +-----+
 | lin↩|
 | k: ↩|
@@ -242,14 +259,15 @@ def test_osc_link_escape_sequence():
 | d   |
 +-----+
 """.strip()
+    )
     table = Table(
         [
-            (
-                "link: \x1b]8;;https://example.com\x1b\\Ex\nample\x1b]8;;\x1b\\end",
-            ),
+            ("link: \x1b]8;;https://example.com\x1b\\Ex\nample\x1b]8;;\x1b\\end",),
         ],
     )
-    assert table.stringify(max_width=(3,), line_break_symbol="↩") == """
+    assert (
+        table.stringify(max_width=(3,), line_break_symbol="↩")
+        == """
 +-----+
 | lin↩|
 | k: ↩|
@@ -259,6 +277,7 @@ def test_osc_link_escape_sequence():
 | nd  |
 +-----+
 """.strip()
+    )
 
     assert split_text(
         "Link: "

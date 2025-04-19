@@ -11,7 +11,8 @@ def test_text_style():
             + style("Blue", fg=Color.BLUE, strike=True),
         )
         + " Text "
-        + style("Italic", italic=True) + "!"
+        + style("Italic", italic=True)
+        + "!"
     ) == (
         "Link: "
         "\x1b]8;;https://site.com\x1b\\"
