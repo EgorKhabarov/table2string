@@ -2,6 +2,7 @@ from table2string.text_styles import style, link, Color
 
 
 def test_text_style():
+    assert Color.RED == Color("\x1b[31m")
     assert (
         "Link: "
         + link(

@@ -1,7 +1,7 @@
-from enum import StrEnum
+from enum import Enum
 
 
-class Color(StrEnum):
+class Color(Enum):
     BLACK = "\x1b[30m"
     RED = "\x1b[31m"
     GREEN = "\x1b[32m"
@@ -20,7 +20,7 @@ class Color(StrEnum):
     BRIGHT_WHITE = "\x1b[97m"
 
 
-class BgColor(StrEnum):
+class BgColor(Enum):
     BLACK = "\x1b[40m"
     RED = "\x1b[41m"
     GREEN = "\x1b[42m"
