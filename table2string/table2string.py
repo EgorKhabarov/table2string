@@ -47,7 +47,7 @@ def print_table(
     theme: Theme = Themes.ascii_thin,
     ignore_width_errors: bool = False,
     proportion_coefficient: float = 0.5,
-    text_spliter: BaseTextSplitter = AnsiTextSplitter(escape_unsafe=False),
+    text_spliter: BaseTextSplitter = AnsiTextSplitter(),
 ) -> None:
     """
     Print the table in sys.stdout or file
@@ -393,7 +393,7 @@ def stringify_table(
     theme: Theme = Themes.ascii_thin,
     ignore_width_errors: bool = False,
     proportion_coefficient: float = 0.5,
-    text_spliter: BaseTextSplitter = AnsiTextSplitter(escape_unsafe=False),
+    text_spliter: BaseTextSplitter = AnsiTextSplitter(),
 ) -> str:
     """
 
@@ -546,7 +546,7 @@ class Table:
         theme: Theme = Themes.ascii_thin,
         ignore_width_errors: bool = False,
         proportion_coefficient: float = 0.5,
-        text_spliter: BaseTextSplitter = AnsiTextSplitter(escape_unsafe=False),
+        text_spliter: BaseTextSplitter = AnsiTextSplitter(),
     ) -> str:
         """
 
@@ -624,7 +624,7 @@ class Table:
         theme: Theme = Themes.ascii_thin,
         ignore_width_errors: bool = False,
         proportion_coefficient: float = 0.5,
-        text_spliter: BaseTextSplitter = AnsiTextSplitter(escape_unsafe=False),
+        text_spliter: BaseTextSplitter = AnsiTextSplitter(),
     ) -> None:
         """
         Print the table in sys.stdout or file

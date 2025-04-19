@@ -61,19 +61,12 @@ class BaseTextSplitter:
 
 
 class AnsiTextSplitter(BaseTextSplitter):
-    ESCAPE_UNSAFE_ANSI_REGEX = re.compile(
-        r"\x1b(?!\[[0-9;]*m|]8;;|\\)|[\x00-\x1a\x1c-\x1f\x7f-\x9f\u200b-\u200d\uFEFF]"
-    )
-
     COLOR_REGEX = re.compile(r"\x1b\[[0-9;]*m")
     OSC_LINK_OPEN_REGEX = re.compile(r"\x1b]8;;(?P<url>[^\x1b]+)\x1b\\")
     OSC_LINK_CLOSE = "\x1b]8;;\x1b\\"
 
     REDUNDANT_COLOR_ANSI_REGEX_1 = re.compile(rf"^({COLOR_REGEX.pattern})*\x1b\[0m")
     REDUNDANT_COLOR_ANSI_REGEX_2 = re.compile(rf"({COLOR_REGEX.pattern})*\x1b\[0m(?!$)")
-
-    def __init__(self, escape_unsafe: bool = False):
-        self.escape_unsafe = escape_unsafe
 
     def split_text(
         self,
@@ -83,12 +76,6 @@ class AnsiTextSplitter(BaseTextSplitter):
         line_break_symbol: str = "\\",
         cell_break_symbol: str = "…",
     ) -> tuple[list[str], list[str], bool, dict[str, tuple[str, ...]]]:
-        if self.escape_unsafe:
-            text = self.ESCAPE_UNSAFE_ANSI_REGEX.sub(
-                lambda m: repr(m[0])[1:-1],
-                text,
-            )
-
         plain = ""
         events: list[dict] = []
         plain_idx = 0
@@ -234,5 +221,65 @@ class AnsiTextSplitter(BaseTextSplitter):
         return restored, symbols, is_subtable, borders
 
 
-class HtmlTextSplitter(AnsiTextSplitter):
-    pass
+class AnsiTextSplitterEscapeUnsafe(AnsiTextSplitter):
+    ESCAPE_UNSAFE_ANSI_REGEX = re.compile(
+        r"\x1b(?!\[[0-9;]*m|]8;;|\\)|[\x00-\x1a\x1c-\x1f\x7f-\x9f\u200b-\u200d\uFEFF]"
+    )
+
+    def split_text(
+        self,
+        text: str,
+        width: int | None = None,
+        height: int | None = None,
+        line_break_symbol: str = "\\",
+        cell_break_symbol: str = "…",
+    ) -> tuple[list[str], list[str], bool, dict[str, tuple[str, ...]]]:
+        text = self.ESCAPE_UNSAFE_ANSI_REGEX.sub(
+            lambda m: repr(m[0])[1:-1],
+            text,
+        )
+        return super().split_text(
+            text=text,
+            width=width,
+            height=height,
+            line_break_symbol=line_break_symbol,
+            cell_break_symbol=cell_break_symbol,
+        )
+
+
+class HtmlTextSplitter(AnsiTextSplitterEscapeUnsafe):
+    def split_text(
+        self,
+        text: str,
+        width: int | None = None,
+        height: int | None = None,
+        line_break_symbol: str = "\\",
+        cell_break_symbol: str = "…",
+    ) -> tuple[list[str], list[str], bool, dict[str, tuple[str, ...]]]:
+        text = text.replace("\x1b", "\\x1b")
+        return super().split_text(
+            text=text,
+            width=width,
+            height=height,
+            line_break_symbol=line_break_symbol,
+            cell_break_symbol=cell_break_symbol,
+        )
+
+
+class MarkdownTextSplitter(HtmlTextSplitter):
+    def split_text(
+        self,
+        text: str,
+        width: int | None = None,
+        height: int | None = None,
+        line_break_symbol: str = "\\",
+        cell_break_symbol: str = "…",
+    ) -> tuple[list[str], list[str], bool, dict[str, tuple[str, ...]]]:
+        # Будущая реализация
+        return super().split_text(
+            text=text,
+            width=width,
+            height=height,
+            line_break_symbol=line_break_symbol,
+            cell_break_symbol=cell_break_symbol,
+        )

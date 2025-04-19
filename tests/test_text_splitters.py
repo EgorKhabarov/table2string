@@ -1,9 +1,9 @@
 from table2string import Table
-from table2string.text_splitters import AnsiTextSplitter
+from table2string.text_splitters import AnsiTextSplitter, AnsiTextSplitterEscapeUnsafe, HtmlTextSplitter, MarkdownTextSplitter
 
 
-text_spliter = AnsiTextSplitter(escape_unsafe=False)
-text_spliter_escape_unsafe = AnsiTextSplitter(escape_unsafe=True)
+text_spliter = AnsiTextSplitter()
+text_spliter_escape_unsafe = AnsiTextSplitterEscapeUnsafe()
 
 split_text = text_spliter.split_text
 split_text_escape_unsafe = text_spliter_escape_unsafe.split_text
@@ -469,3 +469,32 @@ def test_split_text_escape_unsafe():
         "\x1b]8;;https://b.io\x1b\\1b\x1b[7mD\x1b]8;;\x1b\\\x1b[0m",
         "E\x1b[35mF\x1b[0m",
     ]
+
+
+def test_html_spliter():
+    html_text_spliter = HtmlTextSplitter()
+    html_split_text = html_text_spliter.split_text
+    assert html_split_text("123", width=2)[0] == ["12", "3"]
+    assert html_split_text("1\x1b[32m23", width=2)[0] == [
+        "1\\",
+        "x1",
+        "b[",
+        "32",
+        "m2",
+        "3",
+    ]
+
+
+def test_markdown_spliter():
+    markdown_text_spliter = MarkdownTextSplitter()
+    markdown_split_text = markdown_text_spliter.split_text
+    assert markdown_split_text("123", width=2)[0] == ["12", "3"]
+    assert markdown_split_text("1\x1b[32m23", width=2)[0] == [
+        "1\\",
+        "x1",
+        "b[",
+        "32",
+        "m2",
+        "3",
+    ]
+
