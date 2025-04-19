@@ -1,5 +1,10 @@
 from table2string import Table
-from table2string.text_splitters import AnsiTextSplitter, AnsiTextSplitterEscapeUnsafe, HtmlTextSplitter, MarkdownTextSplitter
+from table2string.text_splitters import (
+    AnsiTextSplitter,
+    AnsiTextSplitterEscapeUnsafe,
+    HtmlTextSplitter,
+    MarkdownTextSplitter,
+)
 
 
 text_spliter = AnsiTextSplitter()
@@ -497,4 +502,3 @@ def test_markdown_spliter():
         "m2",
         "3",
     ]
-
