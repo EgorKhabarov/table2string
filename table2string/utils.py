@@ -211,58 +211,6 @@ def transform_width(
     return max_widths
 
 
-def split_text(
-    text: str,
-    width: int | None = None,
-    height: int | None = None,
-    line_break_symbol: str = "\\",
-    cell_break_symbol: str = "…",
-) -> tuple[list[str], list[str], bool, dict[str, tuple[str, ...]]]:
-    """
-    Splits text to the desired width and height
-
-    :param text: Text
-    :param width: Width
-    :param height: Height
-    :param line_break_symbol: "\\" or "↩" or chr(8617) or "\\U000021a9"
-    :param cell_break_symbol: "…" or chr(8230) or "\\U00002026"
-    :return: Split text by width and height
-    """
-    lines = text.split("\n")
-
-    if width is None:
-        width = len(max(lines))
-
-    result_lines: list[str] = []
-    result_symbol: list[str] = []
-
-    for line in lines:
-        if get_text_width_in_console(line) == 0:
-            result_lines.append("")
-            result_symbol.append(" ")
-        else:
-            while line:
-                if get_text_width_in_console(line) <= width:
-                    result_lines.append(line)
-                    result_symbol.append(" ")
-                    line = ""
-                else:
-                    w = 0
-                    assert width >= 1, width
-                    while get_text_width_in_console(line[:w]) <= width - 1:
-                        w += 1
-                    result_lines.append(line[:w])
-                    result_symbol.append(line_break_symbol)
-                    line = line[w:]
-
-    if height and len(result_lines) > height:
-        result_lines = result_lines[:height]
-        result_symbol = result_symbol[:height]
-        result_symbol[-1] = cell_break_symbol
-
-    return result_lines, result_symbol, False, {}
-
-
 def split_text_for_sub_table(
     string_sub_table: str, max_height: int | None = None
 ) -> tuple[list[str], list[str], bool, dict[str, tuple[str, ...]]]:
@@ -270,6 +218,8 @@ def split_text_for_sub_table(
 
     :param string_sub_table:
     :param max_height:
+    :return: Split text by width and height for subtable
+    lines, symbols, is_subtable, borders
     """
     sub_table_lines = string_sub_table.splitlines()
 
@@ -277,16 +227,18 @@ def split_text_for_sub_table(
         sub_table_lines = sub_table_lines[: max_height + 2]
 
     blank_line = ""
+    is_subtable = True
+    borders = {
+        "border_top": tuple(sub_table_lines[0][2:-2]),
+        "border_bottom": tuple(sub_table_lines[-1][2:-2]),
+        "border_left": tuple(line[0] for line in sub_table_lines[1:-1]) or (" ",),
+        "border_right": tuple(line[-1] for line in sub_table_lines[1:-1]) or (" ",),
+    }
     return (
         [line[1:-1] for line in sub_table_lines[1:-1]],
         [blank_line for _ in range(len(sub_table_lines))],
-        True,
-        {
-            "border_top": tuple(sub_table_lines[0][2:-2]),
-            "border_bottom": tuple(sub_table_lines[-1][2:-2]),
-            "border_left": tuple(line[0] for line in sub_table_lines[1:-1]) or (" ",),
-            "border_right": tuple(line[-1] for line in sub_table_lines[1:-1]) or (" ",),
-        },
+        is_subtable,
+        borders,
     )
 
 

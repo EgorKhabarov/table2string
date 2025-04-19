@@ -9,7 +9,6 @@ from table2string.utils import (
     transform_width,
     terminal_size,
     apply_v_align,
-    split_text,
     fill_line,
 )
 
@@ -81,60 +80,6 @@ def test_transform_width():
     assert transform_width((3, 2), 2, (2, 2)) == (3, 2)
 
     assert transform_width((3,), 2, (2, 2)) == (3, 3)
-
-
-def test_split_text():
-    assert split_text("", 1) == ([""], [" "], False, {})
-    assert split_text("1", 1) == (["1"], [" "], False, {})
-    assert split_text("123\n456", 1) == (
-        ["1", "2", "3", "4", "5", "6"],
-        ["\\", "\\", " ", "\\", "\\", " "],
-        False,
-        {},
-    )
-    assert split_text("123\n\n456", 1) == (
-        ["1", "2", "3", "", "4", "5", "6"],
-        ["\\", "\\", " ", " ", "\\", "\\", " "],
-        False,
-        {},
-    )
-    assert split_text("123\n456", 2) == (
-        ["12", "3", "45", "6"],
-        ["\\", " ", "\\", " "],
-        False,
-        {},
-    )
-    assert split_text("123\n456", 3) == (["123", "456"], [" ", " "], False, {})
-    assert split_text("123\n\n456", 3) == (
-        ["123", "", "456"],
-        [" ", " ", " "],
-        False,
-        {},
-    )
-
-    assert split_text(
-        text="123\n456\n789",
-        width=3,
-        height=2,
-    ) == (["123", "456"], [" ", "…"], False, {})
-
-    assert split_text(
-        text="123\n456\n789",
-        width=3,
-        height=3,
-    ) == (["123", "456", "789"], [" ", " ", " "], False, {})
-
-    assert split_text(
-        text="123\n456",
-        width=3,
-        height=3,
-    ) == (["123", "456"], [" ", " "], False, {})
-    assert split_text(text="12345\n123456\n1") == (
-        ["12345", "123456", "1"],
-        [" ", " ", " "],
-        False,
-        {},
-    )
 
 
 def test_fill_line():

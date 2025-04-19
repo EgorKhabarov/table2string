@@ -4,6 +4,7 @@ from typing import Any, Sequence, Iterable, cast
 
 from table2string.themes import Theme, Themes
 from table2string.aligns import HorizontalAlignment, VerticalAlignment
+from table2string.text_splitters import BaseTextSplitter, AnsiTextSplitter
 from table2string.utils import (
     get_text_width_in_console,
     split_text_for_sub_table,
@@ -12,7 +13,6 @@ from table2string.utils import (
     generate_borders,
     transform_align,
     transform_width,
-    split_text,
     fill_line,
 )
 
@@ -47,6 +47,7 @@ def print_table(
     theme: Theme = Themes.ascii_thin,
     ignore_width_errors: bool = False,
     proportion_coefficient: float = 0.5,
+    text_spliter: BaseTextSplitter = AnsiTextSplitter(escape_unsafe=False),
 ) -> None:
     """
     Print the table in sys.stdout or file
@@ -65,12 +66,14 @@ def print_table(
     :param maximize_height: Make all lines of the same height max_height
     :param line_break_symbol: "\\" or "↩" or chr(8617) or "\\U000021a9"
     :param cell_break_symbol: "…" or chr(8230) or "\\U00002026"
-    :param sep: Settings of dividers. You can specify specific lines with dividers.
+    :param sep: Settings of dividers. You can specify specific lines with dividers
     :param end: Configure the last symbol of the table. \\n or nothing
-    :param file: File where you can record the table by .write method.
+    :param file: File where you can record the table by .write method
     :param theme: Theme
     :param ignore_width_errors: Fixes errors in max_width if they exist
     :param proportion_coefficient: Reduction coefficient for too large numbers
+    :param text_spliter: An object or class that implements the split_text method
+    to correctly split and process formatted text (such as ANSI sequences)
     :return: None
     """
     list_table: list[list[str | Table | Any]] = list(list(row) for row in table)
@@ -210,12 +213,12 @@ def print_table(
                 tuple[dict[str, tuple[str, ...]], ...],
             ],
             zip(
-                split_text(
-                    name,
-                    max_name_width,
-                    max_height,
-                    line_break_symbol,
-                    cell_break_symbol,
+                text_spliter.split_text(
+                    text=name,
+                    width=max_name_width,
+                    height=max_height,
+                    line_break_symbol=line_break_symbol,
+                    cell_break_symbol=cell_break_symbol,
                 )
             ),
         )
@@ -262,12 +265,12 @@ def print_table(
                 )
                 column_lines = split_text_for_sub_table(string_sub_table, max_height)
             else:
-                column_lines = split_text(
-                    str(column),
-                    max_widths[ci],
-                    max_height,
-                    line_break_symbol,
-                    cell_break_symbol,
+                column_lines = text_spliter.split_text(
+                    text=str(column),
+                    width=max_widths[ci],
+                    height=max_height,
+                    line_break_symbol=line_break_symbol,
+                    cell_break_symbol=cell_break_symbol,
                 )
             splitted_row.append(column_lines)
 
@@ -390,6 +393,7 @@ def stringify_table(
     theme: Theme = Themes.ascii_thin,
     ignore_width_errors: bool = False,
     proportion_coefficient: float = 0.5,
+    text_spliter: BaseTextSplitter = AnsiTextSplitter(escape_unsafe=False),
 ) -> str:
     """
 
@@ -407,11 +411,13 @@ def stringify_table(
     :param maximize_height: Make all lines of the same height max_height
     :param line_break_symbol: "\\" or "↩" or chr(8617) or "\\U000021a9"
     :param cell_break_symbol: "…" or chr(8230) or "\\U00002026"
-    :param sep: Settings of dividers. You can specify specific lines with dividers.
+    :param sep: Settings of dividers. You can specify specific lines with dividers
     :param end: Configure the last symbol of the table. \\n or nothing
     :param theme: Theme
     :param ignore_width_errors: Fixes errors in max_width if they exist
     :param proportion_coefficient: Reduction coefficient for too large numbers
+    :param text_spliter: An object or class that implements the split_text method
+    to correctly split and process formatted text (such as ANSI sequences)
     :return: String table
     """
     file = StringIO()
@@ -436,6 +442,7 @@ def stringify_table(
         theme=theme,
         ignore_width_errors=ignore_width_errors,
         proportion_coefficient=proportion_coefficient,
+        text_spliter=text_spliter,
     )
     file.seek(0)
     return file.read()
@@ -539,6 +546,7 @@ class Table:
         theme: Theme = Themes.ascii_thin,
         ignore_width_errors: bool = False,
         proportion_coefficient: float = 0.5,
+        text_spliter: BaseTextSplitter = AnsiTextSplitter(escape_unsafe=False),
     ) -> str:
         """
 
@@ -553,11 +561,13 @@ class Table:
         :param maximize_height: Make all lines of the same height max_height
         :param line_break_symbol: "\\" or "↩" or chr(8617) or "\\U000021a9"
         :param cell_break_symbol: "…" or chr(8230) or "\\U00002026"
-        :param sep: Settings of dividers. You can specify specific lines with dividers.
+        :param sep: Settings of dividers. You can specify specific lines with dividers
         :param end: Configure the last symbol of the table. \\n or nothing
         :param theme: Theme
         :param ignore_width_errors: Fixes errors in max_width if they exist
         :param proportion_coefficient: Reduction coefficient for too large numbers
+        :param text_spliter: An object or class that implements the split_text method
+        to correctly split and process formatted text (such as ANSI sequences)
         :return: String table
         """
         return stringify_table(
@@ -583,6 +593,7 @@ class Table:
             ignore_width_errors=ignore_width_errors,
             proportion_coefficient=self.config.get("proportion_coefficient")
             or proportion_coefficient,
+            text_spliter=text_spliter,
         )
 
     def print(
@@ -613,6 +624,7 @@ class Table:
         theme: Theme = Themes.ascii_thin,
         ignore_width_errors: bool = False,
         proportion_coefficient: float = 0.5,
+        text_spliter: BaseTextSplitter = AnsiTextSplitter(escape_unsafe=False),
     ) -> None:
         """
         Print the table in sys.stdout or file
@@ -628,12 +640,14 @@ class Table:
         :param maximize_height: Make all lines of the same height max_height
         :param line_break_symbol: "\\" or "↩" or chr(8617) or "\\U000021a9"
         :param cell_break_symbol: "…" or chr(8230) or "\\U00002026"
-        :param sep: Settings of dividers. You can specify specific lines with dividers.
+        :param sep: Settings of dividers. You can specify specific lines with dividers
         :param end: Configure the last symbol of the table. \\n or nothing
-        :param file: File where you can record the table by .write method.
+        :param file: File where you can record the table by .write method
         :param theme: Theme
         :param ignore_width_errors: Fixes errors in max_width if they exist
         :param proportion_coefficient: Reduction coefficient for too large numbers
+        :param text_spliter: An object or class that implements the split_text method
+        to correctly split and process formatted text (such as ANSI sequences)
         :return: None
         """
         print_table(
@@ -660,6 +674,7 @@ class Table:
             ignore_width_errors=ignore_width_errors,
             proportion_coefficient=self.config.get("proportion_coefficient")
             or proportion_coefficient,
+            text_spliter=text_spliter,
         )
 
     def __str__(self):
