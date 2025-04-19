@@ -6,7 +6,19 @@ from table2string.themes import Theme, Themes, translate_theme_border
 from table2string.aligns import HorizontalAlignment, VerticalAlignment
 
 
-ANSI_REGEX = re.compile(r"\x1b\[[0-9;]*[a-zA-Z]")
+OSC8_LINK_REGEX = re.compile(
+    r"(?s)\x1b]8;;.*?(?:\x07|\x1b\\)(?P<text>.*?)\x1b]8;;.*?(?:\x07|\x1b\\)"
+)
+INVISIBLE_REGEX = re.compile(r"""(?xs)
+(?:
+    \x1b\[[0-?]*[ -/]*[@-~]                  # CSI: ESC [ ... final
+  | \x1b][^\x1b]*(?:\x07|\x1b\\)             # OSC: ESC ] ... BEL or ST
+  | \x1bP[^\x1b]*\x1b\\                      # DCS: ESC P ... ST
+  | \x1b[_^].                                # SOS/PM/APC: ESC _/^ + 1 byte
+  | \x1b\\                                   # ST: ESC \\ (String Terminator)
+  | [\x00-\x1F\x7F-\x9F\u200B-\u200D\uFEFF]  # C0/C1 controls, zero-width, BOM
+)
+""")
 
 
 def get_text_width_in_console(text: str) -> int:
@@ -17,7 +29,8 @@ def get_text_width_in_console(text: str) -> int:
     :param text: Text
     :return: Calculates the length of the text in the console
     """
-    text = ANSI_REGEX.sub("", text)
+    text = OSC8_LINK_REGEX.sub(lambda m: m.group("text"), text)
+    text = INVISIBLE_REGEX.sub("", text)
     width = 0
     for char in text:
         if unicodedata.east_asian_width(char) in "WF":

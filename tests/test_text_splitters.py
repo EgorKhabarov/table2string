@@ -391,7 +391,8 @@ def test_osc_link_escape_sequence():
         "\x1b]8;;https://a.io\x1b\\\x1b[1m\x1b[31m😎\x1b]8;;\x1b\\"
         "\x1b]8;;https://b.io\x1b\\\x1b[0m\x1b[3m\x1b[38;2;123;45;67mB\x1b]8;;\x1b\\\x1b[0m",
         "\x1b[3m\x1b[38;2;123;45;67m\x1b]8;;https://b.io\x1b\\\x1b[0m\x1b[4m"
-        "\x1b[48;5;200mC\x1b[0m\x1b\x1b[7mD\x1b]8;;\x1b\\\x1b[0mE\x1b[35mF\x1b[0m",
+        "\x1b[48;5;200mC\x1b[0m\x1b\x1b[7mD\x1b]8;;\x1b\\\x1b[0mE",
+        "\x1b[35mF\x1b[0m",
     ]
     assert split_text(
         "\x1b[1m\x1b[31m\x1b]8;;https://a.io\x1b\\😎\x1b[0m\x1b]8;;\x1b\\"
@@ -446,4 +447,25 @@ def test_wrong_escape_sequence():
 def test_split_text_escape_unsafe():
     assert split_text_escape_unsafe("\x1b[31m\x1b[1EA\x1b[0m")[0] == [
         "\x1b[31m\\x1b[1EA\x1b[0m",
+    ]
+    assert split_text_escape_unsafe("\x1b[31m1\x07A\x1b[0m", width=1)[0] == [
+        "\x1b[31m1\x1b[0m",
+        "\x1b[31m\\\x1b[0m",
+        "\x1b[31mx\x1b[0m",
+        "\x1b[31m0\x1b[0m",
+        "\x1b[31m7\x1b[0m",
+        "\x1b[31mA\x1b[0m",
+    ]
+    assert split_text_escape_unsafe(
+        "\x1b[1m\x1b[31m\x1b]8;;https://a.io\x1b\\😎\x1b[0m\x1b]8;;\x1b\\"
+        "\x1b[3m\x1b[38;2;123;45;67m\x1b]8;;https://b.io\x1b\\B\x1b[0m\x1b[4m"
+        "\x1b[48;5;200mC\x1b[999m\x1b[0m\x1b"
+        "\x1b[7m\x1b]8;;https://c.io\x1b\\D\x1b[0m\x1b]8;;\x1b\\E\x1b[35mF\x1b[0m",
+        width=3,
+    )[0] == [
+        "\x1b]8;;https://a.io\x1b\\\x1b[1m\x1b[31m😎\x1b]8;;\x1b\\"
+        "\x1b]8;;https://b.io\x1b\\\x1b[0m\x1b[3m\x1b[38;2;123;45;67mB\x1b]8;;\x1b\\\x1b[0m",
+        "\x1b[3m\x1b[38;2;123;45;67m\x1b]8;;https://b.io\x1b\\\x1b[0m\x1b[4m\x1b[48;5;200mC\x1b[0m\\x\x1b]8;;\x1b\\",
+        "\x1b]8;;https://b.io\x1b\\1b\x1b[7mD\x1b]8;;\x1b\\\x1b[0m",
+        "E\x1b[35mF\x1b[0m",
     ]

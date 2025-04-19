@@ -61,17 +61,16 @@ class BaseTextSplitter:
 
 
 class AnsiTextSplitter(BaseTextSplitter):
-    COLOR_REGEX = re.compile(r"\x1b\[[0-9;]*m")
-    START_COLOR_REGEX = re.compile(rf"^({COLOR_REGEX.pattern})*\x1b\[0m")
-    CENTER_COLOR_REGEX = re.compile(rf"({COLOR_REGEX.pattern})*\x1b\[0m(?!$)")
-
-    OSC_LINK_REGEX = re.compile(
-        r"(?s)(\x1b]8;;(?P<url>[^\x1b]+)\x1b\\)(?P<text>.*?)(\x1b]8;;\x1b\\)"
+    ESCAPE_UNSAFE_ANSI_REGEX = re.compile(
+        r"\x1b(?!\[[0-9;]*m|]8;;|\\)|[\x00-\x1a\x1c-\x1f\x7f-\x9f\u200b-\u200d\uFEFF]"
     )
-    OSC_LINK_OPEN = "\x1b]8;;{url}\x1b\\"
+
+    COLOR_REGEX = re.compile(r"\x1b\[[0-9;]*m")
+    OSC_LINK_OPEN_REGEX = re.compile(r"\x1b]8;;(?P<url>[^\x1b]+)\x1b\\")
     OSC_LINK_CLOSE = "\x1b]8;;\x1b\\"
-    OSC_OPEN_PATTERN = re.compile(r"\x1b]8;;(?P<url>[^\x1b]+)\x1b\\")
-    ESCAPE_UNSAFE_ANSI_REGEX = re.compile(r"\x1b(?!\[[0-9;]*m)")
+
+    REDUNDANT_COLOR_ANSI_REGEX_1 = re.compile(rf"^({COLOR_REGEX.pattern})*\x1b\[0m")
+    REDUNDANT_COLOR_ANSI_REGEX_2 = re.compile(rf"({COLOR_REGEX.pattern})*\x1b\[0m(?!$)")
 
     def __init__(self, escape_unsafe: bool = False):
         self.escape_unsafe = escape_unsafe
@@ -85,14 +84,17 @@ class AnsiTextSplitter(BaseTextSplitter):
         cell_break_symbol: str = "…",
     ) -> tuple[list[str], list[str], bool, dict[str, tuple[str, ...]]]:
         if self.escape_unsafe:
-            text = self.ESCAPE_UNSAFE_ANSI_REGEX.sub(r"\\x1b", text)
+            text = self.ESCAPE_UNSAFE_ANSI_REGEX.sub(
+                lambda m: repr(m[0])[1:-1],
+                text,
+            )
 
         plain = ""
         events: list[dict] = []
         plain_idx = 0
         i = 0
         while i < len(text):
-            mo = self.OSC_OPEN_PATTERN.match(text[i:])
+            mo = self.OSC_LINK_OPEN_REGEX.match(text[i:])
             if mo:
                 tok = mo.group(0)
                 url = mo.group("url")
@@ -223,8 +225,8 @@ class AnsiTextSplitter(BaseTextSplitter):
 
             # Убираем лишние сбросы
             line_out = "".join(out)
-            line_out = self.START_COLOR_REGEX.sub("", line_out)
-            line_out = self.CENTER_COLOR_REGEX.sub("\x1b[0m", line_out)
+            line_out = self.REDUNDANT_COLOR_ANSI_REGEX_1.sub("", line_out)
+            line_out = self.REDUNDANT_COLOR_ANSI_REGEX_2.sub("\x1b[0m", line_out)
 
             restored.append(line_out)
             inherited_color = curr_color
