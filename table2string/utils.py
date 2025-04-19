@@ -9,7 +9,8 @@ from table2string.aligns import HorizontalAlignment, VerticalAlignment
 OSC8_LINK_REGEX = re.compile(
     r"(?s)\x1b]8;;.*?(?:\x07|\x1b\\)(?P<text>.*?)\x1b]8;;.*?(?:\x07|\x1b\\)"
 )
-INVISIBLE_REGEX = re.compile(r"""(?xs)
+INVISIBLE_REGEX = re.compile(
+    r"""(?xs)
 (?:
     \x1b\[[0-?]*[ -/]*[@-~]                  # CSI: ESC [ ... final
   | \x1b][^\x1b]*(?:\x07|\x1b\\)             # OSC: ESC ] ... BEL or ST
@@ -18,7 +19,8 @@ INVISIBLE_REGEX = re.compile(r"""(?xs)
   | \x1b\\                                   # ST: ESC \\ (String Terminator)
   | [\x00-\x1F\x7F-\x9F\u200B-\u200D\uFEFF]  # C0/C1 controls, zero-width, BOM
 )
-""")
+"""
+)
 
 
 def get_text_width_in_console(text: str) -> int:
