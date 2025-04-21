@@ -4,7 +4,7 @@ from typing import Any, Sequence, Iterable, cast
 
 from table2string.themes import Theme, Themes
 from table2string.aligns import HorizontalAlignment, VerticalAlignment
-from table2string.text_splitters import BaseTextSplitter, AnsiTextSplitter
+from table2string.text_splitters import BaseTextSplitter, AnsiTextSplitterEscapeUnsafe
 from table2string.utils import (
     get_text_width_in_console,
     split_text_for_sub_table,
@@ -47,7 +47,7 @@ def print_table(
     theme: Theme = Themes.ascii_thin,
     ignore_width_errors: bool = False,
     proportion_coefficient: float = 0.5,
-    text_spliter: BaseTextSplitter = AnsiTextSplitter(),
+    text_spliter: BaseTextSplitter = AnsiTextSplitterEscapeUnsafe(),
 ) -> None:
     """
     Print the table in sys.stdout or file
@@ -393,7 +393,7 @@ def stringify_table(
     theme: Theme = Themes.ascii_thin,
     ignore_width_errors: bool = False,
     proportion_coefficient: float = 0.5,
-    text_spliter: BaseTextSplitter = AnsiTextSplitter(),
+    text_spliter: BaseTextSplitter = BaseTextSplitter(),
 ) -> str:
     """
 
@@ -546,7 +546,7 @@ class Table:
         theme: Theme = Themes.ascii_thin,
         ignore_width_errors: bool = False,
         proportion_coefficient: float = 0.5,
-        text_spliter: BaseTextSplitter = AnsiTextSplitter(),
+        text_spliter: BaseTextSplitter = BaseTextSplitter(),
     ) -> str:
         """
 
@@ -624,7 +624,7 @@ class Table:
         theme: Theme = Themes.ascii_thin,
         ignore_width_errors: bool = False,
         proportion_coefficient: float = 0.5,
-        text_spliter: BaseTextSplitter = AnsiTextSplitter(),
+        text_spliter: BaseTextSplitter = AnsiTextSplitterEscapeUnsafe(),
     ) -> None:
         """
         Print the table in sys.stdout or file
