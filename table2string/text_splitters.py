@@ -223,7 +223,8 @@ class AnsiTextSplitter(BaseTextSplitter):
 
 class AnsiTextSplitterEscapeUnsafe(AnsiTextSplitter):
     ESCAPE_UNSAFE_ANSI_REGEX = re.compile(
-        r"\x1b(?!\[[0-9;]*m|]8;;|\\)|[\x00-\x1a\x1c-\x1f\x7f-\x9f\u200b-\u200d\uFEFF]"
+        r"\x1b(?!\[[0-9;]*m|]8;;|\\)"
+        r"|[\x00-\x09\x0b-\x1a\x1c-\x1f\x7f-\x9f\u200b-\u200d\uFEFF]"
     )
 
     def split_text(
