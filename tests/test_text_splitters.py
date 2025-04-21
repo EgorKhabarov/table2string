@@ -127,6 +127,7 @@ def test_color_escape_sequence():
         "ow",
     ]
     assert split_text("\x1b[31m1234")[0] == ["\x1b[31m1234\x1b[0m"]
+
     table = Table(
         [
             (
@@ -142,7 +143,11 @@ def test_color_escape_sequence():
         ]
     )
     assert (
-        table.stringify(max_width=(4,), line_break_symbol="-")
+        table.stringify(
+            max_width=(4,),
+            line_break_symbol="-",
+            text_spliter=AnsiTextSplitter(),
+        )
         == """
 +------+------+------+------+------+------+------+
 | \x1b[31m1234\x1b[0m |    5 | 67\x1b[31m89\x1b[0m-| abc\x1b[31mX\x1b[0m-| \x1b[32mgree\x1b[0m-| \x1b[34mbl\x1b[0m   | 123\x1b[32m1\x1b[0m-|
@@ -157,7 +162,11 @@ def test_color_escape_sequence():
         ]
     )
     assert (
-        table.stringify(max_width=(4,), line_break_symbol="-")
+        table.stringify(
+            max_width=(4,),
+            line_break_symbol="-",
+            text_spliter=AnsiTextSplitter(),
+        )
         == """
 +------+
 | \x1b[31mq\x1b[33mw\x1b[34me\x1b[35mr\x1b[0m-|
@@ -178,7 +187,6 @@ def test_osc_link_escape_sequence():
         "\x1b]8;;https://example.com\x1b\\e\x1b]8;;\x1b\\ e",
         "nd",
     ]
-
     assert split_text(
         "#1nk: \x1b]8;;https://example.com\x1b\\Example\x1b]8;;\x1b\\ end"
     )[0] == ["#1nk: \x1b]8;;https://example.com\x1b\\Example\x1b]8;;\x1b\\ end"]
@@ -198,92 +206,11 @@ def test_osc_link_escape_sequence():
         "\x1b]8;;https://example.com\x1b\\e\x1b]8;;\x1b\\ e",
         "nd",
     ]
-
     assert split_text(
         "link: \x1b]8;;https://example.com\x1b\\Example\x1b]8;;\x1b\\",
     )[0] == [
         "link: \x1b]8;;https://example.com\x1b\\Example\x1b]8;;\x1b\\",
     ]
-    table = Table(
-        [
-            (
-                # Простой случай без escape последовательностей
-                "1234",
-                "5",
-                "67890\n1112",
-            ),
-            (
-                # Строка с CSI-последовательностями (цвет и сброс)
-                "abc\x1b[31mXYZ\x1b[0mdef",
-                "\x1b[32mgreen\x1b[0m",
-                "normal",
-            ),
-            (
-                # Строка с OSC-последовательностями для кликабельной ссылки и CSI для цвета
-                "link: \x1b]8;;https://example.com\x1b\\Example\x1b]8;;\x1b\\",
-                "\x1b[34mblue\x1b[0m text",
-                "Multiple escapes: \x1b[1;31mBold Red\x1b[0m, \x1b[4mUnderlined\x1b[0m",
-            ),
-            (
-                "\x1b[34mbl\nue\x1b[0m text",
-                "te\nxt",
-                "",
-            ),
-        ]
-    )
-    assert (
-        table.stringify()
-        == """
-+---------------+-----------+----------------------------------------+
-|          1234 |         5 | 67890                                  |
-|               |           | 1112                                   |
-+---------------+-----------+----------------------------------------+
-| abc\x1b[31mXYZ\x1b[0mdef     | \x1b[32mgreen\x1b[0m     | normal                                 |
-+---------------+-----------+----------------------------------------+
-| link: \x1b]8;;https://example.com\x1b\\Example\x1b]8;;\x1b\\ | \x1b[34mblue\x1b[0m text | Multiple escapes: \x1b[1;31mBold Red\x1b[0m, \x1b[4mUnderlined\x1b[0m |
-+---------------+-----------+----------------------------------------+
-| \x1b[34mbl\x1b[0m            | te        |                                        |
-| \x1b[34mue\x1b[0m text       | xt        |                                        |
-+---------------+-----------+----------------------------------------+
-""".strip()
-    )
-    table = Table(
-        [
-            ("link: \x1b]8;;https://example.com\x1b\\Example\x1b]8;;\x1b\\end",),
-        ],
-    )
-    assert (
-        table.stringify(max_width=(3,), line_break_symbol="↩")
-        == """
-+-----+
-| lin↩|
-| k: ↩|
-| \x1b]8;;https://example.com\x1b\\Exa\x1b]8;;\x1b\\↩|
-| \x1b]8;;https://example.com\x1b\\mpl\x1b]8;;\x1b\\↩|
-| \x1b]8;;https://example.com\x1b\\e\x1b]8;;\x1b\\en↩|
-| d   |
-+-----+
-""".strip()
-    )
-    table = Table(
-        [
-            ("link: \x1b]8;;https://example.com\x1b\\Ex\nample\x1b]8;;\x1b\\end",),
-        ],
-    )
-    assert (
-        table.stringify(max_width=(3,), line_break_symbol="↩")
-        == """
-+-----+
-| lin↩|
-| k: ↩|
-| \x1b]8;;https://example.com\x1b\\Ex\x1b]8;;\x1b\\  |
-| \x1b]8;;https://example.com\x1b\\amp\x1b]8;;\x1b\\↩|
-| \x1b]8;;https://example.com\x1b\\le\x1b]8;;\x1b\\e↩|
-| nd  |
-+-----+
-""".strip()
-    )
-
     assert split_text(
         "Link: "
         "\x1b]8;;https://site.com\x1b\\"
@@ -323,13 +250,11 @@ def test_osc_link_escape_sequence():
         "\x1b[4m\x1b]8;;https://b.io\x1b\\\x1b[0m\x1b[9m\x1b[38;2;255;255;0mX\x1b]8;;\x1b\\\x1b[0m EN",
         "D",
     ]
-
     assert split_text(
         "\x1b]8;;https://a.com\x1b\\A\x1b]8;;\x1b\\\x1b]8;;https://b.com\x1b\\B\x1b]8;;\x1b\\",
     )[0] == [
         "\x1b]8;;https://a.com\x1b\\A\x1b]8;;\x1b\\\x1b]8;;https://b.com\x1b\\B\x1b]8;;\x1b\\",
     ]
-
     assert split_text(
         "\x1b]8;;https://a.com\x1b\\A\x1b]8;;\x1b\\"
         "\x1b]8;;https://b.com\x1b\\n\x1b]8;;\x1b\\"
@@ -354,7 +279,6 @@ def test_osc_link_escape_sequence():
         "\x1b]8;;https://b.com\x1b\\2\x1b]8;;\x1b\\",
         "\x1b]8;;https://c.com\x1b\\3\x1b]8;;\x1b\\",
     ]
-
     assert split_text(
         "\x1b[1m\x1b]8;;https://a.com\x1b\\A\x1b]8;;\x1b\\\x1b[0m"
         "\x1b[3m\x1b]8;;https://b.com\x1b\\n\x1b]8;;\x1b\\\x1b[0m"
@@ -369,7 +293,6 @@ def test_osc_link_escape_sequence():
         "\x1b]8;;https://e.com\x1b\\\x1b[38;5;196m\x1b[1mF\x1b]8;;\x1b\\\x1b[0mu\x1b[0mn",
         "!",
     ]
-
     assert split_text(
         "\x1b[1m\x1b[31m\x1b]8;;https://x.com\x1b\\A\x1b[0m\x1b[3mB\x1b]8;;\x1b\\"
         "\x1b[4m\x1b[48;2;10;10;10m\x1b]8;;https://y.com\x1b\\C\x1b[0m\x1b[9mD\x1b]8;;\x1b\\"
@@ -422,6 +345,96 @@ def test_osc_link_escape_sequence():
         "\x1b[3mi—\x1b[4m😈\x1b[0m",
         "\x1b[9m\x1b[35mZ\x1b[0m",
     ]
+
+    table = Table(
+        [
+            (
+                # Простой случай без escape последовательностей
+                "1234",
+                "5",
+                "67890\n1112",
+            ),
+            (
+                # Строка с CSI-последовательностями (цвет и сброс)
+                "abc\x1b[31mXYZ\x1b[0mdef",
+                "\x1b[32mgreen\x1b[0m",
+                "normal",
+            ),
+            (
+                # Строка с OSC-последовательностями для кликабельной ссылки и CSI для цвета
+                "link: \x1b]8;;https://example.com\x1b\\Example\x1b]8;;\x1b\\",
+                "\x1b[34mblue\x1b[0m text",
+                "Multiple escapes: \x1b[1;31mBold Red\x1b[0m, \x1b[4mUnderlined\x1b[0m",
+            ),
+            (
+                "\x1b[34mbl\nue\x1b[0m text",
+                "te\nxt",
+                "",
+            ),
+        ]
+    )
+    assert (
+        table.stringify(
+            text_spliter=AnsiTextSplitter(),
+        )
+        == """
++---------------+-----------+----------------------------------------+
+|          1234 |         5 | 67890                                  |
+|               |           | 1112                                   |
++---------------+-----------+----------------------------------------+
+| abc\x1b[31mXYZ\x1b[0mdef     | \x1b[32mgreen\x1b[0m     | normal                                 |
++---------------+-----------+----------------------------------------+
+| link: \x1b]8;;https://example.com\x1b\\Example\x1b]8;;\x1b\\ | \x1b[34mblue\x1b[0m text | Multiple escapes: \x1b[1;31mBold Red\x1b[0m, \x1b[4mUnderlined\x1b[0m |
++---------------+-----------+----------------------------------------+
+| \x1b[34mbl\x1b[0m            | te        |                                        |
+| \x1b[34mue\x1b[0m text       | xt        |                                        |
++---------------+-----------+----------------------------------------+
+""".strip()
+    )
+    table = Table(
+        [
+            ("link: \x1b]8;;https://example.com\x1b\\Example\x1b]8;;\x1b\\end",),
+        ],
+    )
+    assert (
+        table.stringify(
+            max_width=(3,),
+            line_break_symbol="↩",
+            text_spliter=AnsiTextSplitter(),
+        )
+        == """
++-----+
+| lin↩|
+| k: ↩|
+| \x1b]8;;https://example.com\x1b\\Exa\x1b]8;;\x1b\\↩|
+| \x1b]8;;https://example.com\x1b\\mpl\x1b]8;;\x1b\\↩|
+| \x1b]8;;https://example.com\x1b\\e\x1b]8;;\x1b\\en↩|
+| d   |
++-----+
+""".strip()
+    )
+    table = Table(
+        [
+            ("link: \x1b]8;;https://example.com\x1b\\Ex\nample\x1b]8;;\x1b\\end",),
+        ],
+    )
+    assert (
+        table.stringify(
+            max_width=(3,),
+            line_break_symbol="↩",
+            text_spliter=AnsiTextSplitter(),
+        )
+        == """
++-----+
+| lin↩|
+| k: ↩|
+| \x1b]8;;https://example.com\x1b\\Ex\x1b]8;;\x1b\\  |
+| \x1b]8;;https://example.com\x1b\\amp\x1b]8;;\x1b\\↩|
+| \x1b]8;;https://example.com\x1b\\le\x1b]8;;\x1b\\e↩|
+| nd  |
++-----+
+""".strip()
+    )
 
 
 def test_wrong_escape_sequence():
