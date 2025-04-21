@@ -2,6 +2,8 @@ from typing import Optional
 from functools import lru_cache
 from dataclasses import dataclass
 
+from table2string.text_styles import Color, BgColor
+
 
 BORDER_EXAMPLE_SYMBOLS: dict[str, tuple[str, ...]] = {
     "horizontal": (
@@ -162,6 +164,67 @@ class Border:
 
         return None
 
+    def set_color(self, fg: Color | BgColor | str | tuple[int, int, int] | None = None):
+        prefix = ""
+        reset = ""
+
+        if isinstance(fg, (Color, BgColor)):
+            prefix = fg.value
+            reset = "\x1b[0m"
+        elif isinstance(fg, str):
+            prefix = fg
+            reset = "\x1b[0m"
+        elif isinstance(fg, tuple) and len(fg) == 3:
+            r, g, b = fg
+            prefix = f"\x1b[38;2;{r};{g};{b}m"
+            reset = "\x1b[0m"
+
+        if not hasattr(self, "_Border__vertical"):
+            # noinspection PyAttributeOutsideInit
+            self.__vertical = self.vertical
+
+        if not hasattr(self, "_Border__top_left"):
+            # noinspection PyAttributeOutsideInit
+            self.__top_left = self.top_left
+
+        if not hasattr(self, "_Border__top_right"):
+            # noinspection PyAttributeOutsideInit
+            self.__top_right = self.top_right
+
+        if not hasattr(self, "_Border__bottom_left"):
+            # noinspection PyAttributeOutsideInit
+            self.__bottom_left = self.bottom_left
+
+        if not hasattr(self, "_Border__bottom_right"):
+            # noinspection PyAttributeOutsideInit
+            self.__bottom_right = self.bottom_right
+
+        if not hasattr(self, "_Border__vertical_left"):
+            # noinspection PyAttributeOutsideInit
+            self.__vertical_left = self.vertical_left
+
+        if not hasattr(self, "_Border__vertical_right"):
+            # noinspection PyAttributeOutsideInit
+            self.__vertical_right = self.vertical_right
+
+        if not hasattr(self, "_Border__vertical_left_plus"):
+            # noinspection PyAttributeOutsideInit
+            self.__vertical_left_plus = self.vertical_left_plus
+
+        if not hasattr(self, "_Border__vertical_right_plus"):
+            # noinspection PyAttributeOutsideInit
+            self.__vertical_right_plus = self.vertical_right_plus
+
+        self.vertical = f"{prefix}{self.__vertical}{reset}"
+        self.top_left = f"{prefix}{self.__top_left}"
+        self.top_right = f"{self.__top_right}{reset}"
+        self.bottom_left = f"{prefix}{self.__bottom_left}"
+        self.bottom_right = f"{self.__bottom_right}{reset}"
+        self.vertical_left = f"{prefix}{self.__vertical_left}"
+        self.vertical_right = f"{self.__vertical_right}{reset}"
+        self.vertical_left_plus = f"{prefix}{self.__vertical_left_plus}"
+        self.vertical_right_plus = f"{self.__vertical_right_plus}{reset}"
+
 
 class Theme:
     def __init__(
@@ -200,6 +263,14 @@ class Theme:
 
 
 class Themes:
+    @classmethod
+    def get(cls, theme: str, default_theme: Theme | None = None) -> Theme:
+        if default_theme is None:
+            default_theme: Theme = Themes.ascii_thin
+        if theme == "get":
+            return default_theme
+        return getattr(cls, theme, default_theme)
+
     ascii_thin: Theme = Theme(
         name="ascii_thin",
         border=Border(
