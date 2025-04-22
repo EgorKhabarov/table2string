@@ -265,11 +265,9 @@ class Theme:
 class Themes:
     @classmethod
     def get(cls, theme: str, default_theme: Theme | None = None) -> Theme:
-        if default_theme is None:
-            default_theme: Theme = Themes.ascii_thin
         if theme == "get":
-            return default_theme
-        return getattr(cls, theme, default_theme)
+            return default_theme or Themes.ascii_thin
+        return getattr(cls, theme, default_theme or Themes.ascii_thin)
 
     ascii_thin: Theme = Theme(
         name="ascii_thin",
