@@ -7,7 +7,7 @@ name = "table2string"
 version = "2.0.1"
 description = "A library to convert tables to string with full support for line breaks and formatting"
 authors = [{name = "EgorKhabarov", email = "not.a.fan.of.broccoli@gmail.com"}]
-license = {text = "GPL2"}
+license = {text = "MIT"}
 readme = "README.md"
 requires-python = ">=3.10"
 keywords = ["table", "string", "tools"]
@@ -19,7 +19,9 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Environment :: Console",
-    "License :: OSI Approved :: GNU General Public License v2 (GPLv2)"
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries",
 ]
 dependencies = []
 
