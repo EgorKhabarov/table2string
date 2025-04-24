@@ -501,6 +501,33 @@ def test_html_spliter():
         "m2",
         "3",
     ]
+    assert html_split_text("123<b>456</b>789")[0] == ["123\x1b[1m456\x1b[0m789"]
+    assert html_split_text(
+        """
+<p><span style="color:#2ecc71;">Lorem ipsum dolor sit amet</span>, <span style="color:#3498db;">consectetur adipiscing elit</span>.</p>
+<p>Sed do eiusmod <a href="https://example.com"><span style="color:#e67e22;">tempor incididunt</span></a> ut labore et dolore magna aliqua.<span style="color:#9b59b6;">Ut enim ad minim veniam</span>,quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.<a href="https://w3schools.com" style="color:#e74c3c;">Duis aute irure dolor</a> in reprehenderit in voluptate velit esse<span style="color:#34495e;">cillum dolore eu fugiat nulla pariatur</span>.</p>
+Excepteur sint occaecat cupidatat non p<span style="background-color:rgb(255,0,0)">roide</span>nt, sunt in culpa qui officia
+<a href="https://openai.com" style="color:#1abc9c;">deserunt mollit anim</a> id est laborum.
+""".strip()
+    )[0] == [
+        "\x1b[38;2;46;204;113mLorem ipsum dolor sit amet\x1b[0m, \x1b[38;2;52;152;219mconsecte\x1b[0m",
+        "\x1b[38;2;52;152;219mtur adipiscing elit\x1b[0m.",
+        "",
+        "",
+        "Sed do eiusmod \x1b]8;;https://example.com\x1b\\\x1b[38;2;230;126;34mtempor incididunt\x1b]8;;\x1b\\\x1b[0m ut ",
+        "labore et dolore magna aliqua.\x1b[38;2;155;89;182mUt eni\x1b[0m",
+        "\x1b[38;2;155;89;182mm ad minim veniam\x1b[0m,quis nostrud exerc",
+        "itation ullamco laboris nisi ut aliq",
+        "uip ex ea commodo consequat.\x1b]8;;https://w3schools.com\x1b\\\x1b[38;2;231;76;60mDuis aut\x1b]8;;\x1b\\\x1b[0m",
+        "\x1b[38;2;231;76;60m\x1b]8;;https://w3schools.com\x1b\\e irure dolor\x1b]8;;\x1b\\\x1b[0m in reprehenderit in vo",
+        "luptate velit esse\x1b[38;2;52;73;94mcillum dolore eu f\x1b[0m",
+        "\x1b[38;2;52;73;94mugiat nulla pariatur\x1b[0m.",
+        "",
+        "Excepteur sint occaecat cupidatat no",
+        "n proident, sunt in culpa qui offici",
+        "a",
+        "\x1b]8;;https://openai.com\x1b\\\x1b[38;2;26;188;156mdeserunt mollit anim\x1b]8;;\x1b\\\x1b[0m id est laborum.",
+    ]
 
 
 def test_markdown_spliter():
