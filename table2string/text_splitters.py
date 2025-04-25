@@ -326,7 +326,7 @@ class _HTML2ANSIParser(HTMLParser):
 
     def __init__(self, **html_classes_kwargs: dict[str, str]):
         super().__init__()
-        self.result = []
+        self.result: list[str] = []
         self.html_classes_kwargs = html_classes_kwargs
 
     def handle_starttag(self, tag, attrs):
