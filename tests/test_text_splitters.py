@@ -557,3 +557,41 @@ Excepteur sint occaecat cupidatat non p<span style="background-color:rgb(255,0,0
             "\x1b]8;;https://openai.com\x1b\\\x1b[38;2;26;188;156mdeserunt mollit anim\x1b]8;;\x1b\\\x1b[0m id est laborum.",
         ]
     )
+
+
+def test_different_splitters():
+    table = Table(
+        [
+            (
+                "t\x1b[31mex\x1b[0mt",
+                "plain text",
+                "123<b>456</b>789",
+            ),
+        ],
+        name='<span style="color:#f00">Table</span>',
+        column_names=(
+            "qwoef<b>qd&lt;f</b> qld",
+            "1oijf\x1b[32m1iofj\x1b[0m1woejf",
+            "w1\x1b[32m23",
+        ),
+    )
+    assert table.stringify(
+        name_spliter=HtmlTextSplitter(),
+        column_names_spliter=(
+            HtmlTextSplitter(),
+            AnsiTextSplitter(),
+        ),
+        text_spliter=(
+            AnsiTextSplitter(),
+            BaseTextSplitter(),
+            HtmlTextSplitter(),
+        ),
+    ) == """
++----------------------------------------------+
+|                    \x1b[38;2;255;0;0mTable\x1b[0m                     |
++---------------+------------------+-----------+
+| qwoef\x1b[1mqd<f\x1b[0m qld | 1oijf\x1b[32m1iofj\x1b[0m1woejf |   w1\x1b[32m23\x1b[0m    |
++---------------+------------------+-----------+
+| t\x1b[31mex\x1b[0mt          | plain text       | 123\x1b[1m456\x1b[0m789 |
++---------------+------------------+-----------+
+""".strip()

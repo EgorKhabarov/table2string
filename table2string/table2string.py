@@ -114,6 +114,10 @@ def print_table(
         raise TypeError(theme)
 
     column_count = max(map(len, list_table))
+    column_names_spliter_t = transform_value(column_names_spliter, column_count)
+    text_spliter_t = transform_value(text_spliter, column_count)
+
+    row_widths = get_column_widths(list_table, splitters=text_spliter_t)
 
     # If there are column names, we write them at the beginning of the table
     if column_names_list:
@@ -125,9 +129,19 @@ def print_table(
             column_names_list.extend((" ",) * (column_count - column_names_len))
 
         list_table.insert(0, column_names_list)
+        column_names_widths = get_column_widths(
+            [column_names_list], splitters=column_names_spliter_t,
+        )
+        row_widths = tuple(
+            max(rw, column_names_widths[irw])
+            for irw, rw in enumerate(row_widths)
+        )
 
-    row_widths = get_column_widths(list_table)
-    min_row_widths = get_column_widths(list_table, minimum=True)
+    min_row_widths = get_column_widths(
+        list_table,
+        splitters=transform_value(BaseTextSplitter(), column_count),
+        minimum=True,
+    )
 
     if max_width is not None:
         min_width = sum(min_row_widths) + 3 * column_count + 1
@@ -192,9 +206,6 @@ def print_table(
     column_names_v_align_t = transform_align(
         column_count, column_names_v_align, default="^"
     )
-
-    column_names_spliter_t = transform_value(column_names_spliter, column_count)
-    text_spliter_t = transform_value(text_spliter, column_count)
 
     max_widths = transform_width(
         max_width, column_count, row_widths, min_row_widths, proportion_coefficient
@@ -494,10 +505,13 @@ class Table:
         :param kwargs: Works only with these keys:
             `h_align`,
             `v_align`,
+            `text_spliter`,
             `name_h_align`,
             `name_v_align`,
+            `name_spliter`,
             `column_names_h_align`,
             `column_names_v_align`,
+            `column_names_spliter`,
             `max_height`,
             `maximize_height`,
             `line_break_symbol`,
@@ -615,17 +629,17 @@ class Table:
             table=self.table,
             h_align=self.config.get("h_align") or h_align,
             v_align=self.config.get("v_align") or v_align,
-            text_spliter=text_spliter,
+            text_spliter=self.config.get("text_spliter") or text_spliter,
             name=self.name,
             name_h_align=self.config.get("name_h_align") or name_h_align,
             name_v_align=self.config.get("name_v_align") or name_v_align,
-            name_spliter=name_spliter,
+            name_spliter=self.config.get("name_spliter") or name_spliter,
             column_names=self.column_names,
             column_names_h_align=self.config.get("column_names_h_align")
             or column_names_h_align,
             column_names_v_align=self.config.get("column_names_v_align")
             or column_names_v_align,
-            column_names_spliter=column_names_spliter,
+            column_names_spliter=self.config.get("column_names_spliter") or column_names_spliter,
             max_width=max_width,
             max_height=self.config.get("max_height") or max_height,
             maximize_height=self.config.get("maximize_height") or maximize_height,
@@ -707,17 +721,17 @@ class Table:
             table=self.table,
             h_align=self.config.get("h_align") or h_align,
             v_align=self.config.get("v_align") or v_align,
-            text_spliter=text_spliter,
+            text_spliter=self.config.get("text_spliter") or text_spliter,
             name=self.name,
             name_h_align=self.config.get("name_h_align") or name_h_align,
             name_v_align=self.config.get("name_v_align") or name_v_align,
-            name_spliter=name_spliter,
+            name_spliter=self.config.get("name_spliter") or name_spliter,
             column_names=self.column_names,
             column_names_h_align=self.config.get("column_names_h_align")
             or column_names_h_align,
             column_names_v_align=self.config.get("column_names_v_align")
             or column_names_v_align,
-            column_names_spliter=column_names_spliter,
+            column_names_spliter=self.config.get("column_names_spliter") or column_names_spliter,
             max_width=max_width,
             max_height=self.config.get("max_height") or max_height,
             maximize_height=self.config.get("maximize_height") or maximize_height,
@@ -748,6 +762,7 @@ class Table:
 
 def get_column_widths(
     table: Sequence[Sequence],
+    splitters: tuple[BaseTextSplitter, ...] | None = None,
     minimum: bool = False,
 ) -> tuple[int, ...]:
     """
@@ -758,8 +773,12 @@ def get_column_widths(
     Uses table2string.Table
 
     :param table: Two-dimensional matrix
+    :param splitters: An tuple of object or class that implements the clear_formatting method
     :param minimum: Forces the function to return the minimum width for each column, which is 1
+    to correctly calculate text length (such as HTML tags)
     """
+    default_splitter = BaseTextSplitter()
+
     row_widths = tuple(
         max(
             (
@@ -768,7 +787,13 @@ def get_column_widths(
                         sum(subtable_row_widths) + 3 * len(subtable_row_widths) + 1
                     )
                     - 4
-                )(get_column_widths(cell.table, minimum=minimum))
+                )(
+                    get_column_widths(
+                        cell.table,
+                        splitters=cell.config.get("text_spliter") or None,
+                        minimum=minimum,
+                    )
+                )
                 if isinstance(cell, Table)
                 else (
                     1
@@ -776,8 +801,12 @@ def get_column_widths(
                     else (
                         max(
                             get_text_width_in_console(line)
-                            for line in str(cell).splitlines() or [""]
-                        )
+                            for line in str(
+                                (
+                                    splitters[ci] if splitters else default_splitter
+                                ).clear_formatting(cell)
+                            ).splitlines() or [""]
+                        ) or 1
                         if str(cell)
                         else 1
                     )

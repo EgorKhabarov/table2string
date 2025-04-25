@@ -333,12 +333,12 @@ def test_fill_line():
 
 
 def test_get_column_widths():
-    assert get_column_widths([["123"]]) == (3,)
-    assert get_column_widths([["123"], ["q"]]) == (3,)
-    assert get_column_widths([["123"], ["qqqq"]]) == (4,)
-    assert get_column_widths([["123", "q"]]) == (3, 1)
-    assert get_column_widths([["123", "qqqq"]]) == (3, 4)
-    assert get_column_widths([["123", "qqqq"]], minimum=True) == (1, 1)
+    assert get_column_widths([("123",)]) == (3,)
+    assert get_column_widths([("123",), ("q",)]) == (3,)
+    assert get_column_widths([("123",), ("qqqq",)]) == (4,)
+    assert get_column_widths([("123", "q")]) == (3, 1)
+    assert get_column_widths([("123", "qqqq")]) == (3, 4)
+    assert get_column_widths([("123", "qqqq")], minimum=True) == (1, 1)
     assert get_column_widths(
         [
             ("123", "123"),

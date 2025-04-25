@@ -61,6 +61,9 @@ class BaseTextSplitter:
         borders: dict[str, tuple[str, ...]] = {}
         return result_lines, result_symbols, is_subtable, borders
 
+    def clear_formatting(self, text: str):
+        return text
+
 
 class AnsiTextSplitterUnsafe(BaseTextSplitter):
     COLOR_REGEX = re.compile(r"\x1b\[[0-9;]*m")
@@ -271,6 +274,13 @@ class HtmlTextSplitter(AnsiTextSplitter):
             cell_break_symbol=cell_break_symbol,
         )
 
+    def clear_formatting(self, text: str):
+        text = text.replace("\x1b", "\\x1b")
+        parser = _HTMLClearFormattingParser()
+        parser.feed(text)
+        text = parser.get_text()
+        return super().clear_formatting(text)
+
 
 class _HTML2ANSIParser(HTMLParser):
     RGB_REGEX = re.compile(r"rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)")
@@ -353,3 +363,15 @@ class _HTML2ANSIParser(HTMLParser):
         text = "".join(self.result)
         result = self.ESCAPE_N_REGEX.sub("\n\n", text.strip())
         return result
+
+
+class _HTMLClearFormattingParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.result = []
+
+    def handle_data(self, data):
+        self.result.append(html.unescape(data))
+
+    def get_text(self):
+        return "".join(self.result).strip()
