@@ -4,7 +4,7 @@ from typing import Any, Sequence, Iterable, cast
 
 from table2string.themes import Theme, Themes
 from table2string.aligns import HorizontalAlignment, VerticalAlignment
-from table2string.text_splitters import BaseTextSplitter, AnsiTextSplitterEscapeUnsafe
+from table2string.text_splitters import BaseTextSplitter, AnsiTextSplitter
 from table2string.utils import (
     get_text_width_in_console,
     split_text_for_sub_table,
@@ -29,11 +29,11 @@ def print_table(
     ) = VerticalAlignment.TOP,
     text_spliter: (
         BaseTextSplitter | tuple[BaseTextSplitter, ...]
-    ) = AnsiTextSplitterEscapeUnsafe(),
+    ) = AnsiTextSplitter(),
     name: str | None = None,
     name_h_align: HorizontalAlignment | str = HorizontalAlignment.CENTER,
     name_v_align: VerticalAlignment | str = VerticalAlignment.MIDDLE,
-    name_spliter: BaseTextSplitter = AnsiTextSplitterEscapeUnsafe(),
+    name_spliter: BaseTextSplitter = AnsiTextSplitter(),
     column_names: Sequence[str] | None = None,
     column_names_h_align: (
         tuple[HorizontalAlignment | str, ...] | HorizontalAlignment | str
@@ -43,7 +43,7 @@ def print_table(
     ) = VerticalAlignment.MIDDLE,
     column_names_spliter: (
         BaseTextSplitter | tuple[BaseTextSplitter, ...]
-    ) = AnsiTextSplitterEscapeUnsafe(),
+    ) = AnsiTextSplitter(),
     max_width: int | tuple[int, ...] | None = None,
     max_height: int | None = None,
     maximize_height: bool = False,
@@ -650,10 +650,10 @@ class Table:
         ) = VerticalAlignment.TOP,
         text_spliter: (
             BaseTextSplitter | tuple[BaseTextSplitter, ...]
-        ) = AnsiTextSplitterEscapeUnsafe(),
+        ) = AnsiTextSplitter(),
         name_h_align: HorizontalAlignment | str = HorizontalAlignment.CENTER,
         name_v_align: VerticalAlignment | str = VerticalAlignment.MIDDLE,
-        name_spliter: BaseTextSplitter = AnsiTextSplitterEscapeUnsafe(),
+        name_spliter: BaseTextSplitter = AnsiTextSplitter(),
         column_names_h_align: (
             tuple[HorizontalAlignment | str, ...] | HorizontalAlignment | str
         ) = HorizontalAlignment.CENTER,
@@ -662,7 +662,7 @@ class Table:
         ) = VerticalAlignment.MIDDLE,
         column_names_spliter: (
             BaseTextSplitter | tuple[BaseTextSplitter, ...]
-        ) = AnsiTextSplitterEscapeUnsafe(),
+        ) = AnsiTextSplitter(),
         max_width: int | tuple[int, ...] | None = None,
         max_height: int | None = None,
         maximize_height: bool = False,
@@ -747,7 +747,8 @@ class Table:
 
 
 def get_column_widths(
-    table: Sequence[Sequence], minimum: bool = False
+    table: Sequence[Sequence],
+    minimum: bool = False,
 ) -> tuple[int, ...]:
     """
     Calculates and returns a list of column widths.

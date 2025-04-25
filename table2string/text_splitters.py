@@ -62,7 +62,7 @@ class BaseTextSplitter:
         return result_lines, result_symbols, is_subtable, borders
 
 
-class AnsiTextSplitter(BaseTextSplitter):
+class AnsiTextSplitterUnsafe(BaseTextSplitter):
     COLOR_REGEX = re.compile(r"\x1b\[[0-9;]*m")
     OSC_LINK_OPEN_REGEX = re.compile(r"\x1b]8;;(?P<url>[^\x1b]+)\x1b\\")
     OSC_LINK_CLOSE = "\x1b]8;;\x1b\\"
@@ -223,7 +223,7 @@ class AnsiTextSplitter(BaseTextSplitter):
         return restored, symbols, is_subtable, borders
 
 
-class AnsiTextSplitterEscapeUnsafe(AnsiTextSplitter):
+class AnsiTextSplitter(AnsiTextSplitterUnsafe):
     ESCAPE_UNSAFE_ANSI_REGEX = re.compile(
         r"\x1b(?!\[[0-9;]*m|]8;;|\\)"
         r"|[\x00-\x09\x0b-\x1a\x1c-\x1f\x7f-\x9f\u200b-\u200d\uFEFF]"
@@ -250,7 +250,7 @@ class AnsiTextSplitterEscapeUnsafe(AnsiTextSplitter):
         )
 
 
-class HtmlTextSplitter(AnsiTextSplitterEscapeUnsafe):
+class HtmlTextSplitter(AnsiTextSplitter):
     def split_text(
         self,
         text: str,
@@ -312,6 +312,10 @@ class _HTML2ANSIParser(HTMLParser):
                         r = int(val[1:3], 16)
                         g = int(val[3:5], 16)
                         b = int(val[5:7], 16)
+                    elif val.startswith("#") and len(val) == 4:
+                        r = int(val[1]*2, 16)
+                        g = int(val[2]*2, 16)
+                        b = int(val[3]*2, 16)
                     else:
                         m = self.RGB_REGEX.search(val)
                         if m:

@@ -1,13 +1,14 @@
 from table2string import Table
 from table2string.text_splitters import (
+    BaseTextSplitter,
     AnsiTextSplitter,
-    AnsiTextSplitterEscapeUnsafe,
     HtmlTextSplitter,
+    AnsiTextSplitterUnsafe,
 )
 
 
-text_spliter = AnsiTextSplitter()
-text_spliter_escape_unsafe = AnsiTextSplitterEscapeUnsafe()
+text_spliter = AnsiTextSplitterUnsafe()
+text_spliter_escape_unsafe = AnsiTextSplitter()
 
 split_text = text_spliter.split_text
 split_text_escape_unsafe = text_spliter_escape_unsafe.split_text
@@ -144,7 +145,7 @@ def test_color_escape_sequence():
         table.stringify(
             max_width=(4,),
             line_break_symbol="-",
-            text_spliter=AnsiTextSplitter(),
+            text_spliter=AnsiTextSplitterUnsafe(),
         )
         == """
 +------+------+------+------+------+------+------+
@@ -163,7 +164,7 @@ def test_color_escape_sequence():
         table.stringify(
             max_width=(4,),
             line_break_symbol="-",
-            text_spliter=AnsiTextSplitter(),
+            text_spliter=AnsiTextSplitterUnsafe(),
         )
         == """
 +------+
@@ -373,7 +374,7 @@ def test_osc_link_escape_sequence():
     )
     assert (
         table.stringify(
-            text_spliter=AnsiTextSplitter(),
+            text_spliter=AnsiTextSplitterUnsafe(),
         )
         == """
 +---------------+-----------+----------------------------------------+
@@ -398,7 +399,7 @@ def test_osc_link_escape_sequence():
         table.stringify(
             max_width=(3,),
             line_break_symbol="↩",
-            text_spliter=AnsiTextSplitter(),
+            text_spliter=AnsiTextSplitterUnsafe(),
         )
         == """
 +-----+
@@ -420,7 +421,7 @@ def test_osc_link_escape_sequence():
         table.stringify(
             max_width=(3,),
             line_break_symbol="↩",
-            text_spliter=AnsiTextSplitter(),
+            text_spliter=AnsiTextSplitterUnsafe(),
         )
         == """
 +-----+
