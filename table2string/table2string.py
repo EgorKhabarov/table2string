@@ -13,6 +13,7 @@ from table2string.utils import (
     generate_borders,
     transform_align,
     transform_width,
+    transform_value,
     fill_line,
 )
 
@@ -26,9 +27,11 @@ def print_table(
     v_align: (
         tuple[VerticalAlignment | str, ...] | VerticalAlignment | str
     ) = VerticalAlignment.TOP,
+    text_spliter: BaseTextSplitter | tuple[BaseTextSplitter, ...] = AnsiTextSplitterEscapeUnsafe(),
     name: str | None = None,
     name_h_align: HorizontalAlignment | str = HorizontalAlignment.CENTER,
     name_v_align: VerticalAlignment | str = VerticalAlignment.MIDDLE,
+    name_spliter: BaseTextSplitter = AnsiTextSplitterEscapeUnsafe(),
     column_names: Sequence[str] | None = None,
     column_names_h_align: (
         tuple[HorizontalAlignment | str, ...] | HorizontalAlignment | str
@@ -36,6 +39,7 @@ def print_table(
     column_names_v_align: (
         tuple[VerticalAlignment | str, ...] | VerticalAlignment | str
     ) = VerticalAlignment.MIDDLE,
+    column_names_spliter: BaseTextSplitter | tuple[BaseTextSplitter, ...] = AnsiTextSplitterEscapeUnsafe(),
     max_width: int | tuple[int, ...] | None = None,
     max_height: int | None = None,
     maximize_height: bool = False,
@@ -47,7 +51,6 @@ def print_table(
     theme: Theme = Themes.ascii_thin,
     ignore_width_errors: bool = False,
     proportion_coefficient: float = 0.5,
-    text_spliter: BaseTextSplitter = AnsiTextSplitterEscapeUnsafe(),
 ) -> None:
     """
     Print the table in sys.stdout or file
@@ -55,12 +58,18 @@ def print_table(
     :param table: Two-dimensional matrix
     :param h_align: Can be a line or list, should be from utils.ALLOWED_H_ALIGNS
     :param v_align: Can be a line or list, should be from utils.ALLOWED_V_ALIGNS
+    :param text_spliter: An object or class that implements the split_text method
+    to correctly split and process formatted text (such as ANSI sequences)
     :param name: Table name
     :param name_h_align: Can be a line or list, should be from utils.ALLOWED_H_ALIGNS
     :param name_v_align: Can be a line or list, should be from utils.ALLOWED_V_ALIGNS
+    :param name_spliter: An object or class that implements the split_text method
+    to correctly split and process formatted name (such as ANSI sequences)
     :param column_names: Column names
     :param column_names_h_align: Horizontal aligns for column names
     :param column_names_v_align: Vertical aligns for column names
+    :param column_names_spliter: An object or class that implements the split_text method
+    to correctly split and process formatted column names (such as ANSI sequences)
     :param max_width: Table width or width of individual columns
     :param max_height: The maximum number of lines in one line
     :param maximize_height: Make all lines of the same height max_height
@@ -72,8 +81,6 @@ def print_table(
     :param theme: Theme
     :param ignore_width_errors: Fixes errors in max_width if they exist
     :param proportion_coefficient: Reduction coefficient for too large numbers
-    :param text_spliter: An object or class that implements the split_text method
-    to correctly split and process formatted text (such as ANSI sequences)
     :return: None
     """
     list_table: list[list[str | Table | Any]] = list(list(row) for row in table)
@@ -182,6 +189,9 @@ def print_table(
         column_count, column_names_v_align, default="^"
     )
 
+    column_names_spliter_t = transform_value(column_names_spliter, column_count)
+    text_spliter_t = transform_value(text_spliter, column_count)
+
     max_widths = transform_width(
         max_width, column_count, row_widths, min_row_widths, proportion_coefficient
     )
@@ -213,7 +223,7 @@ def print_table(
                 tuple[dict[str, tuple[str, ...]], ...],
             ],
             zip(
-                text_spliter.split_text(
+                name_spliter.split_text(
                     text=name,
                     width=max_name_width,
                     height=max_height,
@@ -265,7 +275,8 @@ def print_table(
                 )
                 column_lines = split_text_for_sub_table(string_sub_table, max_height)
             else:
-                column_lines = text_spliter.split_text(
+                spliter = column_names_spliter_t if ri == 0 and column_names_list else text_spliter_t
+                column_lines = spliter[ci].split_text(
                     text=str(column),
                     width=max_widths[ci],
                     height=max_height,
@@ -373,9 +384,11 @@ def stringify_table(
     v_align: (
         tuple[VerticalAlignment | str, ...] | VerticalAlignment | str
     ) = VerticalAlignment.TOP,
+    text_spliter: BaseTextSplitter | tuple[BaseTextSplitter, ...] = BaseTextSplitter(),
     name: str | None = None,
     name_h_align: HorizontalAlignment | str = HorizontalAlignment.CENTER,
     name_v_align: VerticalAlignment | str = VerticalAlignment.MIDDLE,
+    name_spliter: BaseTextSplitter = BaseTextSplitter(),
     column_names: Sequence[str] | None = None,
     column_names_h_align: (
         tuple[HorizontalAlignment | str, ...] | HorizontalAlignment | str
@@ -383,6 +396,7 @@ def stringify_table(
     column_names_v_align: (
         tuple[VerticalAlignment | str, ...] | VerticalAlignment | str
     ) = VerticalAlignment.MIDDLE,
+    column_names_spliter: BaseTextSplitter | tuple[BaseTextSplitter, ...] = BaseTextSplitter(),
     max_width: int | tuple[int, ...] | None = None,
     max_height: int | None = None,
     maximize_height: bool = False,
@@ -393,19 +407,24 @@ def stringify_table(
     theme: Theme = Themes.ascii_thin,
     ignore_width_errors: bool = False,
     proportion_coefficient: float = 0.5,
-    text_spliter: BaseTextSplitter = BaseTextSplitter(),
 ) -> str:
     """
 
     :param table: Two-dimensional matrix
     :param h_align: Can be a line or list, should be from utils.ALLOWED_H_ALIGNS
     :param v_align: Can be a line or list, should be from utils.ALLOWED_V_ALIGNS
+    :param text_spliter: An object or class that implements the split_text method
+    to correctly split and process formatted text (such as ANSI sequences)
     :param name: Table name
     :param name_h_align: Can be a line or list, should be from utils.ALLOWED_H_ALIGNS
     :param name_v_align: Can be a line or list, should be from utils.ALLOWED_V_ALIGNS
+    :param name_spliter: An object or class that implements the split_text method
+    to correctly split and process formatted name (such as ANSI sequences)
     :param column_names: Column names
     :param column_names_h_align: Horizontal aligns for column names
     :param column_names_v_align: Vertical aligns for column names
+    :param column_names_spliter: An object or class that implements the split_text method
+    to correctly split and process formatted column names (such as ANSI sequences)
     :param max_width: Table width or width of individual columns
     :param max_height: The maximum number of lines in one line
     :param maximize_height: Make all lines of the same height max_height
@@ -425,12 +444,15 @@ def stringify_table(
         table=table,
         h_align=h_align,
         v_align=v_align,
+        text_spliter=text_spliter,
         name=name,
         name_h_align=name_h_align,
         name_v_align=name_v_align,
+        name_spliter=name_spliter,
         column_names=column_names,
         column_names_h_align=column_names_h_align,
         column_names_v_align=column_names_v_align,
+        column_names_spliter=column_names_spliter,
         max_width=max_width,
         max_height=max_height,
         maximize_height=maximize_height,
@@ -442,7 +464,6 @@ def stringify_table(
         theme=theme,
         ignore_width_errors=ignore_width_errors,
         proportion_coefficient=proportion_coefficient,
-        text_spliter=text_spliter,
     )
     file.seek(0)
     return file.read()
@@ -528,14 +549,17 @@ class Table:
         v_align: (
             tuple[VerticalAlignment | str, ...] | VerticalAlignment | str
         ) = VerticalAlignment.TOP,
+        text_spliter: BaseTextSplitter | tuple[BaseTextSplitter, ...] = BaseTextSplitter(),
         name_h_align: HorizontalAlignment | str = HorizontalAlignment.CENTER,
         name_v_align: VerticalAlignment | str = VerticalAlignment.MIDDLE,
+        name_spliter: BaseTextSplitter = BaseTextSplitter(),
         column_names_h_align: (
             tuple[HorizontalAlignment | str, ...] | HorizontalAlignment | str
         ) = HorizontalAlignment.CENTER,
         column_names_v_align: (
             tuple[VerticalAlignment | str, ...] | VerticalAlignment | str
         ) = VerticalAlignment.MIDDLE,
+        column_names_spliter: BaseTextSplitter | tuple[BaseTextSplitter, ...] = BaseTextSplitter(),
         max_width: int | tuple[int, ...] | None = None,
         max_height: int | None = None,
         maximize_height: bool = False,
@@ -546,16 +570,21 @@ class Table:
         theme: Theme = Themes.ascii_thin,
         ignore_width_errors: bool = False,
         proportion_coefficient: float = 0.5,
-        text_spliter: BaseTextSplitter = BaseTextSplitter(),
     ) -> str:
         """
 
         :param h_align: Can be a line or list, should be from utils.ALLOWED_H_ALIGNS
         :param v_align: Can be a line or list, should be from utils.ALLOWED_V_ALIGNS
+        :param text_spliter: An object or class that implements the split_text method
+        to correctly split and process formatted text (such as ANSI sequences)
         :param name_h_align: Can be a line or list, should be from utils.ALLOWED_H_ALIGNS
         :param name_v_align: Can be a line or list, should be from utils.ALLOWED_V_ALIGNS
+        :param name_spliter: An object or class that implements the split_text method
+        to correctly split and process formatted name (such as ANSI sequences)
         :param column_names_h_align: Horizontal aligns for column names
         :param column_names_v_align: Vertical aligns for column names
+        :param column_names_spliter: An object or class that implements the split_text method
+        to correctly split and process formatted column names (such as ANSI sequences)
         :param max_width: Table width or width of individual columns
         :param max_height: The maximum number of lines in one line
         :param maximize_height: Make all lines of the same height max_height
@@ -566,22 +595,23 @@ class Table:
         :param theme: Theme
         :param ignore_width_errors: Fixes errors in max_width if they exist
         :param proportion_coefficient: Reduction coefficient for too large numbers
-        :param text_spliter: An object or class that implements the split_text method
-        to correctly split and process formatted text (such as ANSI sequences)
         :return: String table
         """
         return stringify_table(
             table=self.table,
             h_align=self.config.get("h_align") or h_align,
             v_align=self.config.get("v_align") or v_align,
+            text_spliter=text_spliter,
             name=self.name,
             name_h_align=self.config.get("name_h_align") or name_h_align,
             name_v_align=self.config.get("name_v_align") or name_v_align,
+            name_spliter=name_spliter,
             column_names=self.column_names,
             column_names_h_align=self.config.get("column_names_h_align")
             or column_names_h_align,
             column_names_v_align=self.config.get("column_names_v_align")
             or column_names_v_align,
+            column_names_spliter=column_names_spliter,
             max_width=max_width,
             max_height=self.config.get("max_height") or max_height,
             maximize_height=self.config.get("maximize_height") or maximize_height,
@@ -593,7 +623,6 @@ class Table:
             ignore_width_errors=ignore_width_errors,
             proportion_coefficient=self.config.get("proportion_coefficient")
             or proportion_coefficient,
-            text_spliter=text_spliter,
         )
 
     def print(
@@ -605,14 +634,17 @@ class Table:
         v_align: (
             tuple[VerticalAlignment | str, ...] | VerticalAlignment | str
         ) = VerticalAlignment.TOP,
+        text_spliter: BaseTextSplitter | tuple[BaseTextSplitter, ...] = AnsiTextSplitterEscapeUnsafe(),
         name_h_align: HorizontalAlignment | str = HorizontalAlignment.CENTER,
         name_v_align: VerticalAlignment | str = VerticalAlignment.MIDDLE,
+        name_spliter: BaseTextSplitter = AnsiTextSplitterEscapeUnsafe(),
         column_names_h_align: (
             tuple[HorizontalAlignment | str, ...] | HorizontalAlignment | str
         ) = HorizontalAlignment.CENTER,
         column_names_v_align: (
             tuple[VerticalAlignment | str, ...] | VerticalAlignment | str
         ) = VerticalAlignment.MIDDLE,
+        column_names_spliter: BaseTextSplitter | tuple[BaseTextSplitter, ...] = AnsiTextSplitterEscapeUnsafe(),
         max_width: int | tuple[int, ...] | None = None,
         max_height: int | None = None,
         maximize_height: bool = False,
@@ -624,7 +656,6 @@ class Table:
         theme: Theme = Themes.ascii_thin,
         ignore_width_errors: bool = False,
         proportion_coefficient: float = 0.5,
-        text_spliter: BaseTextSplitter = AnsiTextSplitterEscapeUnsafe(),
     ) -> None:
         """
         Print the table in sys.stdout or file
@@ -633,8 +664,12 @@ class Table:
         :param v_align: Can be a line or list, should be from utils.ALLOWED_V_ALIGNS
         :param name_h_align: Can be a line or list, should be from utils.ALLOWED_H_ALIGNS
         :param name_v_align: Can be a line or list, should be from utils.ALLOWED_V_ALIGNS
+        :param name_spliter: An object or class that implements the split_text method
+        to correctly split and process formatted name (such as ANSI sequences)
         :param column_names_h_align: Horizontal aligns for column names
         :param column_names_v_align: Vertical aligns for column names
+        :param column_names_spliter: An object or class that implements the split_text method
+        to correctly split and process formatted column names (such as ANSI sequences)
         :param max_width: Table width or width of individual columns
         :param max_height: The maximum number of lines in one line
         :param maximize_height: Make all lines of the same height max_height
@@ -654,14 +689,17 @@ class Table:
             table=self.table,
             h_align=self.config.get("h_align") or h_align,
             v_align=self.config.get("v_align") or v_align,
+            text_spliter=text_spliter,
             name=self.name,
             name_h_align=self.config.get("name_h_align") or name_h_align,
             name_v_align=self.config.get("name_v_align") or name_v_align,
+            name_spliter=name_spliter,
             column_names=self.column_names,
             column_names_h_align=self.config.get("column_names_h_align")
             or column_names_h_align,
             column_names_v_align=self.config.get("column_names_v_align")
             or column_names_v_align,
+            column_names_spliter=column_names_spliter,
             max_width=max_width,
             max_height=self.config.get("max_height") or max_height,
             maximize_height=self.config.get("maximize_height") or maximize_height,
@@ -674,7 +712,6 @@ class Table:
             ignore_width_errors=ignore_width_errors,
             proportion_coefficient=self.config.get("proportion_coefficient")
             or proportion_coefficient,
-            text_spliter=text_spliter,
         )
 
     def __str__(self):

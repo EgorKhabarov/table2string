@@ -1,11 +1,13 @@
 import re
 import shutil
 import unicodedata
+from typing import TypeVar
 
 from table2string.themes import Theme, Themes, translate_theme_border
 from table2string.aligns import HorizontalAlignment, VerticalAlignment
 
 
+T = TypeVar("T")
 OSC8_LINK_REGEX = re.compile(
     r"(?s)\x1b]8;;.*?(?:\x07|\x1b\\)(?P<text>.*?)\x1b]8;;.*?(?:\x07|\x1b\\)"
 )
@@ -224,6 +226,21 @@ def transform_width(
         row_widths, sum_column_width, min_row_widths, proportion_coefficient
     )
     return max_widths
+
+
+def transform_value(value: T | tuple[T, ...], column_count: int) -> tuple[T]:
+    if isinstance(value, tuple):
+        if len(value) < column_count:
+            return (
+                *value,
+                *(value[-1],) * (column_count - len(value)),
+            )[:column_count]
+        return value[:column_count]
+    else:
+        return (
+            value,
+            *(value,) * (column_count - 1),
+        )[:column_count]
 
 
 def split_text_for_sub_table(
