@@ -27,7 +27,9 @@ def print_table(
     v_align: (
         tuple[VerticalAlignment | str, ...] | VerticalAlignment | str
     ) = VerticalAlignment.TOP,
-    text_spliter: BaseTextSplitter | tuple[BaseTextSplitter, ...] = AnsiTextSplitterEscapeUnsafe(),
+    text_spliter: (
+        BaseTextSplitter | tuple[BaseTextSplitter, ...]
+    ) = AnsiTextSplitterEscapeUnsafe(),
     name: str | None = None,
     name_h_align: HorizontalAlignment | str = HorizontalAlignment.CENTER,
     name_v_align: VerticalAlignment | str = VerticalAlignment.MIDDLE,
@@ -39,7 +41,9 @@ def print_table(
     column_names_v_align: (
         tuple[VerticalAlignment | str, ...] | VerticalAlignment | str
     ) = VerticalAlignment.MIDDLE,
-    column_names_spliter: BaseTextSplitter | tuple[BaseTextSplitter, ...] = AnsiTextSplitterEscapeUnsafe(),
+    column_names_spliter: (
+        BaseTextSplitter | tuple[BaseTextSplitter, ...]
+    ) = AnsiTextSplitterEscapeUnsafe(),
     max_width: int | tuple[int, ...] | None = None,
     max_height: int | None = None,
     maximize_height: bool = False,
@@ -275,7 +279,11 @@ def print_table(
                 )
                 column_lines = split_text_for_sub_table(string_sub_table, max_height)
             else:
-                spliter = column_names_spliter_t if ri == 0 and column_names_list else text_spliter_t
+                spliter = (
+                    column_names_spliter_t
+                    if ri == 0 and column_names_list
+                    else text_spliter_t
+                )
                 column_lines = spliter[ci].split_text(
                     text=str(column),
                     width=max_widths[ci],
@@ -396,7 +404,9 @@ def stringify_table(
     column_names_v_align: (
         tuple[VerticalAlignment | str, ...] | VerticalAlignment | str
     ) = VerticalAlignment.MIDDLE,
-    column_names_spliter: BaseTextSplitter | tuple[BaseTextSplitter, ...] = BaseTextSplitter(),
+    column_names_spliter: (
+        BaseTextSplitter | tuple[BaseTextSplitter, ...]
+    ) = BaseTextSplitter(),
     max_width: int | tuple[int, ...] | None = None,
     max_height: int | None = None,
     maximize_height: bool = False,
@@ -549,7 +559,9 @@ class Table:
         v_align: (
             tuple[VerticalAlignment | str, ...] | VerticalAlignment | str
         ) = VerticalAlignment.TOP,
-        text_spliter: BaseTextSplitter | tuple[BaseTextSplitter, ...] = BaseTextSplitter(),
+        text_spliter: (
+            BaseTextSplitter | tuple[BaseTextSplitter, ...]
+        ) = BaseTextSplitter(),
         name_h_align: HorizontalAlignment | str = HorizontalAlignment.CENTER,
         name_v_align: VerticalAlignment | str = VerticalAlignment.MIDDLE,
         name_spliter: BaseTextSplitter = BaseTextSplitter(),
@@ -559,7 +571,9 @@ class Table:
         column_names_v_align: (
             tuple[VerticalAlignment | str, ...] | VerticalAlignment | str
         ) = VerticalAlignment.MIDDLE,
-        column_names_spliter: BaseTextSplitter | tuple[BaseTextSplitter, ...] = BaseTextSplitter(),
+        column_names_spliter: (
+            BaseTextSplitter | tuple[BaseTextSplitter, ...]
+        ) = BaseTextSplitter(),
         max_width: int | tuple[int, ...] | None = None,
         max_height: int | None = None,
         maximize_height: bool = False,
@@ -634,7 +648,9 @@ class Table:
         v_align: (
             tuple[VerticalAlignment | str, ...] | VerticalAlignment | str
         ) = VerticalAlignment.TOP,
-        text_spliter: BaseTextSplitter | tuple[BaseTextSplitter, ...] = AnsiTextSplitterEscapeUnsafe(),
+        text_spliter: (
+            BaseTextSplitter | tuple[BaseTextSplitter, ...]
+        ) = AnsiTextSplitterEscapeUnsafe(),
         name_h_align: HorizontalAlignment | str = HorizontalAlignment.CENTER,
         name_v_align: VerticalAlignment | str = VerticalAlignment.MIDDLE,
         name_spliter: BaseTextSplitter = AnsiTextSplitterEscapeUnsafe(),
@@ -644,7 +660,9 @@ class Table:
         column_names_v_align: (
             tuple[VerticalAlignment | str, ...] | VerticalAlignment | str
         ) = VerticalAlignment.MIDDLE,
-        column_names_spliter: BaseTextSplitter | tuple[BaseTextSplitter, ...] = AnsiTextSplitterEscapeUnsafe(),
+        column_names_spliter: (
+            BaseTextSplitter | tuple[BaseTextSplitter, ...]
+        ) = AnsiTextSplitterEscapeUnsafe(),
         max_width: int | tuple[int, ...] | None = None,
         max_height: int | None = None,
         maximize_height: bool = False,
