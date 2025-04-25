@@ -84,11 +84,15 @@ class AnsiTextSplitterUnsafe(BaseTextSplitter):
         # Foreground colors 30–37, 90–97
         # Expanded foreground colors (256/TrueColor)
         # RGB foreground colors
-        re.compile(r"(\x1b\[(?:3[0-7]|9[0-7])m|\x1b\[38;5;\d+m|\x1b\[38;2;\d+;\d+;\d+m)+(\x1b\[39m)"),
+        re.compile(
+            r"(\x1b\[(?:3[0-7]|9[0-7])m|\x1b\[38;5;\d+m|\x1b\[38;2;\d+;\d+;\d+m)+(\x1b\[39m)"
+        ),
         # Background colors 40–47, 100–107
         # Expanded background colors (256/TrueColor)
         # RGB background colors
-        re.compile(r"(\x1b\[(?:4[0-7]|10[0-7])m|\x1b\[48;5;\d+m|\x1b\[48;2;\d+;\d+;\d+m)+(\x1b\[49m)"),
+        re.compile(
+            r"(\x1b\[(?:4[0-7]|10[0-7])m|\x1b\[48;5;\d+m|\x1b\[48;2;\d+;\d+;\d+m)+(\x1b\[49m)"
+        ),
     ]
 
     def split_text(
@@ -352,10 +356,7 @@ class _HTML2ANSIParser(HTMLParser):
         if tag in ("b", "i", "u", "s", "span", "mark", "a") and "class" in attrs:
             classes = attrs["class"].split()
             self.result.append(
-                "".join(
-                    self.html_classes_kwargs.get(class_, "")
-                    for class_ in classes
-                )
+                "".join(self.html_classes_kwargs.get(class_, "") for class_ in classes)
             )
 
         if tag in ("b", "i", "u", "s", "span", "mark", "a") and "style" in attrs:
