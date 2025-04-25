@@ -1394,6 +1394,11 @@ t.print(h_align="^", sep=(1,))
 
 ## Subtable
 
+To elegantly display structured data inside table cells, you can embed **subtables**.
+These subtables are rendered as full tables within a cell and will seamlessly merge borders with the parent table.
+Since a subtable is itself a `Table` instance, **you can nest them recursively** without limit.
+Subtables will automatically scale to fit the width of their parent cell.
+
 <details>
 <summary>Example</summary>
 
@@ -1491,13 +1496,13 @@ You may also freely use the third-party **Colorama** library for colorizing tabl
 
 ### HtmlTextSplitter
 
-You can use HTML formatting inside table cells.  
-Currently, the following tags are supported: `b`, `i`, `u`, `s`, `span`, `mark`, and `a`.  
+You can use HTML formatting inside table cells.
+Currently, the following tags are supported: `b`, `i`, `u`, `s`, `span`, `mark`, and `a`.
 All other HTML tags will be ignored, but their inner text will still be preserved.
 
 Each tag may include the following attributes:
-- `style` — supports `color` and `background-color` in **RGB** or **HEX** formats only  
-- `class` — can be mapped to ANSI styles via a class-to-color mapping  
+- `style` — supports `color` and `background-color` in **RGB** or **HEX** formats only
+- `class` — can be mapped to ANSI styles via a class-to-color mapping
 - `href` — available in `<a>` tags for generating hyperlinks
 
 ```pycon
