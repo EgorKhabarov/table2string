@@ -430,7 +430,8 @@ You can customize the border color using the `set_color` or `set_context_color` 
 >>> Themes.thin_thick.border.set_color(color=None)
 >>> # You can also use a context manager to temporarily set the border color
 >>> with Themes.thin_thick.border.set_context_color(color=Color.MAGENTA):
-...     ...  # Render tables here
+...     pass  # Render tables here
+
 ```
 
 Expandable previews below this section illustrate the visual appearance of each border theme.
@@ -1487,6 +1488,37 @@ You may also freely use the third-party **Colorama** library for colorizing tabl
 > [!IMPORTANT]
 > `table2string` does **not** automatically enable ANSI support on the Windows console.
 > To turn it on, call `just_fix_windows_console()` from the Colorama package before printing.
+
+### HtmlTextSplitter
+
+You can use HTML formatting inside table cells.  
+Currently, the following tags are supported: `b`, `i`, `u`, `s`, `span`, `mark`, and `a`.  
+All other HTML tags will be ignored, but their inner text will still be preserved.
+
+Each tag may include the following attributes:
+- `style` — supports `color` and `background-color` in **RGB** or **HEX** formats only  
+- `class` — can be mapped to ANSI styles via a class-to-color mapping  
+- `href` — available in `<a>` tags for generating hyperlinks
+
+```pycon
+>>> from table2string import Table, HtmlTextSplitter, Color, BgColor
+>>> splitter = HtmlTextSplitter(
+...     html_classes={"red": Color.RED, "bg-red": BgColor.RED},
+... )
+>>> Table([(
+...     """
+... text
+... <span class="red">red text<span style="color:#000" class="bg-red">black & bg red text</span></span>
+... """,
+... )]).print(text_spliter=splitter)
++-----------------------------+
+| text                        |
+| [31mred text[41m[38;2;0;0;0mblack & bg red text[0m |
++-----------------------------+
+
+```
+
+This allows you to use familiar HTML/CSS markup for styling text while maintaining full support for ANSI rendering.
 
 ### Create your own formatting
 
