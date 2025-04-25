@@ -22,6 +22,7 @@ While there are several libraries available for converting tables to strings in 
 - **Subtable Support**: Easily include a table within a table for a more flexible presentation.
 - **Alignment**: Easily align text in a cell in any direction.
 - **Emoji Integration**: Effortlessly incorporate emoji characters into your tables to add visual appeal and context.
+- **[New!] ANSI Support**: Use escape sequences for colors, decorations, and hyperlinks.
 
 ---
 
@@ -110,29 +111,31 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 
 ## Arguments
 
-| Argument                 | Type                                                                                              | Example                         | Description                                                                                                                                                 |
-|:-------------------------|:--------------------------------------------------------------------------------------------------|:--------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `table`                  | `Sequence[Sequence[Any]]`                                                                         | `[("1", "2"), ("3", "4")]`      | A two-dimensional matrix                                                                                                                                    |
-| `h_align`                | <code>tuple[HorizontalAlignment &#x7c; str, ...]</code> &#x7c; `HorizontalAlignment` &#x7c; `str` | `HorizontalAlignment.CENTER`    | Allows you to align text in a cell horizontally                                                                                                             |
-| `v_align`                | <code>tuple[VerticalAlignment &#x7c; str, ...]</code> &#x7c; `VerticalAlignment` &#x7c; `str`     | `VerticalAlignment.MIDDLE`      | Allows you to align text in a cell vertically                                                                                                               |
-| `name`                   | `str` &#x7c; `None`                                                                               | `"Table Name"`                  | Table name                                                                                                                                                  |
-| `name_h_align`           | `HorizontalAlignment` &#x7c; `str`                                                                | `HorizontalAlignment.CENTER`    | Allows you to align table name horizontally                                                                                                                 |
-| `name_v_align`           | `VerticalAlignment` &#x7c; `str`                                                                  | `VerticalAlignment.MIDDLE`      | Allows you to align table name vertically                                                                                                                   |
-| `column_names`           | `Sequence[str]` &#x7c; `None`                                                                     | `("c1", "c2", ...column_count)` | Sets the names for the table columns                                                                                                                        |
-| `column_names_h_align`   | <code>tuple[HorizontalAlignment &#x7c; str, ...]</code> &#x7c; `HorizontalAlignment` &#x7c; `str` | `HorizontalAlignment.CENTER`    | Allows you to align column names horizontally                                                                                                               |
-| `column_names_v_align`   | <code>tuple[VerticalAlignment &#x7c; str, ...]</code> &#x7c; `VerticalAlignment` &#x7c; `str`     | `VerticalAlignment.MIDDLE`      | Allows you to align column names vertically                                                                                                                 |
-| `max_width`              | `int` &#x7c; `Tuple[int, ...]` &#x7c; `None`                                                      | `120`                           | Allows you to set the width of the entire table or individually for each column                                                                             |
-| `max_height`             | `int` &#x7c; `None`                                                                               | `10`                            | Specifies the maximum height for rows                                                                                                                       |
-| `maximize_height`        | `bool`                                                                                            | `True`                          | Force height to be taken from max_height                                                                                                                    |
-| `line_break_symbol`      | `str`                                                                                             | `"\\"`                          | Line break symbol                                                                                                                                           |
-| `cell_break_symbol`      | `str`                                                                                             | `"…"`                           | Symbol indicating the end of text when there is not enough height                                                                                           |
-| `sep`                    | `bool` &#x7c; `range` &#x7c; `tuple`                                                              | `(1, 3, 6)`                     | Handles the separators between table rows and can be either a boolean type or possess a `__contains__` method                                               |
-| `end`                    | `str` &#x7c; `None`                                                                               | `"\n"`                          | Behaves the same as `print(end=)`                                                                                                                           |
-| `file`                   | `TextIOWrapper` &#x7c; `None`                                                                     | `sys.stdout` or `io.StringIO()` | Behaves the same as `print(file=)`                                                                                                                          |
-| `theme`                  | `Theme`                                                                                           | `Themes.rounded_thick`          | Allows you to set a specific theme for the table. For example, the border style                                                                             |
-| `ignore_width_errors`    | `bool`                                                                                            | `False`                         | Fixes errors in max_width if they exist                                                                                                                     |
-| `proportion_coefficient` | `float`                                                                                           | `0.5`                           | Affects the width distribution of the columns. A value of `0.0` corresponds to proportional distribution, `1.0` averages the values, and `2.0` inverts them |
-
+| Argument                 | Type                                                                                               | Example                         | Description                                                                                                                                                 |
+|:-------------------------|:---------------------------------------------------------------------------------------------------|:--------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `table`                  | `Sequence[Sequence[Any]]`                                                                          | `[("1", "2"), ("3", "4")]`      | A two-dimensional matrix                                                                                                                                    |
+| `h_align`                | <code>tuple\[HorizontalAlignment &#x7c; str, ...]</code> &#x7c; `HorizontalAlignment` &#x7c; `str` | `HorizontalAlignment.CENTER`    | Allows you to align text in a cell horizontally                                                                                                             |
+| `v_align`                | <code>tuple\[VerticalAlignment &#x7c; str, ...]</code> &#x7c; `VerticalAlignment` &#x7c; `str`     | `VerticalAlignment.MIDDLE`      | Allows you to align text in a cell vertically                                                                                                               |
+| `text_spliter`           | `BaseTextSplitter` &#x7c; `tuple[BaseTextSplitter, ...]`                                           | `AnsiTextSplitter()`            | Allows you to customize text formatting, for example, ANSI or HTML                                                                                          |
+| `name`                   | `str` &#x7c; `None`                                                                                | `"Table Name"`                  | Table name                                                                                                                                                  |
+| `name_h_align`           | `HorizontalAlignment` &#x7c; `str`                                                                 | `HorizontalAlignment.CENTER`    | Allows you to align table name horizontally                                                                                                                 |
+| `name_v_align`           | `VerticalAlignment` &#x7c; `str`                                                                   | `VerticalAlignment.MIDDLE`      | Allows you to align table name vertically                                                                                                                   |
+| `name_spliter`           | `BaseTextSplitter`                                                                                 | `AnsiTextSplitter()`            | Allows you to customize name formatting, for example, ANSI or HTML                                                                                          |
+| `column_names`           | `Sequence[str]` &#x7c; `None`                                                                      | `("c1", "c2", ...column_count)` | Sets the names for the table columns                                                                                                                        |
+| `column_names_h_align`   | <code>tuple\[HorizontalAlignment &#x7c; str, ...]</code> &#x7c; `HorizontalAlignment` &#x7c; `str` | `HorizontalAlignment.CENTER`    | Allows you to align column names horizontally                                                                                                               |
+| `column_names_v_align`   | <code>tuple\[VerticalAlignment &#x7c; str, ...]</code> &#x7c; `VerticalAlignment` &#x7c; `str`     | `VerticalAlignment.MIDDLE`      | Allows you to align column names vertically                                                                                                                 |
+| `column_names_spliter`   | `BaseTextSplitter` &#x7c; `tuple[BaseTextSplitter, ...]`                                           | `AnsiTextSplitter()`            | Allows you to customize column names formatting, for example, ANSI or HTML                                                                                  |
+| `max_width`              | `int` &#x7c; `Tuple[int, ...]` &#x7c; `None`                                                       | `120`                           | Allows you to set the width of the entire table or individually for each column                                                                             |
+| `max_height`             | `int` &#x7c; `None`                                                                                | `10`                            | Specifies the maximum height for rows                                                                                                                       |
+| `maximize_height`        | `bool`                                                                                             | `True`                          | Force height to be taken from max_height                                                                                                                    |
+| `line_break_symbol`      | `str`                                                                                              | `"\\"`                          | Line break symbol                                                                                                                                           |
+| `cell_break_symbol`      | `str`                                                                                              | `"…"`                           | Symbol indicating the end of text when there is not enough height                                                                                           |
+| `sep`                    | `bool` &#x7c; `range` &#x7c; `tuple`                                                               | `(1, 3, 6)`                     | Handles the separators between table rows and can be either a boolean type or possess a `__contains__` method                                               |
+| `end`                    | `str` &#x7c; `None`                                                                                | `"\n"`                          | Behaves the same as `print(end=)`                                                                                                                           |
+| `file`                   | `TextIOWrapper` &#x7c; `None`                                                                      | `sys.stdout` or `io.StringIO()` | Behaves the same as `print(file=)`                                                                                                                          |
+| `theme`                  | `Theme`                                                                                            | `Themes.rounded_thick`          | Allows you to set a specific theme for the table. For example, the border style                                                                             |
+| `ignore_width_errors`    | `bool`                                                                                             | `False`                         | Fixes errors in max_width if they exist                                                                                                                     |
+| `proportion_coefficient` | `float`                                                                                            | `0.5`                           | Affects the width distribution of the columns. A value of `0.0` corresponds to proportional distribution, `1.0` averages the values, and `2.0` inverts them |
 
 ## Text alignment
 
@@ -236,7 +239,7 @@ For `name_h_align` and `name_v_align` only the `str` type or the corresponding `
 +------------+------------+------------+
 >>> Table([(1, 12345, "example")]).print(max_width=(1, 8, 6))
 +---+----------+--------+
-| 1 |    12345 | exampl\|
+| 1 |    12345 | exampl/|
 |   |          | e      |
 +---+----------+--------+
 >>> Table([(1, 12345, "example")]).print(max_width=(1, 5, 7))
@@ -245,7 +248,7 @@ For `name_h_align` and `name_v_align` only the `str` type or the corresponding `
 +---+-------+---------+
 >>> Table([("123456\n\n789000", "example")]).print(max_width=(3, 4), max_height=4)
 +-----+------+
-| 123\| exam\|
+| 123/| exam/|
 | 456 | ple  |
 |     |      |
 | 789…|      |
@@ -271,8 +274,8 @@ For `name_h_align` and `name_v_align` only the `str` type or the corresponding `
 ...     maximize_height=True,
 ... )
 +-----+
-| 123\|
-| 456\|
+| 123/|
+| 456/|
 | 789 |
 |     |
 +-----+
@@ -304,7 +307,7 @@ For `name_h_align` and `name_v_align` only the `str` type or the corresponding `
 | qwe | rty  |
 |     | uio  |
 +-----+------+
-| 123\| exam\|
+| 123/| exam/|
 | 456 | ple  |
 |     |      |
 | 789…|      |
@@ -313,7 +316,7 @@ For `name_h_align` and `name_v_align` only the `str` type or the corresponding `
 +-----+------+
 | qwe | rty  |
 |     | uio  |
-| 123\| exam\|
+| 123/| exam/|
 | 456 | ple  |
 |     |      |
 | 789…|      |
@@ -1334,7 +1337,6 @@ t.print(h_align="^", sep=(1,))
 </details>
 </details>
 
-
 ## Subtable
 
 <details>
@@ -1398,3 +1400,61 @@ t.print(h_align="^", sep=(1,))
 
 ```
 </details>
+
+## [New!] Formatting
+
+За форматирование отвечают классы из файла `text_splitters`.
+Все классы каскадно наследуются друг от друга и являются наследниками `BaseTextSplitter`.
+
+- `BaseTextSplitter` (по умолчанию в методе `stringify`) - Базовый класс. Имеет метод `split_text`, который разделяет текст по ширине и высоте, чтобы вместить в ячейку.
+- `AnsiTextSplitterUnsafe` - Наследуется от `BaseTextSplitter` и оборачивает метод `split_text` родительского класса.
+Оборачивает ANSI последовательности и гиперссылки, чтобы они работали даже при переносе строки.
+- `AnsiTextSplitter` (по умолчанию в методе `print`) - Наследуется от `AnsiTextSplitterUnsafe` и экранирует небезопасные последовательности (все кроме цвета и гиперссылок).
+- `HtmlTextSplitter` - Наследуется от `AnsiTextSplitter` и превращает определённые HTML теги в ANSI последовательности.
+
+Можно отдельно настраивать сплиттеры для названия таблицы и названий колонок.
+Можно настроить сплиттер для всей таблицы, а так же для каждого столбца таблицы по отдельности.
+
+> [!TIP]
+> Используйте `BaseTextSplitter` если не используйте форматирование.
+
+Вы можете создать **свой сплиттер** (например для Markdown или других языков разметки)
+просто создав класс наследующийся например от `AnsiTextSplitter` или `BaseTextSplitter` и обернуть методы `split_text` и `clear_formatting`.
+
+- `split_text` - Вызывается для каждой ячейки. Должен разделять текст чтобы он помещался в ячейку. 
+- `clear_formatting` - Вызывается при подсчёте ширины ячейки.
+Должен убирать всё форматирование и оставлять только видимые символы и ANSI последовательности.
+Например при HTML форматировании убирает все теги и оставляет только видимый текст.
+
+```pycon
+>>> from table2string import style, Color
+>>> # Same as Table([("q\x1b[31mwe\nr\x1b[0mty",)]).print()
+>>> red_text = style("we\nr", fg=Color.RED)
+>>> Table([(f"q{red_text}ty",)]).print()  # AnsiTextSplitter by default
++-----+
+| q[31mwe[0m |
+| [31mr[0mty |
++-----+
+>>> from table2string import HtmlTextSplitter
+>>> Table(
+...     [
+...         (
+...             '<b style="color:rgb(255,170,0)">Bold Gold '
+...             '<i style="color:#fff">Bold & Italic White</i></b> '
+...             '<u>Underline</u> '
+...             '<a href="example.com"><s style="color:#55FF55">Strikethrough Green Link</s></a>',
+...         ),
+...     ],
+... ).print(
+...     max_width=25,
+...     theme=Themes.thin,
+...     text_spliter=HtmlTextSplitter(),
+... )
+┌───────────────────────┐
+│ [1m[38;2;255;170;0mBold Gold [3m[38;2;255;255;255mBold & Ital[0m/│
+│ [1m[38;2;255;170;0m[3m[38;2;255;255;255mic White[0m [4mUnderline[0m ]8;;https://example.com\[9m[38;2;85;255;85mSt]8;;\[0m/│
+│ [9m[38;2;85;255;85m]8;;https://example.com\rikethrough Green Lin]8;;\[0m/│
+│ [9m[38;2;85;255;85m]8;;https://example.com\k]8;;\[0m                     │
+└───────────────────────┘
+
+```

@@ -557,6 +557,34 @@ Excepteur sint occaecat cupidatat non p<span style="background-color:rgb(255,0,0
             "\x1b]8;;https://openai.com\x1b\\\x1b[38;2;26;188;156mdeserunt mollit anim\x1b]8;;\x1b\\\x1b[0m id est laborum.",
         ]
     )
+    table = Table(
+        [
+            (
+                """<b>ANSI escape sequences</b> are a standard for <a href="https://en.wikipedia.org/wiki/In-band_signaling">in-band signaling</a> to control cursor location, color, font styling, and other options on video <a href="https://en.wikipedia.org/wiki/Text_terminal">text terminals</a> and <a href="https://en.wikipedia.org/wiki/Terminal_emulator">terminal emulators</a>. Certain sequences of <a href="https://en.wikipedia.org/wiki/Byte">bytes</a>, most starting with an <a href="https://en.wikipedia.org/wiki/Escape_character#ASCII_escape_character">ASCII escape</a> character and a <a href="https://en.wikipedia.org/wiki/Bracket">bracket</a> character, are embedded into text. The terminal interprets these sequences as commands, rather than text to display verbatim.""",
+            ),
+        ],
+        name='<a href="https://en.wikipedia.org/wiki/ANSI_escape_code">https://en.wikipedia.org/wiki/ANSI_escape_code</a>',
+    )
+    assert table.stringify(
+        max_width=51,
+        name_spliter=HtmlTextSplitter(),
+        text_spliter=HtmlTextSplitter(),
+        line_break_symbol="/",
+    ) == """
++-------------------------------------------------+
+| \x1b]8;;https://en.wikipedia.org/wiki/ANSI_escape_code\x1b\\https://en.wikipedia.org/wiki/ANSI_escape_code\x1b]8;;\x1b\\  |
++-------------------------------------------------+
+| \x1b[1mANSI escape sequences\x1b[0m are a standard for \x1b]8;;https://en.wikipedia.org/wiki/In-band_signaling\x1b\\in-ban\x1b]8;;\x1b\\/|
+| \x1b]8;;https://en.wikipedia.org/wiki/In-band_signaling\x1b\\d signaling\x1b]8;;\x1b\\\x1b[0m to control cursor location, color, /|
+| font styling, and other options on video \x1b]8;;https://en.wikipedia.org/wiki/Text_terminal\x1b\\text t\x1b]8;;\x1b\\/|
+| \x1b]8;;https://en.wikipedia.org/wiki/Text_terminal\x1b\\erminals\x1b]8;;\x1b\\\x1b[0m and \x1b]8;;https://en.wikipedia.org/wiki/Terminal_emulator\x1b\\terminal emulators\x1b]8;;\x1b\\\x1b[0m. Certain sequen/|
+| ces of \x1b]8;;https://en.wikipedia.org/wiki/Byte\x1b\\bytes\x1b]8;;\x1b\\\x1b[0m, most starting with an \x1b]8;;https://en.wikipedia.org/wiki/Escape_character#ASCII_escape_character\x1b\\ASCII escap\x1b]8;;\x1b\\/|
+| \x1b]8;;https://en.wikipedia.org/wiki/Escape_character#ASCII_escape_character\x1b\\e\x1b]8;;\x1b\\\x1b[0m character and a \x1b]8;;https://en.wikipedia.org/wiki/Bracket\x1b\\bracket\x1b]8;;\x1b\\\x1b[0m character, are embedd/|
+| ed into text. The terminal interprets these seq/|
+| uences as commands, rather than text to display/|
+|  verbatim.                                      |
++-------------------------------------------------+
+""".strip()
 
 
 def test_different_splitters():

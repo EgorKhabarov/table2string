@@ -81,6 +81,15 @@ class AnsiTextSplitterUnsafe(BaseTextSplitter):
         line_break_symbol: str = "/",
         cell_break_symbol: str = "…",
     ) -> tuple[list[str], list[str], bool, dict[str, tuple[str, ...]]]:
+        if "\x1b" not in text:
+            return super().split_text(
+                text=text,
+                width=width,
+                height=height,
+                line_break_symbol=line_break_symbol,
+                cell_break_symbol=cell_break_symbol,
+            )
+
         plain = ""
         events: list[dict] = []
         plain_idx = 0
@@ -310,6 +319,8 @@ class _HTML2ANSIParser(HTMLParser):
             self.result.append("\x1b[48;2;255;255;0m")
         elif tag == "a" and "href" in attrs:
             url = attrs["href"]
+            if "://" not in url:
+                url = f"https://{url}"
             self.result.append(f"\x1b]8;;{url}\x1b\\")
 
         if tag in ("b", "i", "u", "s", "span", "mark", "a") and "style" in attrs:

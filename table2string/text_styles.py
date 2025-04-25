@@ -90,4 +90,6 @@ def style(
 def link(url: str, text: str | None = None) -> str:
     if text is None:
         text = url
+    if "://" not in url:
+        url = f"https://{url}"
     return f"\x1b]8;;{url}\x1b\\{text}\x1b]8;;\x1b\\"
