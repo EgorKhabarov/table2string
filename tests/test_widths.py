@@ -26,7 +26,7 @@ def test_widths():
     )
     assert (
         table.stringify(max_width=14)
-        == r"""
+        == """
 +---+---+----+
 | 1 | 2 |  3 |
 +---+---+----+
@@ -34,7 +34,7 @@ def test_widths():
 +---+---+----+
 | 6 | 7 |  8 |
 +---+---+----+
-| 9 | 1\| 11 |
+| 9 | 1/| 11 |
 |   | 0 |    |
 +---+---+----+
 """.strip()
@@ -55,7 +55,7 @@ def test_widths():
     )
     assert (
         table.stringify(max_width=13)
-        == r"""
+        == """
 +---+---+---+
 | 1 | 2 | 3 |
 +---+---+---+
@@ -63,14 +63,14 @@ def test_widths():
 +---+---+---+
 | 6 | 7 | 8 |
 +---+---+---+
-| 9 | 1\| 1\|
+| 9 | 1/| 1/|
 |   | 0 | 1 |
 +---+---+---+
 """.strip()
     )
     assert (
         table.stringify(max_width=(2, 1, 5))
-        == r"""
+        == """
 +----+---+-------+
 |  1 | 2 |     3 |
 +----+---+-------+
@@ -78,7 +78,7 @@ def test_widths():
 +----+---+-------+
 |  6 | 7 |     8 |
 +----+---+-------+
-|  9 | 1\|    11 |
+|  9 | 1/|    11 |
 |    | 0 |       |
 +----+---+-------+
 """.strip()
@@ -95,7 +95,7 @@ def test_widths():
         table1.stringify(max_width=1, ignore_width_errors=True)
         == table1.stringify(max_width=(1, 1, 1), ignore_width_errors=True)
         == table1.stringify(max_width=(1, -1, 1), ignore_width_errors=True)
-        == r"""
+        == """
 +---+-------+---+
 | 1 |     2 | 3 |
 +---+-------+---+
@@ -105,14 +105,14 @@ def test_widths():
 |   +---+---+   |
 |   | 3 | 4 |   |
 +---+---+---+---+
-| 9 |    10 | 1\|
+| 9 |    10 | 1/|
 |   |       | 1 |
 +---+-------+---+
 """.strip()
     )
     assert (
         table1.stringify(max_width=(10, 3, 10), ignore_width_errors=True)
-        == r"""
+        == """
 +------------+-------+------------+
 |          1 |     2 |          3 |
 +------------+-------+------------+

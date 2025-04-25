@@ -22,19 +22,19 @@ def test_split_text():
     assert split_text("1", 1) == (["1"], [" "], False, {})
     assert split_text("123\n456", 1) == (
         ["1", "2", "3", "4", "5", "6"],
-        ["\\", "\\", " ", "\\", "\\", " "],
+        ["/", "/", " ", "/", "/", " "],
         False,
         {},
     )
     assert split_text("123\n\n456", 1) == (
         ["1", "2", "3", "", "4", "5", "6"],
-        ["\\", "\\", " ", " ", "\\", "\\", " "],
+        ["/", "/", " ", " ", "/", "/", " "],
         False,
         {},
     )
     assert split_text("123\n456", 2) == (
         ["12", "3", "45", "6"],
-        ["\\", " ", "\\", " "],
+        ["/", " ", "/", " "],
         False,
         {},
     )
@@ -575,18 +575,20 @@ def test_different_splitters():
             "w1\x1b[32m23",
         ),
     )
-    assert table.stringify(
-        name_spliter=HtmlTextSplitter(),
-        column_names_spliter=(
-            HtmlTextSplitter(),
-            AnsiTextSplitter(),
-        ),
-        text_spliter=(
-            AnsiTextSplitter(),
-            BaseTextSplitter(),
-            HtmlTextSplitter(),
-        ),
-    ) == """
+    assert (
+        table.stringify(
+            name_spliter=HtmlTextSplitter(),
+            column_names_spliter=(
+                HtmlTextSplitter(),
+                AnsiTextSplitter(),
+            ),
+            text_spliter=(
+                AnsiTextSplitter(),
+                BaseTextSplitter(),
+                HtmlTextSplitter(),
+            ),
+        )
+        == """
 +----------------------------------------------+
 |                    \x1b[38;2;255;0;0mTable\x1b[0m                     |
 +---------------+------------------+-----------+
@@ -595,3 +597,4 @@ def test_different_splitters():
 | t\x1b[31mex\x1b[0mt          | plain text       | 123\x1b[1m456\x1b[0m789 |
 +---------------+------------------+-----------+
 """.strip()
+    )

@@ -11,7 +11,7 @@ class BaseTextSplitter:
         text: str,
         width: int | None = None,
         height: int | None = None,
-        line_break_symbol: str = "\\",
+        line_break_symbol: str = "/",
         cell_break_symbol: str = "…",
     ) -> tuple[list[str], list[str], bool, dict[str, tuple[str, ...]]]:
         """
@@ -78,7 +78,7 @@ class AnsiTextSplitterUnsafe(BaseTextSplitter):
         text: str,
         width: int | None = None,
         height: int | None = None,
-        line_break_symbol: str = "\\",
+        line_break_symbol: str = "/",
         cell_break_symbol: str = "…",
     ) -> tuple[list[str], list[str], bool, dict[str, tuple[str, ...]]]:
         plain = ""
@@ -237,7 +237,7 @@ class AnsiTextSplitter(AnsiTextSplitterUnsafe):
         text: str,
         width: int | None = None,
         height: int | None = None,
-        line_break_symbol: str = "\\",
+        line_break_symbol: str = "/",
         cell_break_symbol: str = "…",
     ) -> tuple[list[str], list[str], bool, dict[str, tuple[str, ...]]]:
         text = self.ESCAPE_UNSAFE_ANSI_REGEX.sub(
@@ -259,7 +259,7 @@ class HtmlTextSplitter(AnsiTextSplitter):
         text: str,
         width: int | None = None,
         height: int | None = None,
-        line_break_symbol: str = "\\",
+        line_break_symbol: str = "/",
         cell_break_symbol: str = "…",
     ) -> tuple[list[str], list[str], bool, dict[str, tuple[str, ...]]]:
         text = text.replace("\x1b", "\\x1b")

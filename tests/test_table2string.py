@@ -39,9 +39,9 @@ def test_print_table():
     table_2 = [("123",)]
     assert (
         print_table_d(table_2, max_width=(1,), max_height=2)
-        == r"""
+        == """
 +---+
-| 1\|
+| 1/|
 | 2…|
 +---+
 """.lstrip()
@@ -212,10 +212,10 @@ def test_stringify_table():
     table_6 = [("123",)]
     assert (
         stringify_table(table_6, max_width=(1,))
-        == r"""
+        == """
 +---+
-| 1\|
-| 2\|
+| 1/|
+| 2/|
 | 3 |
 +---+
 """.strip()
@@ -223,9 +223,9 @@ def test_stringify_table():
     table_7 = [("123",)]
     assert (
         stringify_table(table_7, max_width=(2,))
-        == r"""
+        == """
 +----+
-| 12\|
+| 12/|
 | 3  |
 +----+
 """.strip()
@@ -233,9 +233,9 @@ def test_stringify_table():
     table_7 = [("123",)]
     assert (
         stringify_table(table_7, max_width=(1,), max_height=2)
-        == r"""
+        == """
 +---+
-| 1\|
+| 1/|
 | 2…|
 +---+
 """.strip()
@@ -256,9 +256,9 @@ def test_stringify_table():
     table_9 = [("123456\n\n789000",)]
     assert (
         stringify_table(table_9, max_width=(3,), max_height=4)
-        == r"""
+        == """
 +-----+
-| 123\|
+| 123/|
 | 456 |
 |     |
 | 789…|
@@ -268,14 +268,14 @@ def test_stringify_table():
     table_10 = [("1234567\n\n891\n234",)]
     assert (
         stringify_table(table_10, max_width=(2,), max_height=7)
-        == r"""
+        == """
 +----+
-| 12\|
-| 34\|
-| 56\|
+| 12/|
+| 34/|
+| 56/|
 | 7  |
 |    |
-| 89\|
+| 89/|
 | 1 …|
 +----+
 """.strip()
@@ -283,14 +283,14 @@ def test_stringify_table():
     table_11 = [("1234567\n\n891\n234", "qwe" * 20)]
     assert (
         stringify_table(table_11, max_width=(2,), max_height=7)
-        == r"""
+        == """
 +----+----+
-| 12\| qw\|
-| 34\| eq\|
-| 56\| we\|
-| 7  | qw\|
-|    | eq\|
-| 89\| we\|
+| 12/| qw/|
+| 34/| eq/|
+| 56/| we/|
+| 7  | qw/|
+|    | eq/|
+| 89/| we/|
 | 1 …| qw…|
 +----+----+
 """.strip()
@@ -377,45 +377,45 @@ Never gonna tell a lie and hurt you
     )
     assert (
         stringify_table(table_13, h_align="^>", max_width=20)
-        == r"""
+        == """
 +------------------+
-| filler filler fi\|
-| ller filler fill\|
-| er filler filler\|
-|  filler filler f\|
+| filler filler fi/|
+| ller filler fill/|
+| er filler filler/|
+|  filler filler f/|
 |           iller  |
 +------------------+
-| We're no strange\|
+| We're no strange/|
 |       rs to love |
-| You know the rul\|
-| es and so do I (\|
+| You know the rul/|
+| es and so do I (/|
 |            do I) |
-| A full commitmen\|
-| t's what I'm thi\|
+| A full commitmen/|
+| t's what I'm thi/|
 |         nking of |
-| You wouldn't get\|
-|  this from any o\|
+| You wouldn't get/|
+|  this from any o/|
 |         ther guy |
 |                  |
-| I just wanna tel\|
-| l you how I'm fe\|
+| I just wanna tel/|
+| l you how I'm fe/|
 |            eling |
-| Gotta make you u\|
+| Gotta make you u/|
 |        nderstand |
 |                  |
-| Never gonna give\|
+| Never gonna give/|
 |           you up |
-| Never gonna let \|
+| Never gonna let /|
 |         you down |
-| Never gonna run \|
-| around and deser\|
+| Never gonna run /|
+| around and deser/|
 |            t you |
-| Never gonna make\|
+| Never gonna make/|
 |          you cry |
-| Never gonna say \|
+| Never gonna say /|
 |          goodbye |
-| Never gonna tell\|
-|  a lie and hurt \|
+| Never gonna tell/|
+|  a lie and hurt /|
 |              you |
 +------------------+
 """.strip()
