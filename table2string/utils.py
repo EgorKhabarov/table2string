@@ -228,7 +228,7 @@ def transform_width(
     return max_widths
 
 
-def transform_value(value: T | tuple[T, ...], column_count: int) -> tuple[T]:
+def transform_value(value: T | tuple[T, ...], column_count: int) -> tuple[T, ...]:
     if isinstance(value, tuple):
         if len(value) < column_count:
             return (

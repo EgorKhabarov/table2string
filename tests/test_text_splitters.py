@@ -565,12 +565,14 @@ Excepteur sint occaecat cupidatat non p<span style="background-color:rgb(255,0,0
         ],
         name='<a href="https://en.wikipedia.org/wiki/ANSI_escape_code">https://en.wikipedia.org/wiki/ANSI_escape_code</a>',
     )
-    assert table.stringify(
-        max_width=51,
-        name_spliter=HtmlTextSplitter(),
-        text_spliter=HtmlTextSplitter(),
-        line_break_symbol="/",
-    ) == """
+    assert (
+        table.stringify(
+            max_width=51,
+            name_spliter=HtmlTextSplitter(),
+            text_spliter=HtmlTextSplitter(),
+            line_break_symbol="/",
+        )
+        == """
 +-------------------------------------------------+
 | \x1b]8;;https://en.wikipedia.org/wiki/ANSI_escape_code\x1b\\https://en.wikipedia.org/wiki/ANSI_escape_code\x1b]8;;\x1b\\  |
 +-------------------------------------------------+
@@ -585,6 +587,7 @@ Excepteur sint occaecat cupidatat non p<span style="background-color:rgb(255,0,0
 |  verbatim.                                      |
 +-------------------------------------------------+
 """.strip()
+    )
 
 
 def test_different_splitters():
