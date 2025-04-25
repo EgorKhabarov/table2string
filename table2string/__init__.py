@@ -9,3 +9,5 @@ from table2string.text_splitters import (  # noqa
     AnsiTextSplitter,
     HtmlTextSplitter,
 )
+
+__version__ = "2.1.0"
