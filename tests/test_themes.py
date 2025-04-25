@@ -511,6 +511,6 @@ def test_border_colors():
     with Themes.thin_thick.border.set_context_color(Color.RED):
         assert table.stringify(theme=Themes.thin_thick) == table_with_red_border
     with Themes.thin_thick.border.set_context_color((255, 0, 0)):
-        assert table.stringify(theme=Themes.thin_thick) == table_with_red_border.replace(
-            "\x1b[31m", "\x1b[38;2;255;0;0m"
-        )
+        assert table.stringify(
+            theme=Themes.thin_thick
+        ) == table_with_red_border.replace("\x1b[31m", "\x1b[38;2;255;0;0m")

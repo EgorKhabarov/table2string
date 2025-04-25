@@ -165,7 +165,9 @@ class Border:
 
         return None
 
-    def set_color(self, color: Color | BgColor | str | tuple[int, int, int] | None = None):
+    def set_color(
+        self, color: Color | BgColor | str | tuple[int, int, int] | None = None
+    ):
         prefix = ""
         reset = ""
 
@@ -227,7 +229,9 @@ class Border:
         self.vertical_right_plus = f"{self.__vertical_right_plus}{reset}"
 
     @contextmanager
-    def set_context_color(self, color: Color | BgColor | str | tuple[int, int, int] | None = None):
+    def set_context_color(
+        self, color: Color | BgColor | str | tuple[int, int, int] | None = None
+    ):
         self.set_color(color)
         yield
         self.set_color(None)
