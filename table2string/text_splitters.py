@@ -323,9 +323,9 @@ class _HTML2ANSIParser(HTMLParser):
                         g = int(val[3:5], 16)
                         b = int(val[5:7], 16)
                     elif val.startswith("#") and len(val) == 4:
-                        r = int(val[1]*2, 16)
-                        g = int(val[2]*2, 16)
-                        b = int(val[3]*2, 16)
+                        r = int(val[1] * 2, 16)
+                        g = int(val[2] * 2, 16)
+                        b = int(val[3] * 2, 16)
                     else:
                         m = self.RGB_REGEX.search(val)
                         if m:

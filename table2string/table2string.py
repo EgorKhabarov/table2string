@@ -27,9 +27,7 @@ def print_table(
     v_align: (
         tuple[VerticalAlignment | str, ...] | VerticalAlignment | str
     ) = VerticalAlignment.TOP,
-    text_spliter: (
-        BaseTextSplitter | tuple[BaseTextSplitter, ...]
-    ) = AnsiTextSplitter(),
+    text_spliter: BaseTextSplitter | tuple[BaseTextSplitter, ...] = AnsiTextSplitter(),
     name: str | None = None,
     name_h_align: HorizontalAlignment | str = HorizontalAlignment.CENTER,
     name_v_align: VerticalAlignment | str = VerticalAlignment.MIDDLE,
@@ -130,11 +128,11 @@ def print_table(
 
         list_table.insert(0, column_names_list)
         column_names_widths = get_column_widths(
-            [column_names_list], splitters=column_names_spliter_t,
+            [column_names_list],
+            splitters=column_names_spliter_t,
         )
         row_widths = tuple(
-            max(rw, column_names_widths[irw])
-            for irw, rw in enumerate(row_widths)
+            max(rw, column_names_widths[irw]) for irw, rw in enumerate(row_widths)
         )
 
     min_row_widths = get_column_widths(
@@ -639,7 +637,8 @@ class Table:
             or column_names_h_align,
             column_names_v_align=self.config.get("column_names_v_align")
             or column_names_v_align,
-            column_names_spliter=self.config.get("column_names_spliter") or column_names_spliter,
+            column_names_spliter=self.config.get("column_names_spliter")
+            or column_names_spliter,
             max_width=max_width,
             max_height=self.config.get("max_height") or max_height,
             maximize_height=self.config.get("maximize_height") or maximize_height,
@@ -731,7 +730,8 @@ class Table:
             or column_names_h_align,
             column_names_v_align=self.config.get("column_names_v_align")
             or column_names_v_align,
-            column_names_spliter=self.config.get("column_names_spliter") or column_names_spliter,
+            column_names_spliter=self.config.get("column_names_spliter")
+            or column_names_spliter,
             max_width=max_width,
             max_height=self.config.get("max_height") or max_height,
             maximize_height=self.config.get("maximize_height") or maximize_height,
@@ -805,8 +805,10 @@ def get_column_widths(
                                 (
                                     splitters[ci] if splitters else default_splitter
                                 ).clear_formatting(cell)
-                            ).splitlines() or [""]
-                        ) or 1
+                            ).splitlines()
+                            or [""]
+                        )
+                        or 1
                         if str(cell)
                         else 1
                     )
