@@ -1508,17 +1508,19 @@ Each tag may include the following attributes:
 ```pycon
 >>> from table2string import Table, HtmlTextSplitter, Color, BgColor
 >>> splitter = HtmlTextSplitter(
-...     html_classes={"red": Color.RED, "bg-red": BgColor.RED},
+...     html_classes={"red": Color.RED, "green": Color.GREEN, "bg-red": BgColor.RED},
 ... )
 >>> Table([(
 ...     """
-... text
 ... <span class="red">red text<span style="color:#000" class="bg-red">black & bg red text</span></span>
+... plain text
+... <a class="green" href="example.com">example green hyperlink</a>
 ... """,
 ... )]).print(text_spliter=splitter)
 +-----------------------------+
-| text                        |
 | [31mred text[41m[38;2;0;0;0mblack & bg red text[0m |
+| plain text                  |
+| ]8;;https://example.com\[32mexample green hyperlink]8;;\[0m     |
 +-----------------------------+
 
 ```
