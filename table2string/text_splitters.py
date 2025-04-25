@@ -272,25 +272,6 @@ class HtmlTextSplitter(AnsiTextSplitterEscapeUnsafe):
         )
 
 
-class MarkdownTextSplitter(HtmlTextSplitter):
-    def split_text(
-        self,
-        text: str,
-        width: int | None = None,
-        height: int | None = None,
-        line_break_symbol: str = "\\",
-        cell_break_symbol: str = "…",
-    ) -> tuple[list[str], list[str], bool, dict[str, tuple[str, ...]]]:
-        # Будущая реализация
-        return super().split_text(
-            text=text,
-            width=width,
-            height=height,
-            line_break_symbol=line_break_symbol,
-            cell_break_symbol=cell_break_symbol,
-        )
-
-
 class _HTML2ANSIParser(HTMLParser):
     RGB_REGEX = re.compile(r"rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)")
     ESCAPE_N_REGEX = re.compile(r"rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)")

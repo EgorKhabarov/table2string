@@ -8,5 +8,4 @@ from table2string.text_splitters import (  # noqa
     AnsiTextSplitter,
     AnsiTextSplitterEscapeUnsafe,
     HtmlTextSplitter,
-    MarkdownTextSplitter,
 )

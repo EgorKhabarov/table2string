@@ -3,7 +3,6 @@ from table2string.text_splitters import (
     AnsiTextSplitter,
     AnsiTextSplitterEscapeUnsafe,
     HtmlTextSplitter,
-    MarkdownTextSplitter,
 )
 
 
@@ -131,7 +130,6 @@ def test_color_escape_sequence():
     table = Table(
         [
             (
-                # Простой случай без escape последовательностей
                 "\x1b[31m1234",
                 "5",
                 "67\x1b[31m890\n1112",
@@ -505,40 +503,50 @@ def test_html_spliter():
     assert html_split_text(
         """
 <p><span style="color:#2ecc71;">Lorem ipsum dolor sit amet</span>, <span style="color:#3498db;">consectetur adipiscing elit</span>.</p>
-<p>Sed do eiusmod <a href="https://example.com"><span style="color:#e67e22;">tempor incididunt</span></a> ut labore et dolore magna aliqua.<span style="color:#9b59b6;">Ut enim ad minim veniam</span>,quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.<a href="https://w3schools.com" style="color:#e74c3c;">Duis aute irure dolor</a> in reprehenderit in voluptate velit esse<span style="color:#34495e;">cillum dolore eu fugiat nulla pariatur</span>.</p>
+<p>Sed do eiusmod <a href="https://example.com"><span style="color:#e67e22;">tempor incididunt</span></a> ut labore et dolore magna aliqua. <span style="color:#9b59b6;">Ut enim ad minim veniam</span>, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. <a href="https://w3schools.com" style="color:#e74c3c;">Duis aute irure dolor</a> in reprehenderit in voluptate velit esse <span style="color:#34495e;">cillum dolore eu fugiat nulla pariatur</span>.</p>
 Excepteur sint occaecat cupidatat non p<span style="background-color:rgb(255,0,0)">roide</span>nt, sunt in culpa qui officia
 <a href="https://openai.com" style="color:#1abc9c;">deserunt mollit anim</a> id est laborum.
 """.strip()
     )[0] == [
-        "\x1b[38;2;46;204;113mLorem ipsum dolor sit amet\x1b[0m, \x1b[38;2;52;152;219mconsecte\x1b[0m",
-        "\x1b[38;2;52;152;219mtur adipiscing elit\x1b[0m.",
-        "",
-        "",
-        "Sed do eiusmod \x1b]8;;https://example.com\x1b\\\x1b[38;2;230;126;34mtempor incididunt\x1b]8;;\x1b\\\x1b[0m ut ",
-        "labore et dolore magna aliqua.\x1b[38;2;155;89;182mUt eni\x1b[0m",
-        "\x1b[38;2;155;89;182mm ad minim veniam\x1b[0m,quis nostrud exerc",
-        "itation ullamco laboris nisi ut aliq",
-        "uip ex ea commodo consequat.\x1b]8;;https://w3schools.com\x1b\\\x1b[38;2;231;76;60mDuis aut\x1b]8;;\x1b\\\x1b[0m",
-        "\x1b[38;2;231;76;60m\x1b]8;;https://w3schools.com\x1b\\e irure dolor\x1b]8;;\x1b\\\x1b[0m in reprehenderit in vo",
-        "luptate velit esse\x1b[38;2;52;73;94mcillum dolore eu f\x1b[0m",
-        "\x1b[38;2;52;73;94mugiat nulla pariatur\x1b[0m.",
-        "",
-        "Excepteur sint occaecat cupidatat no",
-        "n proident, sunt in culpa qui offici",
-        "a",
-        "\x1b]8;;https://openai.com\x1b\\\x1b[38;2;26;188;156mdeserunt mollit anim\x1b]8;;\x1b\\\x1b[0m id est laborum.",
+        '\x1b[38;2;46;204;113mLorem ipsum dolor sit amet\x1b[0m, \x1b[38;2;52;152;219mconsecte\x1b[0m',
+        '\x1b[38;2;52;152;219mtur adipiscing elit\x1b[0m.',
+        '',
+        '',
+        'Sed do eiusmod \x1b]8;;https://example.com\x1b\\\x1b[38;2;230;126;34mtempor incididunt\x1b]8;;\x1b\\\x1b[0m ut ',
+        'labore et dolore magna aliqua. \x1b[38;2;155;89;182mUt en\x1b[0m',
+        '\x1b[38;2;155;89;182mim ad minim veniam\x1b[0m, quis nostrud exe',
+        'rcitation ullamco laboris nisi ut al',
+        'iquip ex ea commodo consequat. \x1b]8;;https://w3schools.com\x1b\\\x1b[38;2;231;76;60mDuis \x1b]8;;\x1b\\\x1b[0m',
+        '\x1b[38;2;231;76;60m\x1b]8;;https://w3schools.com\x1b\\aute irure dolor\x1b]8;;\x1b\\\x1b[0m in reprehenderit in',
+        ' voluptate velit esse \x1b[38;2;52;73;94mcillum dolore \x1b[0m',
+        '\x1b[38;2;52;73;94meu fugiat nulla pariatur\x1b[0m.',
+        '',
+        'Excepteur sint occaecat cupidatat no',
+        'n p\x1b[48;2;255;0;0mroide\x1b[0mnt, sunt in culpa qui offici',
+        'a',
+        '\x1b]8;;https://openai.com\x1b\\\x1b[38;2;26;188;156mdeserunt mollit anim\x1b]8;;\x1b\\\x1b[0m id est laborum.',
     ]
-
-
-def test_markdown_spliter():
-    markdown_text_spliter = MarkdownTextSplitter()
-    markdown_split_text = markdown_text_spliter.split_text
-    assert markdown_split_text("123", width=2)[0] == ["12", "3"]
-    assert markdown_split_text("1\x1b[32m23", width=2)[0] == [
-        "1\\",
-        "x1",
-        "b[",
-        "32",
-        "m2",
-        "3",
+    assert html_split_text(
+        """
+<p><span style="color:#2ecc71;">Lorem ipsum dolor sit amet</span>, <span style="color:#3498db;">consectetur adipiscing elit</span>.</p>
+<p>Sed do eiusmod <a href="https://example.com"><span style="color:#e67e22;">tempor incididunt</span></a> ut labore et dolore magna aliqua. <span style="color:#9b59b6;">Ut enim ad minim veniam</span>, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. <a href="https://w3schools.com" style="color:#e74c3c;">Duis aute irure dolor</a> in reprehenderit in voluptate velit esse <span style="color:#34495e;">cillum dolore eu fugiat nulla pariatur</span>.</p>
+Excepteur sint occaecat cupidatat non p<span style="background-color:rgb(255,0,0)">roide</span>nt, sunt in culpa qui officia
+<a href="https://openai.com" style="color:#1abc9c;">deserunt mollit anim</a> id est laborum.
+""".strip(),
+        width=50,
+    )[0] == [
+        "\x1b[38;2;46;204;113mLorem ipsum dolor sit amet\x1b[0m, \x1b[38;2;52;152;219mconsectetur adipiscing\x1b[0m",
+        "\x1b[38;2;52;152;219m elit\x1b[0m.",
+        "",
+        "",
+        "Sed do eiusmod \x1b]8;;https://example.com\x1b\\\x1b[38;2;230;126;34mtempor incididunt\x1b]8;;\x1b\\\x1b[0m ut labore et dolo",
+        "re magna aliqua. \x1b[38;2;155;89;182mUt enim ad minim veniam\x1b[0m, quis nos",
+        "trud exercitation ullamco laboris nisi ut aliquip ",
+        "ex ea commodo consequat. \x1b]8;;https://w3schools.com\x1b\\\x1b[38;2;231;76;60mDuis aute irure dolor\x1b]8;;\x1b\\\x1b[0m in ",
+        "reprehenderit in voluptate velit esse \x1b[38;2;52;73;94mcillum dolor\x1b[0m",
+        "\x1b[38;2;52;73;94me eu fugiat nulla pariatur\x1b[0m.",
+        "",
+        "Excepteur sint occaecat cupidatat non p\x1b[48;2;255;0;0mroide\x1b[0mnt, su",
+        "nt in culpa qui officia",
+        "\x1b]8;;https://openai.com\x1b\\\x1b[38;2;26;188;156mdeserunt mollit anim\x1b]8;;\x1b\\\x1b[0m id est laborum.",
     ]
