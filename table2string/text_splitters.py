@@ -73,6 +73,24 @@ class AnsiTextSplitterUnsafe(BaseTextSplitter):
     REDUNDANT_COLOR_ANSI_REGEX_1 = re.compile(rf"^({COLOR_REGEX.pattern})*\x1b\[0m")
     REDUNDANT_COLOR_ANSI_REGEX_2 = re.compile(rf"({COLOR_REGEX.pattern})*\x1b\[0m(?!$)")
 
+    REDUNDANT_PAIRS = [
+        re.compile(r"(\x1b\[(?:1|2)m)+(\x1b\[22m)"),  # Bold / Faint)
+        re.compile(r"(\x1b\[3m)+(\x1b\[23m)"),  # Italic
+        re.compile(r"(\x1b\[4m)+(\x1b\[24m)"),  # Underline
+        re.compile(r"(\x1b\[5m)+(\x1b\[25m)"),  # Blinking (slow)
+        re.compile(r"(\x1b\[7m)+(\x1b\[27m)"),  # Inverse
+        re.compile(r"(\x1b\[8m)+(\x1b\[28m)"),  # Hidden
+        re.compile(r"(\x1b\[9m)+(\x1b\[29m)"),  # Strikethrough
+        # Foreground colors 30–37, 90–97
+        # Expanded foreground colors (256/TrueColor)
+        # RGB foreground colors
+        re.compile(r"(\x1b\[(?:3[0-7]|9[0-7])m|\x1b\[38;5;\d+m|\x1b\[38;2;\d+;\d+;\d+m)+(\x1b\[39m)"),
+        # Background colors 40–47, 100–107
+        # Expanded background colors (256/TrueColor)
+        # RGB background colors
+        re.compile(r"(\x1b\[(?:4[0-7]|10[0-7])m|\x1b\[48;5;\d+m|\x1b\[48;2;\d+;\d+;\d+m)+(\x1b\[49m)"),
+    ]
+
     def split_text(
         self,
         text: str,
@@ -228,6 +246,9 @@ class AnsiTextSplitterUnsafe(BaseTextSplitter):
             line_out = "".join(out)
             line_out = self.REDUNDANT_COLOR_ANSI_REGEX_1.sub("", line_out)
             line_out = self.REDUNDANT_COLOR_ANSI_REGEX_2.sub("\x1b[0m", line_out)
+
+            for regex in self.REDUNDANT_PAIRS:
+                line_out = regex.sub(r"\2", line_out)
 
             restored.append(line_out)
             inherited_color = curr_color
