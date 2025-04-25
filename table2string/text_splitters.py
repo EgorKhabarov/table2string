@@ -284,6 +284,10 @@ class AnsiTextSplitter(AnsiTextSplitterUnsafe):
 
 
 class HtmlTextSplitter(AnsiTextSplitter):
+    def __init__(self, **html_classes_kwargs: dict[str, str]):
+        super().__init__()
+        self.html_classes_kwargs = html_classes_kwargs
+
     def split_text(
         self,
         text: str,
@@ -293,7 +297,7 @@ class HtmlTextSplitter(AnsiTextSplitter):
         cell_break_symbol: str = "…",
     ) -> tuple[list[str], list[str], bool, dict[str, tuple[str, ...]]]:
         text = text.replace("\x1b", "\\x1b")
-        parser = _HTML2ANSIParser()
+        parser = _HTML2ANSIParser(**self.html_classes_kwargs)
         parser.feed(text)
         text = parser.get_text()
         return super().split_text(
@@ -316,9 +320,10 @@ class _HTML2ANSIParser(HTMLParser):
     RGB_REGEX = re.compile(r"rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)")
     ESCAPE_N_REGEX = re.compile(r"rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)")
 
-    def __init__(self):
+    def __init__(self, **html_classes_kwargs: dict[str, str]):
         super().__init__()
         self.result = []
+        self.html_classes_kwargs = html_classes_kwargs
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
@@ -343,6 +348,15 @@ class _HTML2ANSIParser(HTMLParser):
             if "://" not in url:
                 url = f"https://{url}"
             self.result.append(f"\x1b]8;;{url}\x1b\\")
+
+        if tag in ("b", "i", "u", "s", "span", "mark", "a") and "class" in attrs:
+            classes = attrs["class"].split()
+            self.result.append(
+                "".join(
+                    self.html_classes_kwargs.get(class_, "")
+                    for class_ in classes
+                )
+            )
 
         if tag in ("b", "i", "u", "s", "span", "mark", "a") and "style" in attrs:
             style = attrs["style"]
