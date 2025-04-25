@@ -403,6 +403,38 @@ For `name_h_align` and `name_v_align` only the `str` type or the corresponding `
 
 ### Borders
 
+A variety of table border styles are available through the `Themes` interface:
+
+- `Themes.ascii_thin`
+- `Themes.ascii_thin_double`
+- `Themes.ascii_double`
+- `Themes.ascii_double_thin`
+- `Themes.thin`
+- `Themes.thin_thick`
+- `Themes.thin_double`
+- `Themes.rounded_double`
+- `Themes.rounded`
+- `Themes.rounded_thick`
+- `Themes.thick`
+- `Themes.thick_thin`
+- `Themes.double`
+- `Themes.double_thin`
+- `Themes.booktabs`
+- `Themes.ascii_booktabs`
+- `Themes.markdown`
+
+You can customize the border color using the `set_color` or `set_context_color` method of the border:
+```pycon
+>>> from table2string import Themes, Color, BgColor
+>>> Themes.thin_thick.border.set_color(color=Color.CYAN)
+>>> Themes.thin_thick.border.set_color(color=None)
+>>> # You can also use a context manager to temporarily set the border color
+>>> with Themes.thin_thick.border.set_context_color(color=Color.MAGENTA):
+...     ...  # Render tables here
+```
+
+Expandable previews below this section illustrate the visual appearance of each border theme.
+
 <details>
 <summary>Border types</summary>
 
@@ -1283,6 +1315,28 @@ For `name_h_align` and `name_v_align` only the `str` type or the corresponding `
 ```
 </details>
 </details>
+
+### Create your own theme
+
+You can define a completely custom theme:
+
+```pycon
+>>> from table2string import Theme, Border
+>>> new_theme = Theme(  # doctest: +SKIP
+...     name="your_new_theme_name",
+...     border=Border(
+...         horizontal="-",
+...         vertical="|",
+...         top_left="+",
+...         top_right="+",
+...         # other characters
+...     ),
+...     # Theme to be used for nested tables to ensure proper border merging
+...     # Defaults to the parent table's theme
+...     custom_sub_table_theme=None,
+... )
+
+```
 
 ## Emojis
 

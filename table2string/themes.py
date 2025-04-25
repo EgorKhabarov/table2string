@@ -1,6 +1,7 @@
 from typing import Optional
 from functools import lru_cache
 from dataclasses import dataclass
+from contextlib import contextmanager
 
 from table2string.text_styles import Color, BgColor
 
@@ -164,18 +165,18 @@ class Border:
 
         return None
 
-    def set_color(self, fg: Color | BgColor | str | tuple[int, int, int] | None = None):
+    def set_color(self, color: Color | BgColor | str | tuple[int, int, int] | None = None):
         prefix = ""
         reset = ""
 
-        if isinstance(fg, (Color, BgColor)):
-            prefix = fg.value
+        if isinstance(color, (Color, BgColor)):
+            prefix = color.value
             reset = "\x1b[0m"
-        elif isinstance(fg, str):
-            prefix = fg
+        elif isinstance(color, str):
+            prefix = color
             reset = "\x1b[0m"
-        elif isinstance(fg, tuple) and len(fg) == 3:
-            r, g, b = fg
+        elif isinstance(color, tuple) and len(color) == 3:
+            r, g, b = color
             prefix = f"\x1b[38;2;{r};{g};{b}m"
             reset = "\x1b[0m"
 
@@ -224,6 +225,12 @@ class Border:
         self.vertical_right = f"{self.__vertical_right}{reset}"
         self.vertical_left_plus = f"{prefix}{self.__vertical_left_plus}"
         self.vertical_right_plus = f"{self.__vertical_right_plus}{reset}"
+
+    @contextmanager
+    def set_context_color(self, color: Color | BgColor | str | tuple[int, int, int] | None = None):
+        self.set_color(color)
+        yield
+        self.set_color(None)
 
 
 class Theme:

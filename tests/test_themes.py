@@ -1,4 +1,4 @@
-from table2string import Table, Themes, Theme
+from table2string import Table, Themes, Theme, Color
 
 
 def test_themes():
@@ -484,3 +484,33 @@ bottom_horizontal_plus='┴'), Themes.thin)
             "\n", ""
         )
     )
+
+
+def test_border_colors():
+    table = Table(
+        [
+            ("2", "4"),
+            ("5", "6"),
+        ],
+        name="Table",
+        column_names=("1", "3"),
+    )
+    table_with_red_border = """
+\x1b[31m┌───────┐\x1b[0m
+\x1b[31m│\x1b[0m Table \x1b[31m│\x1b[0m
+\x1b[31m├───┬───┤\x1b[0m
+\x1b[31m│\x1b[0m 1 \x1b[31m│\x1b[0m 3 \x1b[31m│\x1b[0m
+\x1b[31m┝━━━┿━━━┥\x1b[0m
+\x1b[31m│\x1b[0m 2 \x1b[31m│\x1b[0m 4 \x1b[31m│\x1b[0m
+\x1b[31m├───┼───┤\x1b[0m
+\x1b[31m│\x1b[0m 5 \x1b[31m│\x1b[0m 6 \x1b[31m│\x1b[0m
+\x1b[31m└───┴───┘\x1b[0m
+""".strip()
+    with Themes.thin_thick.border.set_context_color("\x1b[31m"):
+        assert table.stringify(theme=Themes.thin_thick) == table_with_red_border
+    with Themes.thin_thick.border.set_context_color(Color.RED):
+        assert table.stringify(theme=Themes.thin_thick) == table_with_red_border
+    with Themes.thin_thick.border.set_context_color((255, 0, 0)):
+        assert table.stringify(theme=Themes.thin_thick) == table_with_red_border.replace(
+            "\x1b[31m", "\x1b[38;2;255;0;0m"
+        )
