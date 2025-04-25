@@ -16,7 +16,7 @@
 
 ## Convert table to string
 
-While there are several libraries available for converting tables to strings in Python, none seemed to meet my specific requirements. 
+While there are several libraries available for converting tables to strings in Python, none seemed to meet my specific requirements.
 
 - **Line Break Support**: Easily include line breaks within cells for enhanced readability.
 - **Subtable Support**: Easily include a table within a table for a more flexible presentation.
@@ -1305,7 +1305,7 @@ table = [
     ),
 ]
 t = PrettyTable(title="prettytable", field_names=names, h_align="c")
-t.add_rows(table)
+t.add_rows(table)  # type: ignore
 print(t)
 
 t = Table(table, name="table2string", column_names=names)
@@ -1403,31 +1403,51 @@ t.print(h_align="^", sep=(1,))
 
 ## [New!] Formatting
 
-За форматирование отвечают классы из файла `text_splitters`.
-Все классы каскадно наследуются друг от друга и являются наследниками `BaseTextSplitter`.
+Formatting is handled by classes from the `text_splitters` module.
+All classes inherit from one another in a cascading fashion and ultimately extend `BaseTextSplitter`.
 
-- `BaseTextSplitter` (по умолчанию в методе `stringify`) - Базовый класс. Имеет метод `split_text`, который разделяет текст по ширине и высоте, чтобы вместить в ячейку.
-- `AnsiTextSplitterUnsafe` - Наследуется от `BaseTextSplitter` и оборачивает метод `split_text` родительского класса.
-Оборачивает ANSI последовательности и гиперссылки, чтобы они работали даже при переносе строки.
-- `AnsiTextSplitter` (по умолчанию в методе `print`) - Наследуется от `AnsiTextSplitterUnsafe` и экранирует небезопасные последовательности (все кроме цвета и гиперссылок).
-- `HtmlTextSplitter` - Наследуется от `AnsiTextSplitter` и превращает определённые HTML теги в ANSI последовательности.
+- `BaseTextSplitter` (default in the `stringify` method) – The base class. It provides the `split_text` method, which splits text by width and height to fit it into a cell.
+- `AnsiTextSplitterUnsafe` – Inherits from `BaseTextSplitter` and wraps its `split_text` method.
+  It wraps ANSI sequences and hyperlinks so they remain functional even when the text is wrapped.
+- `AnsiTextSplitter` (default in the `print` method) – Inherits from `AnsiTextSplitterUnsafe` and escapes unsafe sequences (everything except color and hyperlinks).
+- `HtmlTextSplitter` – Inherits from `AnsiTextSplitter` and converts specific HTML tags into ANSI sequences.
 
-Можно отдельно настраивать сплиттеры для названия таблицы и названий колонок.
-Можно настроить сплиттер для всей таблицы, а так же для каждого столбца таблицы по отдельности.
+You can separately configure splitters for the table name and column headers.
+It is also possible to set a splitter for the entire table, or for each column individually.
 
-> [!TIP]
-> Используйте `BaseTextSplitter` если не используйте форматирование.
+- `name_spliter` – Splitter for the table name. Can be an instance of any `BaseTextSplitter` subclass.
+- `column_names_spliter` – Splitter for column names. Can be an instance of a `BaseTextSplitter` subclass, or a `tuple` of instances corresponding to the number of columns.
+- `text_spliter` – Splitter for table content. Can be an instance of a `BaseTextSplitter` subclass, or a `tuple` of instances, one for each column.
 
-Вы можете создать **свой сплиттер** (например для Markdown или других языков разметки)
-просто создав класс наследующийся например от `AnsiTextSplitter` или `BaseTextSplitter` и обернуть методы `split_text` и `clear_formatting`.
+If the `tuple` has fewer elements than there are columns, the last element of the `tuple` will be used for all remaining columns.
 
-- `split_text` - Вызывается для каждой ячейки. Должен разделять текст чтобы он помещался в ячейку. 
-- `clear_formatting` - Вызывается при подсчёте ширины ячейки.
-Должен убирать всё форматирование и оставлять только видимые символы и ANSI последовательности.
-Например при HTML форматировании убирает все теги и оставляет только видимый текст.
+For convenient ANSI formatting, you can use the `text_styles` module.
+It provides:
+- **Enum** `Color` — predefined foreground colors
+- **Enum** `BgColor` — predefined background colors
+- **Function** `style(text: str, *, fg: Color | tuple[int, int, int] | None = None, bg: BgColor | tuple[int, int, int] | None = None, **attrs) -> str` — wrap your text in the specified ANSI color/style codes
+- **Function** `link(url: str, text: str) -> str` — create an OSC hyperlink around your text
+
+You may also freely use the third-party **Colorama** library for colorizing table input.
+
+> [!IMPORTANT]
+> `table2string` does **not** automatically enable ANSI support on the Windows console.
+> To turn it on, call `just_fix_windows_console()` from the Colorama package before printing.
+
+### Create your own formatting
+
+You can create your own **custom splitter formatter** (e.g. for Markdown or other markup languages)
+by subclassing `AnsiTextSplitter` or `BaseTextSplitter` and overriding the `split_text` and `clear_formatting` methods.
+
+- `split_text` – Called for each cell. Should split the text so it fits within the cell.
+- `clear_formatting` – Called when calculating the width of a cell.
+
+This method should remove all formatting, leaving only visible characters and ANSI sequences.
+For example, with HTML formatting, it should strip all tags and leave only the visible text.
 
 ```pycon
 >>> from table2string import style, Color
+>>> from table2string import BaseTextSplitter, HtmlTextSplitter, AnsiTextSplitter
 >>> # Same as Table([("q\x1b[31mwe\nr\x1b[0mty",)]).print()
 >>> red_text = style("we\nr", fg=Color.RED)
 >>> Table([(f"q{red_text}ty",)]).print()  # AnsiTextSplitter by default
@@ -1435,7 +1455,6 @@ t.print(h_align="^", sep=(1,))
 | q[31mwe[0m |
 | [31mr[0mty |
 +-----+
->>> from table2string import HtmlTextSplitter
 >>> Table(
 ...     [
 ...         (
@@ -1456,5 +1475,38 @@ t.print(h_align="^", sep=(1,))
 │ [9m[38;2;85;255;85m]8;;https://example.com\rikethrough Green Lin]8;;\[0m/│
 │ [9m[38;2;85;255;85m]8;;https://example.com\k]8;;\[0m                     │
 └───────────────────────┘
+>>> Table(
+...     [
+...         (
+...             "t\x1b[31mex\x1b[0mt",
+...             "plain text",
+...             "123<b>456</b>789",
+...         ),
+...     ],
+...     name='<span style="color:#f00">Table</span>',
+...     column_names=(
+...         "qwoef<b>qd&lt;f</b> qld",
+...         "1oijf\x1b[32m1iofj\x1b[0m1woejf",
+...         "w1\x1b[32m23",
+...     ),
+... ).print(
+...     name_spliter=HtmlTextSplitter(),
+...     column_names_spliter=(
+...         HtmlTextSplitter(),
+...         AnsiTextSplitter(),  # AnsiTextSplitter for all remaining columns
+...     ),
+...     text_spliter=(
+...         AnsiTextSplitter(),
+...         BaseTextSplitter(),
+...         HtmlTextSplitter(),
+...     ),
+... )
++----------------------------------------------+
+|                    [38;2;255;0;0mTable[0m                     |
++---------------+------------------+-----------+
+| qwoef[1mqd<f[0m qld | 1oijf[32m1iofj[0m1woejf |   w1[32m23[0m    |
++---------------+------------------+-----------+
+| t[31mex[0mt          | plain text       | 123[1m456[0m789 |
++---------------+------------------+-----------+
 
 ```
