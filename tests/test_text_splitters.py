@@ -674,10 +674,7 @@ plain text
         )[0]
         == ["t\x1b[1mex\x1b[0mt"]
     )
-    assert (
-        splitter.clear_formatting("<p>text1</p><p>text2</p>")
-        == ["text1\n\ntext2"]
-    )
+    assert splitter.clear_formatting("<p>text1</p><p>text2</p>") == ["text1\n\ntext2"]
 
 
 def test_different_splitters():
