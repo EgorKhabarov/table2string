@@ -429,6 +429,16 @@ class _HTMLClearFormattingParser(HTMLParser):
         super().__init__()
         self.result = []
 
+    def handle_starttag(self, tag, attrs):
+        if tag == "p":
+            self.result.append("\n")
+        elif tag == "br":
+            self.result.append("\n")
+
+    def handle_endtag(self, tag):
+        if tag == "p":
+            self.result.append("\n")
+
     def handle_data(self, data):
         self.result.append(html.unescape(data))
 

@@ -1,4 +1,4 @@
-from table2string import Table
+from table2string import Table, Color, BgColor
 from table2string.text_splitters import (
     BaseTextSplitter,
     AnsiTextSplitter,
@@ -587,6 +587,92 @@ Excepteur sint occaecat cupidatat non p<span style="background-color:rgb(255,0,0
 |  verbatim.                                      |
 +-------------------------------------------------+
 """.strip()
+    )
+    table = Table(
+        [
+            (
+                """
+text<br>text
+""",
+            ),
+        ],
+    )
+    assert (
+        table.stringify(text_spliter=HtmlTextSplitter())
+        == """
++------+
+| text |
+| text |
++------+
+""".strip()
+    )
+    table = Table(
+        [
+            (
+                """
+<i>text</i>
+<u>text</u>
+<s>text</s>
+<mark>text</mark>
+""",
+            ),
+        ],
+    )
+    assert (
+        table.stringify(text_spliter=HtmlTextSplitter())
+        == """
++------+
+| \x1b[3mtext\x1b[0m |
+| \x1b[4mtext\x1b[0m |
+| \x1b[9mtext\x1b[0m |
+| \x1b[48;2;255;255;0mtext\x1b[0m |
++------+
+""".strip()
+    )
+    splitter = HtmlTextSplitter(
+        html_classes={"red": Color.RED, "green": Color.GREEN, "bg-red": BgColor.RED},
+    )
+    table = Table(
+        [
+            (
+                """
+<span class="red">red text<span style="color:#000" class="bg-red">black & bg red text</span></span>
+plain text
+<a class="green" href="example.com">example green hyperlink</a>
+""",
+            )
+        ]
+    )
+    assert (
+        table.stringify(text_spliter=splitter)
+        == """
++-----------------------------+
+| \x1b[31mred text\x1b[41m\x1b[38;2;0;0;0mblack & bg red text\x1b[0m |
+| plain text                  |
+| \x1b]8;;https://example.com\x1b\\\x1b[32mexample green hyperlink\x1b]8;;\x1b\\\x1b[0m     |
++-----------------------------+
+""".strip()
+    )
+    assert (
+        splitter.split_text('<span style="color:#f00">text</span>')[0]
+        == splitter.split_text('<span style="color:#ff0000">text</span>')[0]
+        == splitter.split_text('<span style="color:rgb(255,0,0)">text</span>')[0]
+        == ["\x1b[38;2;255;0;0mtext\x1b[0m"]
+    )
+    assert (
+        splitter.split_text('<span style="background-color:#f00">text</span>')[0]
+        == splitter.split_text('<span style="background-color:#ff0000">text</span>')[0]
+        == splitter.split_text(
+            '<span style="background-color:rgb(255,0,0)">text</span>'
+        )[0]
+        == ["\x1b[48;2;255;0;0mtext\x1b[0m"]
+    )
+    assert (
+        splitter.split_text('<span style="color:IncorrectValue">t<b>ex</b>t</span>')[0]
+        == splitter.split_text(
+            '<span style="background-color:IncorrectValue">t<b>ex</b>t</span>'
+        )[0]
+        == ["t\x1b[1mex\x1b[0mt"]
     )
 
 

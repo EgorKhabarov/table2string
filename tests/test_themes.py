@@ -485,6 +485,10 @@ bottom_horizontal_plus='┴'), Themes.thin)
         )
     )
 
+    assert Themes.get("thin") == Themes.thin
+    assert Themes.get("th1n", Themes.rounded) == Themes.rounded
+    assert Themes.get("get") == Themes.ascii_thin
+
 
 def test_border_colors():
     table = Table(
