@@ -116,15 +116,15 @@ pip install -U git+https://github.com/EgorKhabarov/table2string.git@master
 | `table`                  | `Sequence[Sequence[Any]]`                                                                          | `[("1", "2"), ("3", "4")]`      | A two-dimensional matrix                                                                                                                                    |
 | `h_align`                | <code>tuple\[HorizontalAlignment &#x7c; str, ...]</code> &#x7c; `HorizontalAlignment` &#x7c; `str` | `HorizontalAlignment.CENTER`    | Allows you to align text in a cell horizontally                                                                                                             |
 | `v_align`                | <code>tuple\[VerticalAlignment &#x7c; str, ...]</code> &#x7c; `VerticalAlignment` &#x7c; `str`     | `VerticalAlignment.MIDDLE`      | Allows you to align text in a cell vertically                                                                                                               |
-| `text_spliter`           | `BaseTextSplitter` &#x7c; `tuple[BaseTextSplitter, ...]`                                           | `AnsiTextSplitter()`            | Allows you to customize text formatting, for example, ANSI or HTML                                                                                          |
+| `text_splitter`          | `BaseTextSplitter` &#x7c; `tuple[BaseTextSplitter, ...]`                                           | `AnsiTextSplitter()`            | Allows you to customize text formatting, for example ANSI                                                                                                   |
 | `name`                   | `str` &#x7c; `None`                                                                                | `"Table Name"`                  | Table name                                                                                                                                                  |
 | `name_h_align`           | `HorizontalAlignment` &#x7c; `str`                                                                 | `HorizontalAlignment.CENTER`    | Allows you to align table name horizontally                                                                                                                 |
 | `name_v_align`           | `VerticalAlignment` &#x7c; `str`                                                                   | `VerticalAlignment.MIDDLE`      | Allows you to align table name vertically                                                                                                                   |
-| `name_spliter`           | `BaseTextSplitter`                                                                                 | `AnsiTextSplitter()`            | Allows you to customize name formatting, for example, ANSI or HTML                                                                                          |
+| `name_splitter`          | `BaseTextSplitter`                                                                                 | `AnsiTextSplitter()`            | Allows you to customize name formatting, for example ANSI                                                                                                   |
 | `column_names`           | `Sequence[str]` &#x7c; `None`                                                                      | `("c1", "c2", ...column_count)` | Sets the names for the table columns                                                                                                                        |
 | `column_names_h_align`   | <code>tuple\[HorizontalAlignment &#x7c; str, ...]</code> &#x7c; `HorizontalAlignment` &#x7c; `str` | `HorizontalAlignment.CENTER`    | Allows you to align column names horizontally                                                                                                               |
 | `column_names_v_align`   | <code>tuple\[VerticalAlignment &#x7c; str, ...]</code> &#x7c; `VerticalAlignment` &#x7c; `str`     | `VerticalAlignment.MIDDLE`      | Allows you to align column names vertically                                                                                                                 |
-| `column_names_spliter`   | `BaseTextSplitter` &#x7c; `tuple[BaseTextSplitter, ...]`                                           | `AnsiTextSplitter()`            | Allows you to customize column names formatting, for example, ANSI or HTML                                                                                  |
+| `column_names_splitter`  | `BaseTextSplitter` &#x7c; `tuple[BaseTextSplitter, ...]`                                           | `AnsiTextSplitter()`            | Allows you to customize column names formatting, for example ANSI                                                                                           |
 | `max_width`              | `int` &#x7c; `Tuple[int, ...]` &#x7c; `None`                                                       | `120`                           | Allows you to set the width of the entire table or individually for each column                                                                             |
 | `max_height`             | `int` &#x7c; `None`                                                                                | `10`                            | Specifies the maximum height for rows                                                                                                                       |
 | `maximize_height`        | `bool`                                                                                             | `True`                          | Force height to be taken from max_height                                                                                                                    |
@@ -1470,14 +1470,13 @@ All classes inherit from one another in a cascading fashion and ultimately exten
 - `AnsiTextSplitterUnsafe` – Inherits from `BaseTextSplitter` and wraps its `split_text` method.
   It wraps ANSI sequences and hyperlinks so they remain functional even when the text is wrapped.
 - `AnsiTextSplitter` (default in the `print` method) – Inherits from `AnsiTextSplitterUnsafe` and escapes unsafe sequences (everything except color and hyperlinks).
-- `HtmlTextSplitter` – Inherits from `AnsiTextSplitter` and converts specific HTML tags into ANSI sequences.
 
 You can separately configure splitters for the table name and column headers.
 It is also possible to set a splitter for the entire table, or for each column individually.
 
-- `name_spliter` – Splitter for the table name. Can be an instance of any `BaseTextSplitter` subclass.
-- `column_names_spliter` – Splitter for column names. Can be an instance of a `BaseTextSplitter` subclass, or a `tuple` of instances corresponding to the number of columns.
-- `text_spliter` – Splitter for table content. Can be an instance of a `BaseTextSplitter` subclass, or a `tuple` of instances, one for each column.
+- `name_splitter` – Splitter for the table name. Can be an instance of any `BaseTextSplitter` subclass.
+- `column_names_splitter` – Splitter for column names. Can be an instance of a `BaseTextSplitter` subclass, or a `tuple` of instances corresponding to the number of columns.
+- `text_splitter` – Splitter for table content. Can be an instance of a `BaseTextSplitter` subclass, or a `tuple` of instances, one for each column.
 
 If the `tuple` has fewer elements than there are columns, the last element of the `tuple` will be used for all remaining columns.
 
@@ -1494,42 +1493,9 @@ You may also freely use the third-party **Colorama** library for colorizing tabl
 > `table2string` does **not** automatically enable ANSI support on the Windows console.
 > To turn it on, call `just_fix_windows_console()` from the Colorama package before printing.
 
-### HtmlTextSplitter
-
-You can use HTML formatting inside table cells.
-Currently, the following tags are supported: `b`, `i`, `u`, `s`, `span`, `mark`, and `a`.
-All other HTML tags will be ignored, but their inner text will still be preserved.
-
-Each tag may include the following attributes:
-- `style` — supports `color` and `background-color` in **RGB** or **HEX** formats only
-- `class` — can be mapped to ANSI styles via a class-to-color mapping
-- `href` — available in `<a>` tags for generating hyperlinks
-
-```pycon
->>> from table2string import Table, HtmlTextSplitter, Color, BgColor
->>> splitter = HtmlTextSplitter(
-...     html_classes={"red": Color.RED, "green": Color.GREEN, "bg-red": BgColor.RED},
-... )
->>> Table([(
-...     """
-... <span class="red">red text<span style="color:#000" class="bg-red">black & bg red text</span></span>
-... plain text
-... <a class="green" href="example.com">example green hyperlink</a>
-... """,
-... )]).print(text_spliter=splitter)
-+-----------------------------+
-| [31mred text[41m[38;2;0;0;0mblack & bg red text[0m |
-| plain text                  |
-| ]8;;https://example.com\[32mexample green hyperlink]8;;\[0m     |
-+-----------------------------+
-
-```
-
-This allows you to use familiar HTML/CSS markup for styling text while maintaining full support for ANSI rendering.
-
 ### Create your own formatting
 
-You can create your own **custom splitter formatter** (e.g. for Markdown or other markup languages)
+You can create your own **custom splitter formatter** (e.g. for HTML or Markdown or other markup languages)
 by subclassing `AnsiTextSplitter` or `BaseTextSplitter` and overriding the `split_text` and `clear_formatting` methods.
 
 - `split_text` – Called for each cell. Should split the text so it fits within the cell.
@@ -1539,8 +1505,7 @@ This method should remove all formatting, leaving only visible characters and AN
 For example, with HTML formatting, it should strip all tags and leave only the visible text.
 
 ```pycon
->>> from table2string import style, Color
->>> from table2string import BaseTextSplitter, HtmlTextSplitter, AnsiTextSplitter
+>>> from table2string import style, link, Color, BaseTextSplitter, AnsiTextSplitter
 >>> # Same as Table([("q\x1b[31mwe\nr\x1b[0mty",)]).print()
 >>> red_text = style("we\nr", fg=Color.RED)
 >>> Table([(f"q{red_text}ty",)]).print()  # AnsiTextSplitter by default
@@ -1548,58 +1513,49 @@ For example, with HTML formatting, it should strip all tags and leave only the v
 | q[31mwe[0m |
 | [31mr[0mty |
 +-----+
->>> Table(
-...     [
-...         (
-...             '<b style="color:rgb(255,170,0)">Bold Gold '
-...             '<i style="color:#fff">Bold & Italic White</i></b> '
-...             '<u>Underline</u> '
-...             '<a href="example.com"><s style="color:#55FF55">Strikethrough Green Link</s></a>',
-...         ),
-...     ],
-... ).print(
-...     max_width=25,
-...     theme=Themes.thin,
-...     text_spliter=HtmlTextSplitter(),
-... )
+>>> temp_text = style("Bold & Italic White", fg=(255, 255, 255), italic=True)
+>>> colored_text = style(f"Bold Gold {temp_text}", fg=(255, 170, 0), bold=True)
+>>> underline_text = style("Underline", underline=True)
+>>> example_link = link("example.com", "Strikethrough Green Link", fg=(85, 255, 85), strike=True)
+>>> table = Table([(f"{colored_text} {underline_text} {example_link}",)])
+>>> table.print(max_width=25, theme=Themes.thin)
 ┌───────────────────────┐
-│ [1m[38;2;255;170;0mBold Gold [3m[38;2;255;255;255mBold & Ital[0m/│
-│ [1m[38;2;255;170;0m[3m[38;2;255;255;255mic White[0m [4mUnderline[0m ]8;;https://example.com\[9m[38;2;85;255;85mSt]8;;\[0m/│
-│ [9m[38;2;85;255;85m]8;;https://example.com\rikethrough Green Lin]8;;\[0m/│
-│ [9m[38;2;85;255;85m]8;;https://example.com\k]8;;\[0m                     │
+│ [38;2;255;170;0m[1mBold Gold [38;2;255;255;255m[3mBold & Ital[0m/│
+│ [38;2;255;170;0m[1m[38;2;255;255;255m[3mic White[0m [4mUnderline[0m ]8;;https://example.com\[38;2;85;255;85m[9mSt]8;;\[0m/│
+│ [38;2;85;255;85m[9m]8;;https://example.com\rikethrough Green Lin]8;;\[0m/│
+│ [38;2;85;255;85m[9m]8;;https://example.com\k]8;;\[0m                     │
 └───────────────────────┘
 >>> Table(
 ...     [
 ...         (
-...             "t\x1b[31mex\x1b[0mt",
-...             "plain text",
-...             "123<b>456</b>789",
+...             "Text",
+...             "T\x1b[31me\nxt\x1b[0m1",
+...             "T\x1b[32mex\nt\x1b[0m2",
 ...         ),
 ...     ],
-...     name='<span style="color:#f00">Table</span>',
+...     name=style("Table", fg=Color.BLUE),
 ...     column_names=(
-...         "qwoef<b>qd&lt;f</b> qld",
-...         "1oijf\x1b[32m1iofj\x1b[0m1woejf",
-...         "w1\x1b[32m23",
+...         "Text",
+...         "Colored text 1",
+...         "Colored text 2",
 ...     ),
 ... ).print(
-...     name_spliter=HtmlTextSplitter(),
-...     column_names_spliter=(
-...         HtmlTextSplitter(),
-...         AnsiTextSplitter(),  # AnsiTextSplitter for all remaining columns
-...     ),
-...     text_spliter=(
-...         AnsiTextSplitter(),
+...     name_splitter=AnsiTextSplitter(),
+...     column_names_splitter=(BaseTextSplitter(),),  # BaseTextSplitter for all remaining columns
+...     # Or column_names_splitter=BaseTextSplitter(),
+...     text_splitter=(
 ...         BaseTextSplitter(),
-...         HtmlTextSplitter(),
+...         AnsiTextSplitter(),
+...         BaseTextSplitter(),  # The color sequences will leak here if reset is missing
 ...     ),
 ... )
-+----------------------------------------------+
-|                    [38;2;255;0;0mTable[0m                     |
-+---------------+------------------+-----------+
-| qwoef[1mqd<f[0m qld | 1oijf[32m1iofj[0m1woejf |   w1[32m23[0m    |
-+---------------+------------------+-----------+
-| t[31mex[0mt          | plain text       | 123[1m456[0m789 |
-+---------------+------------------+-----------+
++----------------------------------------+
+|                 [34mTable[0m                  |
++------+----------------+----------------+
+| Text | Colored text 1 | Colored text 2 |
++------+----------------+----------------+
+| Text | T[31me[0m             | T[32mex            |
+|      | [31mxt[0m1            | t[0m2             |
++------+----------------+----------------+
 
 ```

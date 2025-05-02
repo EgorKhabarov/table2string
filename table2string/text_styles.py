@@ -87,9 +87,47 @@ def style(
     return f"{start}{text}{reset}"
 
 
-def link(url: str, text: str | None = None) -> str:
+def link(
+    url: str,
+    text: str | None = None,
+    *,
+    fg: Color | tuple[int, int, int] | None = None,
+    bg: BgColor | tuple[int, int, int] | None = None,
+    bold: bool = False,
+    italic: bool = False,
+    underline: bool = False,
+    strike: bool = False,
+    double_underline: bool = False,
+    inverse: bool = False,
+    hidden: bool = False,
+) -> str:
     if text is None:
         text = url
     if "://" not in url:
         url = f"https://{url}"
+    if any(
+        (
+            fg,
+            bg,
+            bold,
+            italic,
+            underline,
+            strike,
+            double_underline,
+            inverse,
+            hidden,
+        )
+    ):
+        text = style(
+            text,
+            fg=fg,
+            bg=bg,
+            bold=bold,
+            italic=italic,
+            underline=underline,
+            strike=strike,
+            double_underline=double_underline,
+            inverse=inverse,
+            hidden=hidden,
+        )
     return f"\x1b]8;;{url}\x1b\\{text}\x1b]8;;\x1b\\"

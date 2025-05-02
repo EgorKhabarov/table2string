@@ -1,9 +1,6 @@
 import re
-import html
-from html.parser import HTMLParser
 
 from table2string.utils import get_text_width_in_console
-from table2string.text_styles import Color, BgColor
 
 
 class BaseTextSplitter:
@@ -26,10 +23,10 @@ class BaseTextSplitter:
         :return: Split text by width and height
         lines, symbols, is_subtable, borders
         """
-        lines = text.split("\n")
+        lines = text.splitlines() or [""]
 
         if width is None:
-            width = len(max(lines))
+            width = len(max(lines, key=len))
 
         result_lines: list[str] = []
         result_symbols: list[str] = []
@@ -75,7 +72,7 @@ class AnsiTextSplitterUnsafe(BaseTextSplitter):
     REDUNDANT_COLOR_ANSI_REGEX_2 = re.compile(rf"({COLOR_REGEX.pattern})*\x1b\[0m(?!$)")
 
     REDUNDANT_PAIRS = [
-        re.compile(r"(\x1b\[(?:1|2)m)+(\x1b\[22m)"),  # Bold / Faint)
+        re.compile(r"(\x1b\[[12]m)+(\x1b\[22m)"),  # Bold / Faint)
         re.compile(r"(\x1b\[3m)+(\x1b\[23m)"),  # Italic
         re.compile(r"(\x1b\[4m)+(\x1b\[24m)"),  # Underline
         re.compile(r"(\x1b\[5m)+(\x1b\[25m)"),  # Blinking (slow)
@@ -286,161 +283,3 @@ class AnsiTextSplitter(AnsiTextSplitterUnsafe):
             line_break_symbol=line_break_symbol,
             cell_break_symbol=cell_break_symbol,
         )
-
-
-class HtmlTextSplitter(AnsiTextSplitter):
-    def __init__(self, html_classes: dict[str, str | Color | BgColor] | None = None):
-        super().__init__()
-        self.html_classes: dict[str, str] = (
-            {
-                k: v.value if isinstance(v, Color | BgColor) else v
-                for k, v in html_classes.items()
-            }
-            if html_classes
-            else {}
-        )
-
-    def split_text(
-        self,
-        text: str,
-        width: int | None = None,
-        height: int | None = None,
-        line_break_symbol: str = "/",
-        cell_break_symbol: str = "…",
-    ) -> tuple[list[str], list[str], bool, dict[str, tuple[str, ...]]]:
-        text = text.replace("\x1b", "\\x1b")
-        parser = _HTML2ANSIParser(self.html_classes)
-        parser.feed(text)
-        text = parser.get_text()
-        return super().split_text(
-            text=text,
-            width=width,
-            height=height,
-            line_break_symbol=line_break_symbol,
-            cell_break_symbol=cell_break_symbol,
-        )
-
-    def clear_formatting(self, text: str):
-        text = text.replace("\x1b", "\\x1b")
-        parser = _HTMLClearFormattingParser()
-        parser.feed(text)
-        text = parser.get_text()
-        return super().clear_formatting(text)
-
-
-class _HTML2ANSIParser(HTMLParser):
-    RGB_REGEX = re.compile(r"rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)")
-    ESCAPE_N_REGEX = re.compile(r"rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)")
-
-    def __init__(self, html_classes: dict[str, str]):
-        super().__init__()
-        self.result: list[str] = []
-        self.html_classes = html_classes
-
-    def handle_starttag(self, tag, attrs):
-        attrs = dict(attrs)
-
-        if tag == "p":
-            self.result.append("\n")
-        elif tag == "br":
-            self.result.append("\n")
-        elif tag == "b":
-            self.result.append("\x1b[1m")
-        elif tag == "i":
-            self.result.append("\x1b[3m")
-        elif tag == "u":
-            self.result.append("\x1b[4m")
-        elif tag == "s":
-            self.result.append("\x1b[9m")
-        elif tag == "mark":
-            # Жёлтый фон ANSI
-            self.result.append("\x1b[48;2;255;255;0m")
-        elif tag == "a" and "href" in attrs:
-            url = attrs["href"]
-            if "://" not in url:
-                url = f"https://{url}"
-            self.result.append(f"\x1b]8;;{url}\x1b\\")
-
-        if tag in ("b", "i", "u", "s", "span", "mark", "a") and "class" in attrs:
-            classes = attrs["class"].split()
-            self.result.append(
-                "".join(self.html_classes.get(class_, "") for class_ in classes)
-            )
-
-        if tag in ("b", "i", "u", "s", "span", "mark", "a") and "style" in attrs:
-            style = attrs["style"]
-            for part in style.split(";"):
-                key, sep, value = part.partition(":")
-                if key.strip() == "color" and value:
-                    val = value.strip()
-                    if val.startswith("#") and len(val) == 7:
-                        r = int(val[1:3], 16)
-                        g = int(val[3:5], 16)
-                        b = int(val[5:7], 16)
-                    elif val.startswith("#") and len(val) == 4:
-                        r = int(val[1] * 2, 16)
-                        g = int(val[2] * 2, 16)
-                        b = int(val[3] * 2, 16)
-                    else:
-                        m = self.RGB_REGEX.search(val)
-                        if m:
-                            r, g, b = map(int, m.groups())
-                        else:
-                            continue
-                    self.result.append(f"\x1b[38;2;{r};{g};{b}m")
-                if key.strip() == "background-color" and value:
-                    val = value.strip()
-                    if val.startswith("#") and len(val) == 7:
-                        r = int(val[1:3], 16)
-                        g = int(val[3:5], 16)
-                        b = int(val[5:7], 16)
-                    elif val.startswith("#") and len(val) == 4:
-                        r = int(val[1] * 2, 16)
-                        g = int(val[2] * 2, 16)
-                        b = int(val[3] * 2, 16)
-                    else:
-                        m = self.RGB_REGEX.search(val)
-                        if m:
-                            r, g, b = map(int, m.groups())
-                        else:
-                            continue
-                    self.result.append(f"\x1b[48;2;{r};{g};{b}m")
-
-    def handle_endtag(self, tag):
-        if tag == "p":
-            self.result.append("\n")
-        elif tag == "a":
-            self.result.append("\x1b]8;;\x1b\\")
-
-        if tag in ("b", "i", "u", "s", "span", "mark", "a"):
-            self.result.append("\x1b[0m")
-
-    def handle_data(self, data):
-        self.result.append(html.unescape(data))
-
-    def get_text(self):
-        text = "".join(self.result)
-        result = self.ESCAPE_N_REGEX.sub("\n\n", text.strip())
-        return result
-
-
-class _HTMLClearFormattingParser(HTMLParser):
-    def __init__(self):
-        super().__init__()
-        self.result = []
-
-    def handle_starttag(self, tag, attrs):
-        if tag == "p":
-            self.result.append("\n")
-        elif tag == "br":
-            self.result.append("\n")
-
-    def handle_endtag(self, tag):
-        if tag == "p":
-            self.result.append("\n")
-
-    def handle_data(self, data):
-        self.result.append(html.unescape(data))
-
-    def get_text(self):
-        return "".join(self.result).strip()

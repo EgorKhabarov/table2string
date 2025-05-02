@@ -5,9 +5,8 @@ from table2string.aligns import HorizontalAlignment, VerticalAlignment  # noqa
 from table2string.text_styles import style, link, Color, BgColor  # noqa
 from table2string.text_splitters import (  # noqa
     BaseTextSplitter,
-    AnsiTextSplitterUnsafe,
     AnsiTextSplitter,
-    HtmlTextSplitter,
+    AnsiTextSplitterUnsafe,
 )
 
 __version__ = "2.1.0"
