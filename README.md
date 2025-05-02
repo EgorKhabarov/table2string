@@ -423,17 +423,6 @@ A variety of table border styles are available through the `Themes` interface:
 - `Themes.ascii_booktabs`
 - `Themes.markdown`
 
-You can customize the border color using the `set_color` or `set_context_color` method of the border:
-```pycon
->>> from table2string import Themes, Color, BgColor
->>> Themes.thin_thick.border.set_color(color=Color.CYAN)
->>> Themes.thin_thick.border.set_color(color=None)
->>> # You can also use a context manager to temporarily set the border color
->>> with Themes.thin_thick.border.set_context_color(color=Color.MAGENTA):
-...     pass  # Render tables here
-
-```
-
 Expandable previews below this section illustrate the visual appearance of each border theme.
 
 <details>
