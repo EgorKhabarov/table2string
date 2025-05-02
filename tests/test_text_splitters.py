@@ -556,3 +556,22 @@ def test_different_splitters():
 +-----------+-----------+-------+
 """.strip()
     )
+    table = Table(
+        [
+            (
+                "text",
+                Table(
+                    [("1", "\x1b[31m2")],
+                    text_splitter=(BaseTextSplitter(), AnsiTextSplitter()),
+                ),
+            )
+        ]
+    )
+    assert (
+        table.stringify(text_splitter=BaseTextSplitter())
+        == """
++------+---+---+
+| text | 1 | \x1b[31m2\x1b[0m |
++------+---+---+
+""".strip()
+    )

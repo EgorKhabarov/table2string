@@ -1474,24 +1474,13 @@ It provides:
 - **Enum** `Color` — predefined foreground colors
 - **Enum** `BgColor` — predefined background colors
 - **Function** `style(text: str, *, fg: Color | tuple[int, int, int] | None = None, bg: BgColor | tuple[int, int, int] | None = None, **attrs) -> str` — wrap your text in the specified ANSI color/style codes
-- **Function** `link(url: str, text: str) -> str` — create an OSC hyperlink around your text
+- **Function** `link(url: str, text: str, **attrs) -> str` — create an OSC hyperlink around your text
 
 You may also freely use the third-party **Colorama** library for colorizing table input.
 
 > [!IMPORTANT]
 > `table2string` does **not** automatically enable ANSI support on the Windows console.
 > To turn it on, call `just_fix_windows_console()` from the Colorama package before printing.
-
-### Create your own formatting
-
-You can create your own **custom splitter formatter** (e.g. for HTML or Markdown or other markup languages)
-by subclassing `AnsiTextSplitter` or `BaseTextSplitter` and overriding the `split_text` and `clear_formatting` methods.
-
-- `split_text` – Called for each cell. Should split the text so it fits within the cell.
-- `clear_formatting` – Called when calculating the width of a cell.
-
-This method should remove all formatting, leaving only visible characters and ANSI sequences.
-For example, with HTML formatting, it should strip all tags and leave only the visible text.
 
 ```pycon
 >>> from table2string import Table, Themes, style, link, Color, BaseTextSplitter, AnsiTextSplitter
@@ -1540,3 +1529,14 @@ For example, with HTML formatting, it should strip all tags and leave only the v
 
 ```
 ![formatting_example.png](images/formatting_example.png)
+
+### Create your own formatting
+
+You can create your own **custom splitter formatter** (e.g. for HTML or Markdown or other markup languages)
+by subclassing `AnsiTextSplitter` or `BaseTextSplitter` and overriding the `split_text` and `clear_formatting` methods.
+
+- `split_text` – Called for each cell. Should split the text so it fits within the cell.
+- `clear_formatting` – Called when calculating the width of a cell.
+
+This method should remove all formatting, leaving only visible characters and ANSI sequences.
+For example, with HTML formatting, it should strip all tags and leave only the visible text.

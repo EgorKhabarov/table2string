@@ -43,6 +43,6 @@ def test_text_style():
         == "\x1b]8;;https://example.com\x1b\\example.com\x1b]8;;\x1b\\"
     )
     assert (
-        link("https://example.com")
-        == "\x1b]8;;https://example.com\x1b\\https://example.com\x1b]8;;\x1b\\"
+        link("https://example.com", fg=Color.BLUE, underline=True)
+        == "\x1b]8;;https://example.com\x1b\\\x1b[34m\x1b[4mhttps://example.com\x1b[0m\x1b]8;;\x1b\\"
     )
