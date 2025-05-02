@@ -1494,7 +1494,7 @@ This method should remove all formatting, leaving only visible characters and AN
 For example, with HTML formatting, it should strip all tags and leave only the visible text.
 
 ```pycon
->>> from table2string import style, link, Color, BaseTextSplitter, AnsiTextSplitter
+>>> from table2string import Table, Themes, style, link, Color, BaseTextSplitter, AnsiTextSplitter
 >>> # Same as Table([("q\x1b[31mwe\nr\x1b[0mty",)]).print()
 >>> red_text = style("we\nr", fg=Color.RED)
 >>> Table([(f"q{red_text}ty",)]).print()  # AnsiTextSplitter by default
@@ -1503,32 +1503,23 @@ For example, with HTML formatting, it should strip all tags and leave only the v
 | [31mr[0mty |
 +-----+
 >>> temp_text = style("Bold & Italic White", fg=(255, 255, 255), italic=True)
->>> colored_text = style(f"Bold Gold {temp_text}", fg=(255, 170, 0), bold=True)
->>> underline_text = style("Underline", underline=True)
+>>> colored_text = style(f"Bold Gold {temp_text} Text", fg=(255, 170, 0), bold=True)
+>>> underlined_text = style("Underline", underline=True)
 >>> example_link = link("example.com", "Strikethrough Green Link", fg=(85, 255, 85), strike=True)
->>> table = Table([(f"{colored_text} {underline_text} {example_link}",)])
->>> table.print(max_width=25, theme=Themes.thin)
-┌───────────────────────┐
-│ [38;2;255;170;0m[1mBold Gold [38;2;255;255;255m[3mBold & Ital[0m/│
-│ [38;2;255;170;0m[1m[38;2;255;255;255m[3mic White[0m [4mUnderline[0m ]8;;https://example.com\[38;2;85;255;85m[9mSt]8;;\[0m/│
-│ [38;2;85;255;85m[9m]8;;https://example.com\rikethrough Green Lin]8;;\[0m/│
-│ [38;2;85;255;85m[9m]8;;https://example.com\k]8;;\[0m                     │
-└───────────────────────┘
->>> Table(
-...     [
-...         (
-...             "Text",
-...             "T\x1b[31me\nxt\x1b[0m1",
-...             "T\x1b[32mex\nt\x1b[0m2",
-...         ),
-...     ],
+>>> table = Table([(f"{colored_text} {underlined_text} {example_link}",)])
+>>> table.print(max_width=25)
++-----------------------+
+| [38;2;255;170;0m[1mBold Gold [38;2;255;255;255m[3mBold & Ital[0m/|
+| [38;2;255;170;0m[1m[38;2;255;255;255m[3mic White[0m[38;2;255;170;0m[1m Text[0m [4mUnderli[0m/|
+| [4mne[0m ]8;;https://example.com\[38;2;85;255;85m[9mStrikethrough Gree]8;;\[0m/|
+| [38;2;85;255;85m[9m]8;;https://example.com\n Link]8;;\[0m                |
++-----------------------+
+>>> table = Table(
+...     [("Text", "T\x1b[31me\nxt\x1b[0m1", "T\x1b[32mex\nt\x1b[0m2")],
 ...     name=style("Table", fg=Color.BLUE),
-...     column_names=(
-...         "Text",
-...         "Colored text 1",
-...         "Colored text 2",
-...     ),
-... ).print(
+...     column_names=("Text", "Colored text 1", "Colored text 2"),
+... )
+>>> table.print(
 ...     name_splitter=AnsiTextSplitter(),
 ...     column_names_splitter=(BaseTextSplitter(),),  # BaseTextSplitter for all remaining columns
 ...     # Or column_names_splitter=BaseTextSplitter(),
@@ -1548,3 +1539,4 @@ For example, with HTML formatting, it should strip all tags and leave only the v
 +------+----------------+----------------+
 
 ```
+![formatting_example.png](images/formatting_example.png)
