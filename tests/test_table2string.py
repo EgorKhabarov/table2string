@@ -25,9 +25,7 @@ def test_print_table():
     print_table_d = get_output(print_table)
 
     table_1 = [("1", "2", "3"), ("123", "456\n567", "")]
-    assert (
-        print_table_d(table_1)
-        == """
+    assert print_table_d(table_1) == """
 +-----+-----+---+
 |   1 |   2 | 3 |
 +-----+-----+---+
@@ -35,24 +33,18 @@ def test_print_table():
 |     | 567 |   |
 +-----+-----+---+
 """.lstrip()
-    )
     table_2 = [("123",)]
-    assert (
-        print_table_d(table_2, max_width=(1,), max_height=2)
-        == """
+    assert print_table_d(table_2, max_width=(1,), max_height=2) == """
 +---+
 | 1/|
 | 2…|
 +---+
 """.lstrip()
-    )
 
 
 def test_stringify_table():
     table_1 = [("1", "2", "3"), ("123", "456\n567", "")]
-    assert (
-        stringify_table(table_1)
-        == """
+    assert stringify_table(table_1) == """
 +-----+-----+---+
 |   1 |   2 | 3 |
 +-----+-----+---+
@@ -60,15 +52,12 @@ def test_stringify_table():
 |     | 567 |   |
 +-----+-----+---+
 """.strip()
-    )
     table_2 = [
         ("1", "2", "3"),
         ("12345", "456\n\n567", ""),
         ("q", "NULL", "NULL"),
     ]
-    assert (
-        stringify_table(table_2)
-        == """
+    assert stringify_table(table_2) == """
 +-------+------+------+
 |     1 |    2 |    3 |
 +-------+------+------+
@@ -79,10 +68,7 @@ def test_stringify_table():
 | q     | NULL | NULL |
 +-------+------+------+
 """.strip()
-    )
-    assert (
-        stringify_table(table_2, h_align="<", name="Table Name")
-        == """
+    assert stringify_table(table_2, h_align="<", name="Table Name") == """
 +---------------------+
 |     Table Name      |
 +-------+------+------+
@@ -95,10 +81,7 @@ def test_stringify_table():
 | q     | NULL | NULL |
 +-------+------+------+
 """.strip()
-    )
-    assert (
-        stringify_table(table_2, h_align=">", name="Table Name")
-        == """
+    assert stringify_table(table_2, h_align=">", name="Table Name") == """
 +---------------------+
 |     Table Name      |
 +-------+------+------+
@@ -111,11 +94,8 @@ def test_stringify_table():
 |     q | NULL | NULL |
 +-------+------+------+
 """.strip()
-    )
     table_3 = [("coll 1", "coll 2")]
-    assert (
-        stringify_table(table_3, name="Table\nName", name_h_align="<")
-        == """
+    assert stringify_table(table_3, name="Table\nName", name_h_align="<") == """
 +-----------------+
 | Table           |
 | Name            |
@@ -123,10 +103,7 @@ def test_stringify_table():
 | coll 1 | coll 2 |
 +--------+--------+
 """.strip()
-    )
-    assert (
-        stringify_table(table_3, name="Table\nName", name_h_align="^")
-        == """
+    assert stringify_table(table_3, name="Table\nName", name_h_align="^") == """
 +-----------------+
 |      Table      |
 |      Name       |
@@ -134,10 +111,7 @@ def test_stringify_table():
 | coll 1 | coll 2 |
 +--------+--------+
 """.strip()
-    )
-    assert (
-        stringify_table(table_3, name="Table\nName", name_h_align=">")
-        == """
+    assert stringify_table(table_3, name="Table\nName", name_h_align=">") == """
 +-----------------+
 |           Table |
 |            Name |
@@ -145,10 +119,7 @@ def test_stringify_table():
 | coll 1 | coll 2 |
 +--------+--------+
 """.strip()
-    )
-    assert (
-        stringify_table(table_3, name="Table\nName", name_h_align="<<")
-        == """
+    assert stringify_table(table_3, name="Table\nName", name_h_align="<<") == """
 +-----------------+
 | Table           |
 | Name            |
@@ -156,10 +127,7 @@ def test_stringify_table():
 | coll 1 | coll 2 |
 +--------+--------+
 """.strip()
-    )
-    assert (
-        stringify_table(table_3, name="Table\nName", name_h_align=">>")
-        == """
+    assert stringify_table(table_3, name="Table\nName", name_h_align=">>") == """
 +-----------------+
 |           Table |
 |            Name |
@@ -167,10 +135,7 @@ def test_stringify_table():
 | coll 1 | coll 2 |
 +--------+--------+
 """.strip()
-    )
-    assert (
-        stringify_table(table_3, name="Table\nName", name_h_align="<>")
-        == """
+    assert stringify_table(table_3, name="Table\nName", name_h_align="<>") == """
 +-----------------+
 | Table           |
 |            Name |
@@ -178,10 +143,7 @@ def test_stringify_table():
 | coll 1 | coll 2 |
 +--------+--------+
 """.strip()
-    )
-    assert (
-        stringify_table(table_3, name="Table\nName", name_h_align="><")
-        == """
+    assert stringify_table(table_3, name="Table\nName", name_h_align="><") == """
 +-----------------+
 |           Table |
 | Name            |
@@ -189,61 +151,43 @@ def test_stringify_table():
 | coll 1 | coll 2 |
 +--------+--------+
 """.strip()
-    )
     table_4 = [("",)]
-    assert (
-        stringify_table(table_4)
-        == """
+    assert stringify_table(table_4) == """
 +---+
 |   |
 +---+
 """.strip()
-    )
     table_5 = [("\n1",)]
-    assert (
-        stringify_table(table_5)
-        == """
+    assert stringify_table(table_5) == """
 +---+
 |   |
 | 1 |
 +---+
 """.strip()
-    )
     table_6 = [("123",)]
-    assert (
-        stringify_table(table_6, max_width=(1,))
-        == """
+    assert stringify_table(table_6, max_width=(1,)) == """
 +---+
 | 1/|
 | 2/|
 | 3 |
 +---+
 """.strip()
-    )
     table_7 = [("123",)]
-    assert (
-        stringify_table(table_7, max_width=(2,))
-        == """
+    assert stringify_table(table_7, max_width=(2,)) == """
 +----+
 | 12/|
 | 3  |
 +----+
 """.strip()
-    )
     table_7 = [("123",)]
-    assert (
-        stringify_table(table_7, max_width=(1,), max_height=2)
-        == """
+    assert stringify_table(table_7, max_width=(1,), max_height=2) == """
 +---+
 | 1/|
 | 2…|
 +---+
 """.strip()
-    )
     table_8 = [("1",), ("q",), ("👍",)]
-    assert (
-        stringify_table(table_8)
-        == """
+    assert stringify_table(table_8) == """
 +----+
 |  1 |
 +----+
@@ -252,11 +196,8 @@ def test_stringify_table():
 | 👍 |
 +----+
 """.strip()
-    )
     table_9 = [("123456\n\n789000",)]
-    assert (
-        stringify_table(table_9, max_width=(3,), max_height=4)
-        == """
+    assert stringify_table(table_9, max_width=(3,), max_height=4) == """
 +-----+
 | 123/|
 | 456 |
@@ -264,11 +205,8 @@ def test_stringify_table():
 | 789…|
 +-----+
 """.strip()
-    )
     table_10 = [("1234567\n\n891\n234",)]
-    assert (
-        stringify_table(table_10, max_width=(2,), max_height=7)
-        == """
+    assert stringify_table(table_10, max_width=(2,), max_height=7) == """
 +----+
 | 12/|
 | 34/|
@@ -279,11 +217,8 @@ def test_stringify_table():
 | 1 …|
 +----+
 """.strip()
-    )
     table_11 = [("1234567\n\n891\n234", "qwe" * 20)]
-    assert (
-        stringify_table(table_11, max_width=(2,), max_height=7)
-        == """
+    assert stringify_table(table_11, max_width=(2,), max_height=7) == """
 +----+----+
 | 12/| qw/|
 | 34/| eq/|
@@ -294,11 +229,8 @@ def test_stringify_table():
 | 1 …| qw…|
 +----+----+
 """.strip()
-    )
     table_12 = [("long string",), ("1234567\n34\n787878",)]
-    assert (
-        stringify_table(table_12, h_align="^<")
-        == """
+    assert stringify_table(table_12, h_align="^<") == """
 +-------------+
 | long string |
 +-------------+
@@ -307,7 +239,6 @@ def test_stringify_table():
 |   787878    |
 +-------------+
 """.strip()
-    )
     table_13 = [
         ("filler " * 10,),
         (
@@ -329,9 +260,7 @@ Never gonna tell a lie and hurt you
 """.strip(),
         ),
     ]
-    assert (
-        stringify_table(table_13, h_align="^<")
-        == """
+    assert stringify_table(table_13, h_align="^<") == """
 +------------------------------------------------------------------------+
 | filler filler filler filler filler filler filler filler filler filler  |
 +------------------------------------------------------------------------+
@@ -351,10 +280,7 @@ Never gonna tell a lie and hurt you
 |                Never gonna tell a lie and hurt you                     |
 +------------------------------------------------------------------------+
 """.strip()
-    )
-    assert (
-        stringify_table(table_13, h_align="^>")
-        == """
+    assert stringify_table(table_13, h_align="^>") == """
 +------------------------------------------------------------------------+
 | filler filler filler filler filler filler filler filler filler filler  |
 +------------------------------------------------------------------------+
@@ -374,10 +300,7 @@ Never gonna tell a lie and hurt you
 |                     Never gonna tell a lie and hurt you                |
 +------------------------------------------------------------------------+
 """.strip()
-    )
-    assert (
-        stringify_table(table_13, h_align="^>", max_width=20)
-        == """
+    assert stringify_table(table_13, h_align="^>", max_width=20) == """
 +------------------+
 | filler filler fi/|
 | ller filler fill/|
@@ -419,10 +342,7 @@ Never gonna tell a lie and hurt you
 |              you |
 +------------------+
 """.strip()
-    )
-    assert (
-        stringify_table(table_13[:1], name=table_13[1][0], name_h_align="^<")
-        == """
+    assert stringify_table(table_13[:1], name=table_13[1][0], name_h_align="^<") == """
 +------------------------------------------------------------------------+
 |                We're no strangers to love                              |
 |                You know the rules and so do I (do I)                   |
@@ -442,11 +362,8 @@ Never gonna tell a lie and hurt you
 | filler filler filler filler filler filler filler filler filler filler  |
 +------------------------------------------------------------------------+
 """.strip()
-    )
     table_14 = [("filler " * 2,), ("12345\n67890",)]
-    assert (
-        stringify_table(table_14, h_align="<>")
-        == """
+    assert stringify_table(table_14, h_align="<>") == """
 +----------------+
 | filler filler  |
 +----------------+
@@ -454,10 +371,7 @@ Never gonna tell a lie and hurt you
 |          67890 |
 +----------------+
 """.strip()
-    )
-    assert (
-        stringify_table(table_14, h_align="><")
-        == """
+    assert stringify_table(table_14, h_align="><") == """
 +----------------+
 | filler filler  |
 +----------------+
@@ -465,7 +379,6 @@ Never gonna tell a lie and hurt you
 | 67890          |
 +----------------+
 """.strip()
-    )
     table_15 = [("qwe", "rty\nuio"), ("123456\n\n789000", "example")]
     kwargs = {
         "max_width": (3, 4),
@@ -473,9 +386,7 @@ Never gonna tell a lie and hurt you
         "line_break_symbol": "\\",
         "cell_break_symbol": "/",
     }
-    assert (
-        stringify_table(table_15, **kwargs, sep=True)
-        == """
+    assert stringify_table(table_15, **kwargs, sep=True) == """
 +-----+------+
 | qwe | rty  |
 |     | uio  |
@@ -486,10 +397,7 @@ Never gonna tell a lie and hurt you
 | 789/|      |
 +-----+------+
 """.strip()
-    )
-    assert (
-        stringify_table(table_15, **kwargs, sep=False)
-        == """
+    assert stringify_table(table_15, **kwargs, sep=False) == """
 +-----+------+
 | qwe | rty  |
 |     | uio  |
@@ -499,11 +407,8 @@ Never gonna tell a lie and hurt you
 | 789/|      |
 +-----+------+
 """.strip()
-    )
     table_16 = [("1", "2"), ("3", "4")]
-    assert (
-        stringify_table(table_16, sep=True, name="Name")
-        == """
+    assert stringify_table(table_16, sep=True, name="Name") == """
 +-------+
 | Name  |
 +---+---+
@@ -512,10 +417,7 @@ Never gonna tell a lie and hurt you
 | 3 | 4 |
 +---+---+
 """.strip()
-    )
-    assert (
-        stringify_table(table_16, sep=False, name="Name")
-        == """
+    assert stringify_table(table_16, sep=False, name="Name") == """
 +-------+
 | Name  |
 +---+---+
@@ -523,11 +425,8 @@ Never gonna tell a lie and hurt you
 | 3 | 4 |
 +---+---+
 """.strip()
-    )
     table_17 = [("1", "2"), ("3", "4"), ("5", "6"), ("7", "8")]
-    assert (
-        stringify_table(table_17, sep=(1,))
-        == """
+    assert stringify_table(table_17, sep=(1,)) == """
 +---+---+
 | 1 | 2 |
 +---+---+
@@ -536,10 +435,7 @@ Never gonna tell a lie and hurt you
 | 7 | 8 |
 +---+---+
 """.strip()
-    )
-    assert (
-        stringify_table(table_17, sep=(2,))
-        == """
+    assert stringify_table(table_17, sep=(2,)) == """
 +---+---+
 | 1 | 2 |
 | 3 | 4 |
@@ -548,10 +444,7 @@ Never gonna tell a lie and hurt you
 | 7 | 8 |
 +---+---+
 """.strip()
-    )
-    assert (
-        stringify_table(table_17, sep=(1, 3))
-        == """
+    assert stringify_table(table_17, sep=(1, 3)) == """
 +---+---+
 | 1 | 2 |
 +---+---+
@@ -561,10 +454,7 @@ Never gonna tell a lie and hurt you
 | 7 | 8 |
 +---+---+
 """.strip()
-    )
-    assert (
-        stringify_table(table_17, sep=(1,), name="Name")
-        == """
+    assert stringify_table(table_17, sep=(1,), name="Name") == """
 +-------+
 | Name  |
 +---+---+
@@ -575,10 +465,7 @@ Never gonna tell a lie and hurt you
 | 7 | 8 |
 +---+---+
 """.strip()
-    )
-    assert (
-        stringify_table(table_17, sep=(2,), name="Name")
-        == """
+    assert stringify_table(table_17, sep=(2,), name="Name") == """
 +-------+
 | Name  |
 +---+---+
@@ -589,10 +476,7 @@ Never gonna tell a lie and hurt you
 | 7 | 8 |
 +---+---+
 """.strip()
-    )
-    assert (
-        stringify_table(table_17, sep=(1, 3), name="Name")
-        == """
+    assert stringify_table(table_17, sep=(1, 3), name="Name") == """
 +-------+
 | Name  |
 +---+---+
@@ -604,7 +488,6 @@ Never gonna tell a lie and hurt you
 | 7 | 8 |
 +---+---+
 """.strip()
-    )
     table_18 = [("123\n456\n789",)]
     assert (
         stringify_table(
@@ -740,9 +623,7 @@ Never gonna tell a lie and hurt you
     )
     table_19 = [("1", "2", "3"), ("qwe", "rty\nuio", "")]
     name_1 = "Table Name"
-    assert (
-        stringify_table(table_19, theme=Themes.ascii_thin)
-        == """
+    assert stringify_table(table_19, theme=Themes.ascii_thin) == """
 +-----+-----+---+
 |   1 |   2 | 3 |
 +-----+-----+---+
@@ -750,10 +631,7 @@ Never gonna tell a lie and hurt you
 |     | uio |   |
 +-----+-----+---+
 """.strip()
-    )
-    assert (
-        stringify_table(table_19, theme=Themes.ascii_thin, name=name_1)
-        == """
+    assert stringify_table(table_19, theme=Themes.ascii_thin, name=name_1) == """
 +---------------+
 |  Table Name   |
 +-----+-----+---+
@@ -763,10 +641,7 @@ Never gonna tell a lie and hurt you
 |     | uio |   |
 +-----+-----+---+
 """.strip()
-    )
-    assert (
-        stringify_table(table_19, theme=Themes.ascii_thin_double)
-        == """
+    assert stringify_table(table_19, theme=Themes.ascii_thin_double) == """
 +-----+-----+---+
 |   1 |   2 | 3 |
 +=====+=====+===+
@@ -774,10 +649,7 @@ Never gonna tell a lie and hurt you
 |     | uio |   |
 +-----+-----+---+
 """.strip()
-    )
-    assert (
-        stringify_table(table_19, theme=Themes.ascii_thin_double, name=name_1)
-        == """
+    assert stringify_table(table_19, theme=Themes.ascii_thin_double, name=name_1) == """
 +---------------+
 |  Table Name   |
 +-----+-----+---+
@@ -787,10 +659,7 @@ Never gonna tell a lie and hurt you
 |     | uio |   |
 +-----+-----+---+
 """.strip()
-    )
-    assert (
-        stringify_table(table_19, theme=Themes.ascii_double)
-        == """
+    assert stringify_table(table_19, theme=Themes.ascii_double) == """
 +=====+=====+===+
 ‖   1 ‖   2 ‖ 3 ‖
 +=====+=====+===+
@@ -798,10 +667,7 @@ Never gonna tell a lie and hurt you
 ‖     ‖ uio ‖   ‖
 +=====+=====+===+
 """.strip()
-    )
-    assert (
-        stringify_table(table_19, theme=Themes.ascii_double, name=name_1)
-        == """
+    assert stringify_table(table_19, theme=Themes.ascii_double, name=name_1) == """
 +===============+
 ‖  Table Name   ‖
 +=====+=====+===+
@@ -811,10 +677,7 @@ Never gonna tell a lie and hurt you
 ‖     ‖ uio ‖   ‖
 +=====+=====+===+
 """.strip()
-    )
-    assert (
-        stringify_table(table_19, theme=Themes.ascii_double_thin)
-        == """
+    assert stringify_table(table_19, theme=Themes.ascii_double_thin) == """
 +=====+=====+===+
 ‖   1 ‖   2 ‖ 3 ‖
 +-----+-----+---+
@@ -822,10 +685,7 @@ Never gonna tell a lie and hurt you
 ‖     ‖ uio ‖   ‖
 +=====+=====+===+
 """.strip()
-    )
-    assert (
-        stringify_table(table_19, theme=Themes.ascii_double_thin, name=name_1)
-        == """
+    assert stringify_table(table_19, theme=Themes.ascii_double_thin, name=name_1) == """
 +===============+
 ‖  Table Name   ‖
 +=====+=====+===+
@@ -835,7 +695,6 @@ Never gonna tell a lie and hurt you
 ‖     ‖ uio ‖   ‖
 +=====+=====+===+
 """.strip()
-    )
     assert stringify_table(table_19, theme=Themes.ascii_booktabs) == (
         " --------------- \n"
         "    1     2   3  \n"
@@ -858,9 +717,7 @@ Never gonna tell a lie and hurt you
         "        uio      \n"
         " --------------- "
     )
-    assert (
-        stringify_table(table_19, theme=Themes.thin)
-        == """
+    assert stringify_table(table_19, theme=Themes.thin) == """
 ┌─────┬─────┬───┐
 │   1 │   2 │ 3 │
 ├─────┼─────┼───┤
@@ -868,10 +725,7 @@ Never gonna tell a lie and hurt you
 │     │ uio │   │
 └─────┴─────┴───┘
 """.strip()
-    )
-    assert (
-        stringify_table(table_19, theme=Themes.thin, name=name_1)
-        == """
+    assert stringify_table(table_19, theme=Themes.thin, name=name_1) == """
 ┌───────────────┐
 │  Table Name   │
 ├─────┬─────┬───┤
@@ -881,10 +735,7 @@ Never gonna tell a lie and hurt you
 │     │ uio │   │
 └─────┴─────┴───┘
 """.strip()
-    )
-    assert (
-        stringify_table(table_19, theme=Themes.thin_thick)
-        == """
+    assert stringify_table(table_19, theme=Themes.thin_thick) == """
 ┌─────┬─────┬───┐
 │   1 │   2 │ 3 │
 ┝━━━━━┿━━━━━┿━━━┥
@@ -892,10 +743,7 @@ Never gonna tell a lie and hurt you
 │     │ uio │   │
 └─────┴─────┴───┘
 """.strip()
-    )
-    assert (
-        stringify_table(table_19, theme=Themes.thin_thick, name=name_1)
-        == """
+    assert stringify_table(table_19, theme=Themes.thin_thick, name=name_1) == """
 ┌───────────────┐
 │  Table Name   │
 ├─────┬─────┬───┤
@@ -905,10 +753,7 @@ Never gonna tell a lie and hurt you
 │     │ uio │   │
 └─────┴─────┴───┘
 """.strip()
-    )
-    assert (
-        stringify_table(table_19, theme=Themes.thin_double)
-        == """
+    assert stringify_table(table_19, theme=Themes.thin_double) == """
 ┌─────┬─────┬───┐
 │   1 │   2 │ 3 │
 ╞═════╪═════╪═══╡
@@ -916,10 +761,7 @@ Never gonna tell a lie and hurt you
 │     │ uio │   │
 └─────┴─────┴───┘
 """.strip()
-    )
-    assert (
-        stringify_table(table_19, theme=Themes.thin_double, name=name_1)
-        == """
+    assert stringify_table(table_19, theme=Themes.thin_double, name=name_1) == """
 ┌───────────────┐
 │  Table Name   │
 ├─────┬─────┬───┤
@@ -929,10 +771,7 @@ Never gonna tell a lie and hurt you
 │     │ uio │   │
 └─────┴─────┴───┘
 """.strip()
-    )
-    assert (
-        stringify_table(table_19, theme=Themes.rounded)
-        == """
+    assert stringify_table(table_19, theme=Themes.rounded) == """
 ╭─────┬─────┬───╮
 │   1 │   2 │ 3 │
 ├─────┼─────┼───┤
@@ -940,10 +779,7 @@ Never gonna tell a lie and hurt you
 │     │ uio │   │
 ╰─────┴─────┴───╯
 """.strip()
-    )
-    assert (
-        stringify_table(table_19, theme=Themes.rounded, name=name_1)
-        == """
+    assert stringify_table(table_19, theme=Themes.rounded, name=name_1) == """
 ╭───────────────╮
 │  Table Name   │
 ├─────┬─────┬───┤
@@ -953,10 +789,7 @@ Never gonna tell a lie and hurt you
 │     │ uio │   │
 ╰─────┴─────┴───╯
 """.strip()
-    )
-    assert (
-        stringify_table(table_19, theme=Themes.rounded_thick)
-        == """
+    assert stringify_table(table_19, theme=Themes.rounded_thick) == """
 ╭─────┬─────┬───╮
 │   1 │   2 │ 3 │
 ┝━━━━━┿━━━━━┿━━━┥
@@ -964,10 +797,7 @@ Never gonna tell a lie and hurt you
 │     │ uio │   │
 ╰─────┴─────┴───╯
 """.strip()
-    )
-    assert (
-        stringify_table(table_19, theme=Themes.rounded_thick, name=name_1)
-        == """
+    assert stringify_table(table_19, theme=Themes.rounded_thick, name=name_1) == """
 ╭───────────────╮
 │  Table Name   │
 ├─────┬─────┬───┤
@@ -977,10 +807,7 @@ Never gonna tell a lie and hurt you
 │     │ uio │   │
 ╰─────┴─────┴───╯
 """.strip()
-    )
-    assert (
-        stringify_table(table_19, theme=Themes.rounded_double)
-        == """
+    assert stringify_table(table_19, theme=Themes.rounded_double) == """
 ╭─────┬─────┬───╮
 │   1 │   2 │ 3 │
 ╞═════╪═════╪═══╡
@@ -988,10 +815,7 @@ Never gonna tell a lie and hurt you
 │     │ uio │   │
 ╰─────┴─────┴───╯
 """.strip()
-    )
-    assert (
-        stringify_table(table_19, theme=Themes.rounded_double, name=name_1)
-        == """
+    assert stringify_table(table_19, theme=Themes.rounded_double, name=name_1) == """
 ╭───────────────╮
 │  Table Name   │
 ├─────┬─────┬───┤
@@ -1001,10 +825,7 @@ Never gonna tell a lie and hurt you
 │     │ uio │   │
 ╰─────┴─────┴───╯
 """.strip()
-    )
-    assert (
-        stringify_table(table_19, theme=Themes.thick)
-        == """
+    assert stringify_table(table_19, theme=Themes.thick) == """
 ┏━━━━━┳━━━━━┳━━━┓
 ┃   1 ┃   2 ┃ 3 ┃
 ┣━━━━━╋━━━━━╋━━━┫
@@ -1012,10 +833,7 @@ Never gonna tell a lie and hurt you
 ┃     ┃ uio ┃   ┃
 ┗━━━━━┻━━━━━┻━━━┛
 """.strip()
-    )
-    assert (
-        stringify_table(table_19, theme=Themes.thick, name=name_1)
-        == """
+    assert stringify_table(table_19, theme=Themes.thick, name=name_1) == """
 ┏━━━━━━━━━━━━━━━┓
 ┃  Table Name   ┃
 ┣━━━━━┳━━━━━┳━━━┫
@@ -1025,10 +843,7 @@ Never gonna tell a lie and hurt you
 ┃     ┃ uio ┃   ┃
 ┗━━━━━┻━━━━━┻━━━┛
 """.strip()
-    )
-    assert (
-        stringify_table(table_19, theme=Themes.thick_thin)
-        == """
+    assert stringify_table(table_19, theme=Themes.thick_thin) == """
 ┏━━━━━┳━━━━━┳━━━┓
 ┃   1 ┃   2 ┃ 3 ┃
 ┠─────╂─────╂───┨
@@ -1036,10 +851,7 @@ Never gonna tell a lie and hurt you
 ┃     ┃ uio ┃   ┃
 ┗━━━━━┻━━━━━┻━━━┛
 """.strip()
-    )
-    assert (
-        stringify_table(table_19, theme=Themes.thick_thin, name=name_1)
-        == """
+    assert stringify_table(table_19, theme=Themes.thick_thin, name=name_1) == """
 ┏━━━━━━━━━━━━━━━┓
 ┃  Table Name   ┃
 ┣━━━━━┳━━━━━┳━━━┫
@@ -1049,10 +861,7 @@ Never gonna tell a lie and hurt you
 ┃     ┃ uio ┃   ┃
 ┗━━━━━┻━━━━━┻━━━┛
 """.strip()
-    )
-    assert (
-        stringify_table(table_19, theme=Themes.double)
-        == """
+    assert stringify_table(table_19, theme=Themes.double) == """
 ╔═════╦═════╦═══╗
 ║   1 ║   2 ║ 3 ║
 ╠═════╬═════╬═══╣
@@ -1060,10 +869,7 @@ Never gonna tell a lie and hurt you
 ║     ║ uio ║   ║
 ╚═════╩═════╩═══╝
 """.strip()
-    )
-    assert (
-        stringify_table(table_19, theme=Themes.double, name=name_1)
-        == """
+    assert stringify_table(table_19, theme=Themes.double, name=name_1) == """
 ╔═══════════════╗
 ║  Table Name   ║
 ╠═════╦═════╦═══╣
@@ -1073,10 +879,7 @@ Never gonna tell a lie and hurt you
 ║     ║ uio ║   ║
 ╚═════╩═════╩═══╝
 """.strip()
-    )
-    assert (
-        stringify_table(table_19, theme=Themes.double_thin)
-        == """
+    assert stringify_table(table_19, theme=Themes.double_thin) == """
 ╔═════╦═════╦═══╗
 ║   1 ║   2 ║ 3 ║
 ╟─────╫─────╫───╢
@@ -1084,10 +887,7 @@ Never gonna tell a lie and hurt you
 ║     ║ uio ║   ║
 ╚═════╩═════╩═══╝
 """.strip()
-    )
-    assert (
-        stringify_table(table_19, theme=Themes.double_thin, name=name_1)
-        == """
+    assert stringify_table(table_19, theme=Themes.double_thin, name=name_1) == """
 ╔═══════════════╗
 ║  Table Name   ║
 ╠═════╦═════╦═══╣
@@ -1097,7 +897,6 @@ Never gonna tell a lie and hurt you
 ║     ║ uio ║   ║
 ╚═════╩═════╩═══╝
 """.strip()
-    )
     assert stringify_table(table_19, theme=Themes.booktabs) == (
         " ─────────────── \n"
         "    1     2   3  \n"
@@ -1116,25 +915,19 @@ Never gonna tell a lie and hurt you
         "        uio      \n"
         " ─────────────── "
     )
-    assert (
-        stringify_table(table_19, theme=Themes.markdown)
-        == """
+    assert stringify_table(table_19, theme=Themes.markdown) == """
 |   1 |   2 | 3 |
 |-----|-----|---|
 | qwe | rty |   |
 |     | uio |   |
 """.strip()
-    )
-    assert (
-        stringify_table(table_19, theme=Themes.markdown, name=name_1)
-        == """
+    assert stringify_table(table_19, theme=Themes.markdown, name=name_1) == """
 |  Table Name   |
 |   1 |   2 | 3 |
 |-----|-----|---|
 | qwe | rty |   |
 |     | uio |   |
 """.strip()
-    )
     assert (
         stringify_table(
             table_19,
@@ -1166,9 +959,7 @@ Never gonna tell a lie and hurt you
 # noinspection PyPep8Naming
 def test_Table():
     table_1 = [("1", "2", "3"), ("qwe", "rty\nuio", "")]
-    assert (
-        Table(table_1, name="Table Name").stringify()
-        == """
+    assert Table(table_1, name="Table Name").stringify() == """
 +---------------+
 |  Table Name   |
 +-----+-----+---+
@@ -1178,10 +969,7 @@ def test_Table():
 |     | uio |   |
 +-----+-----+---+
 """.strip()
-    )
-    assert (
-        Table.from_table(table_1, name="Table Name").stringify()
-        == """
+    assert Table.from_table(table_1, name="Table Name").stringify() == """
 +---------------+
 |  Table Name   |
 +-----+-----+---+
@@ -1191,18 +979,13 @@ def test_Table():
 |     | uio |   |
 +-----+-----+---+
 """.strip()
-    )
-    file_1 = StringIO(
-        """
+    file_1 = StringIO("""
 c1,c2,c3
 1,2,3
 qwe,"rty
 uio",
-""".strip()
-    )
-    assert (
-        Table.from_csv(file_1, name="Table Name").stringify()
-        == """
+""".strip())
+    assert Table.from_csv(file_1, name="Table Name").stringify() == """
 +----------------+
 |   Table Name   |
 +-----+-----+----+
@@ -1214,7 +997,6 @@ uio",
 |     | uio |    |
 +-----+-----+----+
     """.strip()
-    )
     file_1.seek(0)
     assert (
         Table.from_csv(
@@ -1241,9 +1023,7 @@ uio",
         [("1", "2", "3"), ("qwe", "rty\nuio", "")],
     )
     cursor.execute("SELECT c1, c2, c3 FROM data;")
-    assert (
-        Table.from_db_cursor(cursor, name="Table Name").stringify()
-        == """
+    assert Table.from_db_cursor(cursor, name="Table Name").stringify() == """
 +---------------+
 |  Table Name   |
 +-----+-----+---+
@@ -1253,7 +1033,6 @@ uio",
 |     | uio |   |
 +-----+-----+---+
 """.strip()
-    )
     cursor.execute("SELECT c1, c2, c3 FROM data;")
     assert (
         Table.from_db_cursor(
@@ -1274,32 +1053,23 @@ uio",
 +-----+-----+----+
 """.strip()
     )
-    assert (
-        str(Table([("1", "2"), ("3", "4")]))
-        == """
+    assert str(Table([("1", "2"), ("3", "4")])) == """
 +---+---+
 | 1 | 2 |
 +---+---+
 | 3 | 4 |
 +---+---+
 """.strip()
-    )
-    assert (
-        repr(Table([("1", "2"), ("3", "4")]))
-        == """
+    assert repr(Table([("1", "2"), ("3", "4")])) == """
 Table([('1', '2'), ('3', '4')])
 """.strip()
-    )
-    assert (
-        get_output(Table([("1", "2"), ("3", "4")]).print)()
-        == """
+    assert get_output(Table([("1", "2"), ("3", "4")]).print)() == """
 +---+---+
 | 1 | 2 |
 +---+---+
 | 3 | 4 |
 +---+---+
 """.lstrip()
-    )
 
 
 def test_column_names():

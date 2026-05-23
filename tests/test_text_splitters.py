@@ -567,11 +567,8 @@ def test_different_splitters():
             )
         ]
     )
-    assert (
-        table.stringify(text_splitter=BaseTextSplitter())
-        == """
+    assert table.stringify(text_splitter=BaseTextSplitter()) == """
 +------+---+---+
 | text | 1 | \x1b[31m2\x1b[0m |
 +------+---+---+
 """.strip()
-    )

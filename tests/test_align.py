@@ -17,10 +17,7 @@ def test_v_align():
         "max_height": 7,
         "maximize_height": True,
     }
-    assert (
-        table.stringify(**kwargs1)
-        == table.stringify(**kwargs1, v_align="^")
-        == """
+    assert table.stringify(**kwargs1) == table.stringify(**kwargs1, v_align="^") == """
 +----------------------------+
 | text                       |
 |                            |
@@ -30,11 +27,7 @@ def test_v_align():
 |                            |
 +----------------------------+
 """.strip()
-    )
-    assert (
-        table.stringify(**kwargs2)
-        == table.stringify(**kwargs2, v_align="^")
-        == """
+    assert table.stringify(**kwargs2) == table.stringify(**kwargs2, v_align="^") == """
 +----------------------------+
 | text                       |
 |                            |
@@ -45,10 +38,7 @@ def test_v_align():
 |                            |
 +----------------------------+
 """.strip()
-    )
-    assert (
-        table.stringify(**kwargs1, v_align="-")
-        == """
+    assert table.stringify(**kwargs1, v_align="-") == """
 +----------------------------+
 |                            |
 |                            |
@@ -58,10 +48,7 @@ def test_v_align():
 |                            |
 +----------------------------+
 """.strip()
-    )
-    assert (
-        table.stringify(**kwargs2, v_align="-")
-        == """
+    assert table.stringify(**kwargs2, v_align="-") == """
 +----------------------------+
 |                            |
 |                            |
@@ -72,10 +59,7 @@ def test_v_align():
 |                            |
 +----------------------------+
 """.strip()
-    )
-    assert (
-        table.stringify(**kwargs1, v_align="_")
-        == """
+    assert table.stringify(**kwargs1, v_align="_") == """
 +----------------------------+
 |                            |
 |                            |
@@ -85,10 +69,7 @@ def test_v_align():
 | text                       |
 +----------------------------+
 """.strip()
-    )
-    assert (
-        table.stringify(**kwargs2, v_align="_")
-        == """
+    assert table.stringify(**kwargs2, v_align="_") == """
 +----------------------------+
 |                            |
 |                            |
@@ -99,7 +80,6 @@ def test_v_align():
 | text                       |
 +----------------------------+
 """.strip()
-    )
 
 
 def test_align_together():

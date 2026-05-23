@@ -316,9 +316,7 @@ def test_subtable():
         json_data = json.loads(row[1])  # remember json.JSONDecodeError
         row[1] = Table(json_data)
         table.table[i] = row
-    assert (
-        table.stringify(theme=Themes.thin_thick)
-        == """
+    assert table.stringify(theme=Themes.thin_thick) == """
 ┌─────┬─────────┬─────┐
 │ c1  │   c2    │ c3  │
 ┝━━━━━┿━━━━┯━━━━┿━━━━━┥
@@ -333,10 +331,7 @@ def test_subtable():
 │     │     │ 6 │     │
 └─────┴─────┴───┴─────┘
 """.strip()
-    )
-    assert (
-        table.stringify(h_align="^")
-        == """
+    assert table.stringify(h_align="^") == """
 +-----+---------+-----+
 | c1  |   c2    | c3  |
 +-----+----+----+-----+
@@ -351,7 +346,6 @@ def test_subtable():
 |     |     | 6 |     |
 +-----+-----+---+-----+
 """.strip()
-    )
     table = Table(
         [
             ("1", "2"),
@@ -385,9 +379,7 @@ def test_subtable():
             ),
         ],
     )
-    assert (
-        table.stringify()
-        == """
+    assert table.stringify() == """
 +---+---------------+
 | 1 |             2 |
 +---+---+-----------+
@@ -400,7 +392,6 @@ def test_subtable():
 |   |   |   | 3 | 4 |
 +---+---+---+---+---+
 """.strip()
-    )
     assert (
         Table(
             [

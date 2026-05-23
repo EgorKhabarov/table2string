@@ -10,9 +10,7 @@ def test_sep():
             ("9", "10", "11"),
         ],
     )
-    assert (
-        table.stringify()
-        == """
+    assert table.stringify() == """
 +---+----+----+
 | 1 |  2 |  3 |
 +---+----+----+
@@ -23,10 +21,7 @@ def test_sep():
 | 9 | 10 | 11 |
 +---+----+----+
 """.strip()
-    )
-    assert (
-        table.stringify(sep=False)
-        == """
+    assert table.stringify(sep=False) == """
 +---+----+----+
 | 1 |  2 |  3 |
 | 3 |  4 |  5 |
@@ -34,10 +29,7 @@ def test_sep():
 | 9 | 10 | 11 |
 +---+----+----+
 """.strip()
-    )
-    assert (
-        table.stringify(sep=range(0, 100, 2))
-        == """
+    assert table.stringify(sep=range(0, 100, 2)) == """
 +---+----+----+
 | 1 |  2 |  3 |
 | 3 |  4 |  5 |
@@ -46,10 +38,7 @@ def test_sep():
 | 9 | 10 | 11 |
 +---+----+----+
 """.strip()
-    )
-    assert (
-        table.stringify(sep=range(0, 100, 2))
-        == """
+    assert table.stringify(sep=range(0, 100, 2)) == """
 +---+----+----+
 | 1 |  2 |  3 |
 | 3 |  4 |  5 |
@@ -58,7 +47,6 @@ def test_sep():
 | 9 | 10 | 11 |
 +---+----+----+
 """.strip()
-    )
     table_2 = Table(
         [
             ("1", "2", "3"),
@@ -68,9 +56,7 @@ def test_sep():
         ],
         name="Table Name",
     )
-    assert (
-        table_2.stringify(sep=False, theme=Themes.thin)
-        == """
+    assert table_2.stringify(sep=False, theme=Themes.thin) == """
 ┌─────────────┐
 │ Table Name  │
 ├───┬────┬────┤
@@ -80,7 +66,6 @@ def test_sep():
 │ 9 │ 10 │ 11 │
 └───┴────┴────┘
 """.strip()
-    )
     table_3 = Table(
         [
             ("1", "2", "3"),
@@ -90,9 +75,7 @@ def test_sep():
         ],
         column_names=["c1", "c2", "c3"],
     )
-    assert (
-        table_3.stringify(sep=False, theme=Themes.thin)
-        == """
+    assert table_3.stringify(sep=False, theme=Themes.thin) == """
 ┌────┬────┬────┐
 │ c1 │ c2 │ c3 │
 ├────┼────┼────┤
@@ -102,7 +85,6 @@ def test_sep():
 │  9 │ 10 │ 11 │
 └────┴────┴────┘
 """.strip()
-    )
     table_4 = Table(
         [
             ("1", "2", "3"),
@@ -113,9 +95,7 @@ def test_sep():
         name="Table Name",
         column_names=["c1", "c2", "c3"],
     )
-    assert (
-        table_4.stringify(sep=False, theme=Themes.thin)
-        == """
+    assert table_4.stringify(sep=False, theme=Themes.thin) == """
 ┌──────────────┐
 │  Table Name  │
 ├────┬────┬────┤
@@ -127,4 +107,3 @@ def test_sep():
 │  9 │ 10 │ 11 │
 └────┴────┴────┘
 """.strip()
-    )

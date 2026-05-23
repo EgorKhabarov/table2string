@@ -419,8 +419,7 @@ def test_apply_border_data():
 
 def test_split_text_for_sub_table():
     assert (
-        split_text_for_sub_table(
-            """
+        split_text_for_sub_table("""
 ┌────────────────────┐
 │   987qwertyuiop    │
 ┝━━━━━┯━━━━━┯━━━━━━━━┥
@@ -428,8 +427,7 @@ def test_split_text_for_sub_table():
 ├─────┴─────┼────────┤
 │  123456   │ 789123 │
 └───────────┴────────┘
-""".strip()
-        )
+""".strip())
         == (
             [
                 "   987qwertyuiop    ",
