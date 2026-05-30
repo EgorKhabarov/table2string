@@ -1536,7 +1536,7 @@ You can create your own **custom splitter formatter** (e.g. for HTML or Markdown
 by subclassing `AnsiTextSplitter` or `BaseTextSplitter` and overriding the `split_text` and `clear_formatting` methods.
 
 - `split_text` – Called for each cell. Should split the text so it fits within the cell.
-- `clear_formatting` – Called when calculating the width of a cell.
+- `clear_formatting` – Called when calculating the width of a cell. Should return text without formatting.
 
 This method should remove all formatting, leaving only visible characters and ANSI sequences.
 For example, with HTML formatting, it should strip all tags and leave only the visible text.
