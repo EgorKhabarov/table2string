@@ -242,7 +242,8 @@ def transform_value(value: T | tuple[T, ...], column_count: int) -> tuple[T, ...
 
 
 def split_text_for_sub_table(
-    string_sub_table: str, max_height: int | None = None
+    string_sub_table: str,
+    max_height: int | None = None,
 ) -> tuple[list[str], list[str], bool, dict[str, tuple[str, ...]]]:
     """
 
